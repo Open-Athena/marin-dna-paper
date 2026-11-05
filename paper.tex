@@ -36,7 +36,138 @@ TODO
 \end{keywords}
 \end{frontmatter}
 \section{Background}
-\todo
+Genomic language models (gLMs) learn statistical relationships among nucleotides
+by predicting DNA sequence from its surrounding context. Training requires
+sequences rather than experimentally measured labels, allowing these models
+to use reference genomes from multiple species. The resulting sequence
+probabilities and representations can support functional constraint prediction,
+sequence generation, and adaptation to downstream tasks~\citep{benegas2025review}.
+Examples include DNABERT and Nucleotide Transformer for adapting pretrained
+representations to genomic prediction tasks~\citep{ji2021dnabert,dallatorre2025nt},
+and regLM for regulatory sequence design using autoregressive models together
+with supervised predictors~\citep{lal2024reglm}.
+Variant effect prediction (VEP) is a particularly useful application: a model
+that captures constraints imposed by natural selection may help identify
+changes that disrupt biological function. Related approaches to protein
+sequence variation have yielded disease-variant predictions without training
+on clinical labels~\citep{frazer2021eve}. Accurate, scalable predictions are
+needed to interpret rare variants and prioritize candidate causal variants
+at associated loci, including changes outside protein-coding
+regions~\citep{benegas2023dna,zhou2015deepsea}.
+Fine-mapping methods formalize the challenge of resolving candidate causal
+variants within associated regions~\citep{benner2016finemap}.
+
+Existing approaches obtain information about variant effects from different
+sources. Models trained on functional-genomics measurements predict changes
+in molecular phenotypes: DeepSEA predicts chromatin features~\citep{zhou2015deepsea},
+Enformer integrates long-range sequence information for expression
+prediction~\citep{avsec2021enformer}, and Borzoi predicts RNA-seq
+coverage~\citep{linder2025borzoi}. Conservation scores such as
+phastCons~\citep{siepel2005phastcons} and phyloP~\citep{pollard2010phylop}
+use evolutionary comparisons at homologous sites; GPN-MSA learns nucleotide
+predictions from multispecies alignments~\citep{benegas2025gpnmsa}. Both provide valuable
+evidence, but their application depends on the availability of experimental
+data or suitable whole-genome alignments. Models trained on unaligned DNA
+sequences provide another route to learning functional constraint. GPN, for
+example, showed that training on the reference genomes of Arabidopsis and
+related species can yield informative genome-wide variant scores without
+functional-genomics supervision~\citep{benegas2023dna}. Such approaches are
+especially attractive for organisms with limited experimental resources,
+although success in one species does not establish comparable performance
+across different genomes or evolutionary distances.
+
+The composition of the training data is central to this approach. Large
+eukaryotic genomes contain abundant repetitive and weakly constrained
+sequence, so sampling uniformly need not provide the most useful examples
+for learning functional elements~\citep{benegas2025review}.
+GPN demonstrated benefits from multispecies
+training and from reducing the influence of repetitive sequence on the
+training objective~\citep{benegas2023dna}. More generally, the choice of species,
+regions, and sequence weights determines which evolutionary and functional
+signals a model encounters~\citep{benegas2025review}. Increasing the number
+of training bases therefore need not be equivalent to increasing the amount
+of information relevant to variant interpretation. Explicit data curation
+and sampling offer ways to concentrate training on the capabilities of
+interest, but introduce choices that must be evaluated empirically.
+
+TraitGym provides evidence that these choices matter for human regulatory
+variants~\citep{benegas2025traitgym}. Its comparisons show substantial gains
+with model scale for Evo 2, alongside continuing difficulties with enhancer
+variants. Its GPN-Promoter model, trained specifically on animal promoter
+sequences, was competitive with Evo 2 40B on the proximal non-exonic
+Mendelian subset~\citep{benegas2025traitgym}. These observations motivate a broader question: can one
+model retain the complementary capabilities of region specialists through
+an appropriate training mixture? Simply pooling datasets gives the largest
+region classes the greatest influence. Controlling their relative exposure
+instead makes it possible to test how coding, promoter-proximal, and distal
+sequence contribute to a shared model, and whether introducing additional
+region types improves their corresponding downstream tasks.
+
+Architecture and optimization complicate this comparison. HyenaDNA uses
+implicit convolutions to extend genomic context at single-nucleotide
+resolution~\citep{nguyen2023hyenadna}. Evo 2 combines a
+specialized architecture with extensive data curation and large-scale training,
+and provides an important reference for alignment-free variant effect
+prediction~\citep{brixi2026evo2}. Here, we ask how far a standard causal,
+decoder-only Transformer can progress by improving the data and training
+recipe. We use Marin, an open platform for foundation-model development,
+to organize data preparation, training, and evaluation~\citep{marin}.
+Keeping the architecture within a widely used model family also allows
+training and inference to benefit from established software implementations.
+Our aim is to assess this practical recipe, rather than to claim that causal
+language modeling is a new approach to genomic sequence.
+
+A useful comparison across model sizes also requires an optimization recipe
+that remains effective as scale changes. Language-model scaling studies
+relate sequence loss to model size, data, and compute~\citep{kaplan2020scaling},
+while hyperparameter-transfer methods seek to reduce the cost of tuning
+larger networks using small reference models~\citep{yang2021transfer}.
+Differences in training quality can obscure the relationship between model capacity, sequence loss,
+and downstream performance. We therefore calibrate hyperparameters on small
+reference models and test their transfer before studying parameter scaling.
+We focus initially on short sequences centered on individual functional
+elements, using a 255-base context to make these experiments tractable.
+This design supports controlled studies of local sequence constraints; it
+does not address the full range of long-distance regulatory interactions.
+Together, mixture control and hyperparameter transfer provide a basis for
+separating questions about data exposure from questions about model scale.
+
+We evaluate the resulting models using human Mendelian variants and
+experimental saturation genome-editing measurements. ClinVar aggregates
+clinical interpretations of human variation~\citep{landrum2020clinvar},
+while saturation genome editing measures variant effects directly in a
+cellular assay, as demonstrated for BRCA1~\citep{findlay2018sge}.
+MaveDB provides access to multiplexed variant-effect measurements~\citep{esposito2019mavedb}.
+These resources support complementary evaluations: clinical interpretation
+and measured cellular function are related but distinct outcomes.
+Human data provide
+well-characterized tests of biological relevance, even though a longer-term
+motivation is to develop useful models for less studied organisms.
+We use both sequence log-likelihood ratios and linear probes trained on
+frozen representations. Likelihood-based scoring was used in
+GPN~\citep{benegas2023dna}; TraitGym compared likelihood and embedding-based
+scores on human regulatory variants~\citep{benegas2025traitgym}.
+These readouts ask different questions: whether
+sequence probabilities rank deleterious changes, and whether the learned
+representations contain information useful for that ranking. Neither
+should be assumed to summarize all capabilities of a pretrained model.
+Our evaluation concerns functional constraint and pathogenicity-related
+ranking, rather than direct prediction of changes in gene expression.
+Transfer to other species requires separate evaluation.
+
+In this article, we present Marin DNA and examine data mixtures,
+hyperparameter transfer, and parameter scaling within this standardized
+training framework. We test how changes in sequence loss relate to VEP
+under both readouts, and investigate mixtures that add ncRNA and enhancer
+sequence to annotation-derived training regions. We show that the resulting
+1B-parameter model is competitive with Evo 2 40B on our Mendelian benchmark,
+with substantially lower training compute and faster variant scoring at
+the models' deployed context lengths. These comparisons characterize a
+specific evaluation setting, rather than establish superiority across all
+genomic tasks. The experiments assess the extent to which a compact,
+standard architecture can combine useful performance with practical training
+and inference costs.
+
 \section{Results}
 \subsection{Early mixture experiments}
 \todo
@@ -87,8 +218,7 @@ TODO
 \todo
 \section{Acknowledgements}
 \todo
-% Uncomment when real bibliography entries and citations are added.
-% \bibliography{paper}
+\bibliography{paper}
 \section*{Supplementary material}
 \todo
 \end{document}
