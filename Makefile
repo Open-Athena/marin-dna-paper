@@ -1,7 +1,7 @@
 .PHONY: all clean mrproper
 all: paper.pdf
 
-paper.pdf: paper.tex paper.bib oup-contemporary.cls vancouver-authoryear.bst
+paper.pdf: paper.tex paper.bib oup-contemporary.cls vancouver-authoryear.bst $(wildcard figures/*.pdf)
 	pdflatex -interaction=nonstopmode -halt-on-error paper.tex
 	@if grep -q '\\citation{' paper.aux && grep -q '\\bibdata{' paper.aux; then bibtex paper; fi
 	pdflatex -interaction=nonstopmode -halt-on-error paper.tex

@@ -13,18 +13,6 @@
 \jnumber{TODO}
 \jyear{TODO}
 \newcommand{\todo}{\par\noindent\textit{TODO}\par}
-\newcommand{\figslot}[2]{%
-  \begin{figure}[htbp]
-  \centering\fbox{\parbox[c][25mm][c]{0.85\linewidth}{\centering TODO: #1}}
-  \caption{#1. TODO}\label{fig:#2}
-  \end{figure}}
-\newcommand{\tableslot}[2]{%
-  \begin{table}[htbp]
-  \caption{#1. TODO}\label{tab:#2}
-  \centering\begin{tabular}{ll}\toprule
-  TODO & TODO\\\midrule
-  TODO & TODO\\\bottomrule
-  \end{tabular}\end{table}}
 \begin{document}
 \begin{frontmatter}
 \maketitle
@@ -35,48 +23,574 @@
 TODO
 \end{keywords}
 \end{frontmatter}
+
 \section{Background}
-\todo
+% Narrative scaffold: each item is one paragraph brief, not manuscript prose.
+% Draft the introduction in four paragraphs totaling approximately 300--400 words.
+
+\textcolor{red}{JK: this is a narrative plan of the document, where each item plans a
+given paragraph. Figures are transferred directly from the blog for this draft.
+Main text figures with missing panels are filled with explanatory text.}
+
+\begin{itemize}
+\item Introduce genomic language models as a way to learn functional
+constraints from DNA~\citep{benegas2025review}. Motivate single-sequence models
+for organisms with limited experimental resources or whole-genome alignments,
+and introduce variant effect prediction (VEP) as a concrete test of biological
+usefulness.
+\item Ask how far a standard GPT-style model can progress through data
+curation, optimization, and scale. Establish Evo 2 as a demanding reference
+for single-sequence VEP~\citep{brixi2026evo2}, without reviewing architectures,
+training budgets, or individual benchmarks here.
+\item Introduce Marin DNA and its use of Marin's open development
+infrastructure~\citep{marin}. Set out the three findings in reader-facing
+order: competitive human variant prediction at lower cost, improved regional
+performance through training-sequence selection, and gains from scaling that
+depend on how the model is read out. Keep this roadmap to one paragraph.
+\item State the headline: a 1B model competitive with Evo 2 40B on the
+evaluated Mendelian benchmark, with substantially lower training and inference
+costs. Close on the practical contribution of an accessible, standard modeling
+recipe; leave numerical comparisons and their qualifications to Results.
+\end{itemize}
+
 \section{Results}
-\subsection{Early mixture experiments}
-\todo
-\figslot{Mixture comparisons}{mixtures}
-\subsection{Hyperparameter transfer}
-\todo
-\figslot{Hyperparameter transfer}{transfer}
-\subsection{Parameter scaling}
-\todo
-\figslot{Loss scaling}{scaling}
-\subsection{Downstream performance}
-\todo
-\figslot{Downstream performance across model scale}{downstream}
-\subsection{Later mixture experiments}
-\todo
-\figslot{Training mixture histories and evaluation}{later-mixtures}
-\subsection{Benchmark comparisons and efficiency}
-\todo
-\figslot{Benchmark comparisons and throughput}{benchmarks}
+% Each item is one paragraph brief. Lead with a finding, then give the minimum
+% context and evidence needed to interpret it. Procedures belong in Methods.
+% A schematic and three multipanel drafts carry the narrative. Bordered cells describe
+% unfinished panels; existing plots are retained until replacements are generated.
+\subsection{A compact Transformer achieves competitive variant prediction at much lower cost}
+\begin{itemize}
+\item Marin DNA uses a standard Transformer to learn DNA sequence patterns
+from multiple species. Explain next-base prediction in plain language, then
+connect it to variant ranking: comparing reference and altered sequences can
+reveal changes inconsistent with learned constraints. Use the planned training
+overview in Figure~\ref{fig:model-overview}A--B and the existing scoring
+diagram in Figure~\ref{fig:model-overview}C to orient the reader. Introduce the human
+Mendelian benchmark as distinguishing disease-associated from putatively
+benign variants. Keep architectural and benchmark details in Methods
+Sections~\nameref{methods:architecture} and~\nameref{methods:benchmarks}.
+\item The 1B model achieves competitive Mendelian variant prediction with
+substantially lower cost than Evo 2 40B~\citep{brixi2026evo2}. Lead with the
+aggregate comparison: a small zero-shot advantage and a larger advantage
+under linear probing, to be summarized in Figure~\ref{fig:throughput}A.
+Use Supplementary Figures~\ref{fig:benchmarks} and~\ref{fig:benchmark-probes}
+for the current aggregate evidence. Define a probe briefly as a simple predictor trained
+with labeled examples on frozen model representations. Use
+Figure~\ref{fig:throughput}B to connect performance to practical scoring speed,
+with the planned compute comparison alongside it: approximately
+$1{,}980\times$ fewer final-model training FLOPs and
+$2{,}330\times$ faster scoring in the reported comparison. Keep the deployed
+256- versus 8,192-token contexts beside the throughput claim; these are not
+equal-context measurements or total research costs. Explain AUPRC as a
+ranking-performance measure where higher is better; refer to Methods
+Sections~\nameref{methods:statistics} and~\nameref{methods:efficiency} for details.
+\item Competitive aggregate performance does not mean a win on every variant
+class or against every model family. Summarize regional strengths and
+exceptions from Supplementary Figures~\ref{fig:benchmarks}
+and~\ref{fig:benchmark-probes}; retain the stronger overall zero-shot results
+of alignment-based GPN-Star and experimentally supervised AlphaGenome.
+Human evaluation establishes relevance to this benchmark, not transfer to
+other organisms. TODO: add the GPN-Star and AlphaGenome primary citations
+identified in the blog.
+\end{itemize}
+\begin{figure}
+\centering
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{\dimexpr\linewidth-2\tabcolsep-2\arrayrulewidth\relax}|}
+\hline
+\textbf{A \quad Multispecies training sequences}\par
+\textit{Planned schematic.} Show DNA from multiple species and functional
+regions being assembled into a training mixture. Distinguish sequence
+selection from model inputs: the model receives individual DNA sequences.
+Keep detailed dataset provenance in Figure~\ref{fig:datasets}. \\[3pt]
+\hline
+\textbf{B \quad Learning to predict DNA}\par
+\textit{Planned schematic.} Show a standard causal Transformer reading a DNA
+sequence and predicting the next base. Indicate that training uses DNA
+sequence rather than variant-effect labels, and produces sequence
+probabilities and learned representations. \\[3pt]
+\hline
+\textbf{C \quad From sequences to variant scores}\par
+\includegraphics[width=\linewidth]{figures/variant_scoring_workflow.pdf}\par
+Zero-shot scoring compares reference and alternate sequence likelihoods
+without labeled variant examples. A linear probe uses labeled examples to
+learn from the frozen model's reference/alternate representations. \\[3pt]
+\hline
+\end{tabular}
+\caption{From DNA to variant ranking: draft panel layout.
+\textbf{A}, Planned overview of multispecies training sequences.
+\textbf{B}, Planned next-base prediction schematic.
+\textbf{C}, Existing variant-scoring diagram, showing likelihood-based scoring
+and a linear probe trained on frozen reference/alternate representations.}
+\label{fig:model-overview}
+\end{figure}
+
+\begin{figure}
+\centering
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{\dimexpr\linewidth-2\tabcolsep-2\arrayrulewidth\relax}|}
+\hline
+\textbf{A \quad Aggregate variant-prediction performance}\par
+\textit{Planned zero-shot comparison.} Plot macro-average Mendelian AUPRC
+for Marin DNA, Evo 2, GPN-Star, and AlphaGenome; distinguish single-sequence,
+alignment-based, and supervised model families.\par
+\textit{Planned probe comparison.} Separately plot macro-averages of
+chromosome-weighted AUPRC for Marin DNA and Evo 2. Keep the two aggregation
+schemes distinct. Current evidence: Supplementary
+Figures~\ref{fig:benchmarks} and~\ref{fig:benchmark-probes}. \\[3pt]
+\hline
+\textbf{B \quad Training and inference costs}\par
+\includegraphics[width=\linewidth]{figures/vep_performance_vs_throughput.pdf}\par
+\textit{Planned training-cost comparison.} Add final-model training FLOPs
+for Marin DNA 1B and Evo 2 40B (approximately $1{,}980\times$ fewer for
+Marin DNA), separate from total research costs. The existing throughput plot
+uses deployed contexts: 256 versus 8,192 tokens for this comparison. \\[3pt]
+\hline
+\end{tabular}
+\caption{Performance and cost: draft panel layout.
+\textbf{A}, Planned aggregate performance comparisons for two readouts.
+\textbf{B}, Existing zero-shot Mendelian macro-average AUPRC versus variants
+scored per hour on a GH200, with a planned training-cost comparison.
+Throughput is measured at deployed, rather than equal, context lengths.}
+\label{fig:throughput}
+\end{figure}
+
+\subsection{Training-sequence selection improves performance across genomic regions}
+\begin{itemize}
+\item The choice of training DNA changes which variants a model predicts
+well. Explain the central intuition: abundant protein-coding sequence can
+dominate training unless less abundant regions receive deliberate exposure.
+Connect functional-region enrichment in GPN and promoter specialization in
+TraitGym to this question~\citep{benegas2023dna,benegas2025traitgym}, without
+recounting the sequence of experiments.
+\item Balanced sampling preserves performance across coding and upstream
+regions better than pooling in proportion to dataset size.
+Figure~\ref{fig:mixtures}A provides the direct comparison: allocating equal
+exposure improves promoter performance while retaining useful missense
+prediction. Define promoters as regions near gene starts and missense variants
+as protein-altering changes. Use specialists only as supporting context
+(Supplementary Figure~\ref{fig:specialists}); do not claim equal weights are
+optimal. Refer to Methods Section~\nameref{methods:mixtures} for the designs.
+\item Adding ncRNA and enhancer-region sequences is accompanied by gains on
+ncRNA and distal variants. Explain these categories briefly as non-protein-coding
+RNAs and regulatory regions farther from genes. Use the planned focused
+views in Figure~\ref{fig:mixtures}B--C to frame these findings; cite the
+currently available trajectories in Supplementary Figures~\ref{fig:mixture-llr}
+and~\ref{fig:mixture-probe}, retaining subset exceptions and noisier probe
+results. Treat a possible benefit of staged exposure as secondary and
+uncertain, rather than a controlled causal finding. Briefly disclose
+alignment-assisted dataset construction and refer to Methods
+Sections~\nameref{methods:data} and~\nameref{methods:mixtures}.
+\end{itemize}
+\begin{figure}
+\centering
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{\dimexpr\linewidth-2\tabcolsep-2\arrayrulewidth\relax}|}
+\hline
+\textbf{A \quad Balanced regional exposure}\par
+\includegraphics[width=\linewidth]{figures/upstream_coding_mixture_balance.pdf} \\[3pt]
+\hline
+\textbf{B \quad ncRNA performance}\par
+\textit{Planned focused plot.} Show ncRNA zero-shot AUPRC versus training
+tokens along the staged training history. Mark introduction of ncRNA and
+enhancer-region sequences at approximately 104B tokens. Use the observed
+trajectory from Supplementary Figure~\ref{fig:mixture-llr}, with its uncertainty;
+retain the probe view in Supplementary Figure~\ref{fig:mixture-probe}. \\[3pt]
+\hline
+\textbf{C \quad Distal-variant performance}\par
+\textit{Planned focused plot.} Show distal-variant zero-shot AUPRC versus
+training tokens, using the same lineage, transition marker, and uncertainty
+convention as panel B. Source: Supplementary Figure~\ref{fig:mixture-llr}.
+These are observed training histories, not a matched causal ablation. \\[3pt]
+\hline
+\end{tabular}
+\caption{Training-sequence selection: draft panel layout.
+\textbf{A}, Existing upstream/CDS mixture comparison: zero-shot promoter and
+missense AUPRC versus training steps. The rightmost plot is their unweighted
+mean. \textbf{B--C}, Planned ncRNA and distal-variant views around the addition
+of new training regions; complete trajectories remain in the supplement.}
+\label{fig:mixtures}
+\end{figure}
+
+\subsection{Scaling improves representations beyond what likelihood scores reveal}
+\begin{itemize}
+\item Larger models generally improve variant prediction, but the improvement
+depends on how their information is read out. Explain that likelihood scoring
+asks how plausible an altered sequence is, while a linear probe asks what a
+simple trained predictor can extract from the model's representations. Point
+to the complete variant-class comparison in Supplementary
+Figure~\ref{fig:downstream}; leave fitting and scoring procedures in Methods
+Section~\nameref{methods:scoring}.
+\item Mendelian missense prediction reveals information that likelihood
+scores alone miss. Lead with Figure~\ref{fig:missense-scaling}A: as model size
+increases, likelihood-based ranking worsens beyond an intermediate size while
+probe performance improves. The analogous pattern in Evo 2 shows that this
+observation spans two model families; it does not establish a shared mechanism.
+\item One scoring rule is therefore insufficient to judge whether scaling
+has improved a model. Use the planned Figure~\ref{fig:missense-scaling}B
+to contrast SGE missense, where both readouts improve; cite Supplementary
+Figure~\ref{fig:downstream} for the existing evidence. Explain SGE as experimental
+measurements of variant effects. Note briefly that reliable optimization and
+predictable sequence-loss scaling support the comparison, with details in
+Methods Sections~\nameref{methods:transfer} and~\nameref{methods:scaling}.
+The monitoring loss is not a held-out generalization estimate, and its
+relationship to VEP varies by readout (Supplementary Figure~\ref{fig:loss-vep}).
+Close on room for further scaling: 1B is a practical choice, not a demonstrated
+optimum, and improvements should be assessed across tasks and readouts.
+\end{itemize}
+\begin{figure}
+\centering
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{\dimexpr\linewidth-2\tabcolsep-2\arrayrulewidth\relax}|}
+\hline
+\textbf{A \quad Mendelian missense}\par
+\includegraphics[width=\linewidth]{figures/missense_readout_scaling.pdf} \\[3pt]
+\hline
+\textbf{B \quad Experimental missense effects}\par
+\textit{Planned SGE comparison.} Plot chromosome-weighted AUPRC versus
+model size for Marin DNA SGE missense variants under zero-shot likelihood
+scoring and linear probing. Use matched variants, consistent readout colors,
+a logarithmic model-size axis, and standard-error bars. Draw on the existing
+results in Supplementary Figure~\ref{fig:downstream}; include no unverified
+Evo 2 SGE measurements. \\[3pt]
+\hline
+\end{tabular}
+\caption{Scaling and readout choice: draft panel layout.
+\textbf{A}, Existing Marin DNA and Evo 2 Mendelian missense comparison on
+identical variants. Performance is chromosome-weighted AUPRC; error bars
+denote standard errors. \textbf{B}, Planned experimental SGE missense panel
+contrasting the two readouts using existing Marin DNA results.}
+\label{fig:missense-scaling}
+\end{figure}
+
 \section{Discussion}
-\todo
+\begin{itemize}
+\item Develop the practical implications of a standard, openly developed
+training recipe. Revisit affordable genome-wide constraint mapping in less
+studied organisms and potential complementarity with alignments and
+functional-genomics models; human VEP alone does not establish cross-species
+transfer. Relate the readout divergence cautiously to prior likelihood-based
+regressions in protein models without asserting a shared mechanism. TODO: add
+the Gordon and Pugh primary citations linked in the blog.
+\item Discuss opportunities for better mixtures, optimization, regularization,
+and further scaling. Separate demonstrated results from future longer-context,
+expression, complex-trait, and cross-species evaluations. Relate these goals
+to variant interpretation and causal-variant prioritization without implying
+that the present experiments validate those broader applications.
+\end{itemize}
+
 \section{Methods}
-\subsection{Dataset construction}
-\todo
-\figslot{Dataset provenance}{datasets}
-\subsection{Architecture and training}
-\todo
-\tableslot{Model configurations}{models}
-\subsection{Hyperparameter transfer}
-\todo
-\subsection{Scaling experiments}
-\todo
-\subsection{Evaluation benchmarks}
-\todo
-\figslot{Evaluation design}{evaluation}
-\tableslot{Benchmark summaries}{benchmarks}
-\subsection{Zero-shot scoring and linear probes}
-\todo
-\subsection{Efficiency measurements}
-\todo
+% Each item specifies a methods paragraph to develop. Fill missing details
+% from versioned experiment artifacts; do not infer reproducibility settings.
+\subsection{Dataset construction}\label{methods:data}
+\begin{itemize}
+\item Document genome and annotation sources, versions, species selection,
+and provenance. Use Figure~\ref{fig:datasets}A to distinguish annotation-derived
+and alignment-projected data. TODO: supply versioned source manifests,
+species lists, and dataset sizes. Identify the initial annotation-derived
+pool in Figure~\ref{fig:datasets}B.
+\item Define coding, upstream, and downstream extraction, strand handling,
+and window construction. Clarify that downstream denotes the 256 bases after
+an annotated CDS end rather than annotated 3-prime UTRs. TODO: specify all
+remaining extraction boundaries and filtering rules from the implementation.
+\item Describe projection of human ncRNA and enhancer-region annotations
+through whole-genome alignments. Define enhancer as the ENCODE V4 non-promoter
+cCRE set, including classes beyond enhancer-like signatures. TODO: document
+annotation/alignment versions, projection rules, and quality filters.
+\item Specify filtering, repetitive-sequence marking, deduplication if used,
+and sequence preparation. Distinguish early dataset versions from the later
+training pool, with per-region counts and experiment provenance.
+\end{itemize}
+\begin{figure}
+\centering
+\small
+\begin{tabular}{@{}p{\linewidth}@{}}
+\textbf{A \quad Training-dataset provenance and scale}\par
+\includegraphics[width=\linewidth]{figures/training_dataset_provenance.pdf} \\[6pt]
+\textbf{B \quad Annotation-derived training pool}\par
+\includegraphics[width=\linewidth]{figures/annotation_derived_training_pool.pdf}
+\end{tabular}
+\caption{Training datasets and their composition.
+\textbf{A}, Annotation-derived CDS, upstream, and downstream sequences are
+supplemented with alignment-projected ncRNA and enhancer-region sequences.
+\textbf{B}, The initial annotation-derived pool contains approximately 85B
+tokens across CDS, upstream, and downstream regions; proportional sampling
+follows these dataset sizes.}\label{fig:datasets}
+\end{figure}
+
+\subsection{Architecture and training}\label{methods:architecture}
+\begin{itemize}
+\item Describe the standard Qwen3 causal, decoder-only architecture, geometry
+rule, and experiment families summarized in Table~\ref{tab:models}.
+TODO: pin model code and provide complete architecture configurations in
+supplementary material or versioned experiment records. Acknowledge prior
+causal gLMs; TODO: add an appropriate primary citation from the blog.
+\item Specify nucleotide tokenization, sequence orientation, special tokens,
+and context construction. Distinguish early 512-base examples without a BOS
+token from the later 255-base recipe with a 256-token deployed context.
+\item Define the training objective and repetitive-base loss weighting,
+optimizer implementation, and learning-rate schedule. Document the later
+schedule's 10\% warmup and 20\% decay, and identify any experiment-specific
+exceptions. TODO: supply complete configuration references, precision,
+batching, seeds, software versions, and training hardware.
+\end{itemize}
+% Overview transcribed from blog/marin-dna.md; scaling sizes also appear in
+% blog/figure4_loss_scaling.svg. Unreported settings are not inferred.
+\begin{table*}
+\caption{Overview of training configurations. Parameter counts and training
+budgets are approximate; training tokens are reported per model or stage.}
+\label{tab:models}
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.17\linewidth}>{\raggedright\arraybackslash}p{0.19\linewidth}c r r L@{}}
+\toprule
+Experiment & Parameters & Context (bp) & Tokens (B) & Batch (tokens) & Training mixture \\
+\midrule
+Upstream specialist & 1.7B & 512 & ? & ? & Upstream only \\
+CDS specialist & ? & 512 & ? & ? & CDS only \\
+Early mixture comparison & ? & ? & ? & ? & Upstream/CDS: 10/90 or 50/50; single-region controls \\
+Reference calibration & 25M & 255 & 2.5 & 16k & ? \\
+Transfer validation & 255M, 476M, 1B & 255 & 10 & 4k & ? \\
+Parameter scaling & 46M, 76M, 128M, 255M, 476M, 1B, 2B, 4B & 255 & 84 & ? & Three regions, dataset-proportional \\
+m5.1, initial stage & 1B & 255 & 104 & ? & Three regions, uniform \\
+m5.1, continuation & 1B & 255 & 62 & ? & Five regions, uniform \\
+m1.3 control & 1B & 255 & 166$^{a}$ & ? & Five regions, uniform \\
+m3.3 control & 1B & 255 & 166$^{a}$ & ? & Upstream 25\%; each other region 18.75\% \\
+\bottomrule
+\end{tabularx}
+\par\smallskip
+\parbox{\linewidth}{\footnotesize
+?: not established by the blog; TODO: verify against experiment configurations.
+The early specialists use no BOS token. The later 255-base recipe has a
+256-token deployed context. Transfer-validation tokens and batch size follow
+the reported fourfold token increase and fourfold batch reduction from the
+reference run. Three-region mixtures contain CDS, upstream, and downstream;
+five-region mixtures add ncRNA and enhancer-region sequences.
+The two m5.1 stages total 166B tokens.
+$^{a}$Displayed comparison horizon, not necessarily full training duration.}
+\end{table*}
+
+\subsection{Mixture experiments}\label{methods:mixtures}
+\begin{itemize}
+\item Define specialist, dataset-proportional, and balanced sampling. Document
+the early upstream/CDS comparisons, their datasets, contexts, token budgets,
+and checkpoints. TODO: identify the sampling unit and repeat/epoch behavior.
+\item Use Figure~\ref{fig:later-mixtures} to document exposure histories.
+Define the later lineages: m5.1 uses approximately 104B tokens of uniform
+three-region training followed by 62B tokens of uniform five-region training;
+m1.3 and m3.3 use five regions from the start, with m3.3 assigning upstream
+25\% and each other region 18.75\%. TODO: verify full configurations and
+checkpoint histories against versioned artifacts.
+\item Record exposure counts, continuation state, schedules, evaluation
+checkpoints, and comparison horizons. Identify differences between histories
+that limit causal interpretation of exposure order.
+\end{itemize}
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{figures/training_mixture_histories.pdf}
+\caption{Training-data exposure histories. The staged m5.1 lineage uses approximately 104B tokens of uniform three-region training followed by 62B tokens with ncRNA and enhancer data added. The m1.3 and m3.3 controls use five-region mixtures from the start; m3.3 assigns upstream 25\% and each other region 18.75\%.}\label{fig:later-mixtures}
+\end{figure}
+
+\subsection{Hyperparameter transfer}\label{methods:transfer}
+\begin{itemize}
+\item Use Figure~\ref{fig:transfer-workflow} to explain calibration and transfer.
+Situate the calibration in hyperparameter-transfer literature
+\citep{yang2021transfer}; TODO: add the Complete(d) citation from the blog.
+Explain how poor tuning can confound model-size comparisons.
+Specify the approximately 25M-parameter reference sweep, 2.5B-token
+horizon, 16k-token batch, Vizier search, tuned parameters, and selection
+objective. Refer to Section~\nameref{methods:scaling} for the monitoring statistic.
+TODO: provide search spaces, trial counts, and selection rules.
+\item Give the exact transfer equations for learning rates, optimizer moments,
+and epsilon, and identify settings reused unchanged. Distinguish inherited
+geometry and token-horizon heuristics from quantities fitted on DNA, including
+the departure from the Complete(d) exponent. TODO: transcribe equations and
+bounds from the commit-pinned implementation linked in the blog.
+\item Document target validation at 255M, 476M, and 1B, changed batch sizes and
+token horizons, sweep grids, and unchanged-reference controls. Specify the
+regional checks and criterion for comparing predicted and observed optima.
+Use Figure~\ref{fig:transfer} for learning-rate validation and Supplementary
+Figures~\ref{fig:optimizer-transfer} and~\ref{fig:regional-transfer} for the
+other optimizer and regional checks. Describe the support for the scaling
+recipe without claiming globally optimal tuning or universal transfer.
+\end{itemize}
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{figures/hyperparameter_transfer_workflow.pdf}
+\caption{Hyperparameter calibration and transfer workflow. A small-model reference sweep calibrates optimizer settings, which are transformed for target batch sizes and token horizons using fixed transfer rules.}\label{fig:transfer-workflow}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{figures/learning_rate_transfer.pdf}
+\caption{Learning-rate transfer at 255M, 476M, and 1B parameters. The control uses the reference-sweep optimum unchanged; sweep points test target-scale settings. The transferred prediction gives the lowest observed loss at each scale.}\label{fig:transfer}
+\end{figure}
+
+\subsection{Scaling experiments and loss monitoring}\label{methods:scaling}
+\begin{itemize}
+\item List the eight model sizes, common approximately 84B-token budget,
+proportional three-region mixture, transferred hyperparameters, and checkpoint
+selection. TODO: supply exact run configurations and completed token counts.
+\item Define the fixed human monitoring sequences, their overlap with
+training, and loss aggregation. Explain that lowercase marks repetitive bases
+in training but non-conserved bases in monitoring, with 1\% weight in both.
+Document the statistic's role in tuning and model choice, and its limitations
+as an estimate of generalization. TODO: specify sequence provenance and
+conservation-mask construction.
+\item Use Figure~\ref{fig:scaling} to document predictable sequence-loss scaling
+\citep{kaplan2020scaling}. Specify the Kaplan-style fitting equation, endpoints, fitting procedure,
+and goodness-of-fit calculation. Define region-matched log-likelihood used in
+downstream analyses. TODO: recover exact fitting settings from the plot code.
+\end{itemize}
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{figures/sequence_loss_scaling.pdf}
+\caption{Sequence loss across model sizes. Eight models from 46M to 4B parameters are each trained on approximately 84B tokens. The inset shows a Kaplan-style power-law fit to final validation loss.}\label{fig:scaling}
+\end{figure}
+
+\subsection{Evaluation benchmarks}\label{methods:benchmarks}
+\begin{itemize}
+\item Anchor clinical curation in ClinVar~\citep{landrum2020clinvar}.
+Describe Mendelian sources, pathogenic and putatively benign labels,
+consequence classes, and inclusion criteria. Explain control matching and
+chromosome-disjoint development/test splits. Document changes from TraitGym,
+including the 0.1\% control allele-frequency threshold and expanded variant
+classes. TODO: pin source releases, matching rules, and split assignments.
+\item Describe SGE assay sources in MaveDB~\citep{findlay2018sge,esposito2019mavedb},
+gene coverage, variant inclusion,
+and conversion of assay measurements to evaluation labels. TODO: supply
+accession/version identifiers, thresholds, and counts.
+\item Use Figure~\ref{fig:evaluation} and Table~\ref{tab:benchmarks} to document
+benchmark flow, class counts, exclusions, and split sizes. Distinguish
+chromosome-disjoint evaluation labels from the separate question of pretraining
+sequence exposure.
+\end{itemize}
+\textcolor{red}{JK: it's not obvious to me what the distinction between
+what Figure~\ref{fig:evaluation} and Table~\ref{tab:benchmarks} are doing is here. Needs to be
+worked out in detail, to see what we're trying to document here.}
+
+% Draft counts and source descriptions transcribed from blog/eval_datasets.svg.
+% These are the blog snapshot, not yet verified against versioned dataset records.
+\begin{table*}
+\caption{Draft evaluation benchmark summary. Counts reproduce the blog's
+benchmark diagram; train/validation/test counts and source versions remain
+to be verified. Positive and negative labels are defined separately below.}
+\label{tab:benchmarks}
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\linewidth}{@{}p{0.13\linewidth}L L L@{}}
+\toprule
+Benchmark & Sources & Positive label & Negative label \\
+\midrule
+Mendelian & OMIM, Smedley et al., HGMD; gnomAD controls. Releases: TODO. &
+Pathogenic; allele frequency $<0.1\%$. Exact inclusion rules: TODO. &
+Non-rare gnomAD controls; allele frequency $>0.1\%$. Nine matched controls
+per pathogenic variant. \\
+SGE & MaveDB, 11 studies. Accessions, genes, and versions: TODO. &
+Abnormal function, using ClinGen/ExCALIBR or author thresholds.
+Per-assay thresholds: TODO. &
+Normal function under the corresponding assay classification.
+Ambiguous-label exclusions: TODO. \\
+\bottomrule
+\end{tabularx}
+\par\medskip
+\begin{tabularx}{\linewidth}{@{}l L r r r r r r@{}}
+\toprule
+Benchmark & Variant class & Positive & Negative & Total & Train & Validation & Test \\
+\midrule
+Mendelian & Missense & ? & ? & 10,000 & ? & ? & ? \\
+& Splicing & ? & ? & 5,500 & ? & ? & ? \\
+& 5-prime UTR & ? & ? & 3,050 & ? & ? & ? \\
+& Promoter & ? & ? & 2,700 & ? & ? & ? \\
+& ncRNA & ? & ? & 1,590 & ? & ? & ? \\
+& 3-prime UTR & ? & ? & 1,100 & ? & ? & ? \\
+& Distal & ? & ? & 990 & ? & ? & ? \\
+& Synonymous & ? & ? & 650 & ? & ? & ? \\
+& Mature miRNA$^{a}$ & ? & ? & 50 & ? & ? & ? \\
+& Total in diagram & 2,563 & 23,067 & 25,630 & ? & ? & ? \\
+\midrule
+SGE & Missense & 4,250 & 27,066 & 31,316 & ? & ? & ? \\
+& Splicing & 735 & 6,690 & 7,425 & ? & ? & ? \\
+& Total in diagram & 4,985 & 33,756 & 38,741 & ? & ? & ? \\
+\bottomrule
+\end{tabularx}
+\par\smallskip
+\parbox{\linewidth}{\footnotesize
+?: not provided in the blog diagram; TODO: obtain exact label and split counts
+from versioned dataset records. The diagram specifies GRCh38 SNVs, excludes
+HIGH-impact annotations, and assigns odd chromosomes to training/validation
+and even chromosomes to testing; the internal training/validation partition
+is TODO. Confirm these rules and counts for each benchmark and analysis.
+Mendelian matching uses chromosome, consequence, TSS distance, and exon
+distance; SGE uses no matching or subsampling.
+$^{a}$The diagram lists mature miRNA separately, whereas the main results
+summarize eight variant classes. TODO: establish whether this subset is
+excluded, merged, or otherwise treated differently before finalizing totals.}
+\end{table*}
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{figures/evaluation_benchmarks.pdf}
+\caption{Variant effect prediction benchmarks. Clinical Mendelian and experimental SGE evidence provide complementary labels across the displayed variant classes and subset sizes.}\label{fig:evaluation}
+\end{figure}
+
+\subsection{Zero-shot scoring and linear probes}\label{methods:scoring}
+\begin{itemize}
+\item Introduce the two scoring workflows in Figure~\ref{fig:model-overview}C.
+Define reference/alternate sequence construction, variant centering,
+LLR sign and aggregation, scoring windows, and forward/reverse-complement
+handling. TODO: specify exact equations and model-specific token handling.
+\item Specify embedding layer and pooling, reference/alternate feature
+construction, probe family, fitting, tuning, and evaluation splits. Distinguish
+subset-specific probes from any pooled analysis. TODO: document regularization,
+preprocessing, and labeled-data usage from the evaluation implementation.
+\item Define matched-variant inclusion across readouts and model sizes, and
+handling of missing predictions. TODO: document all exclusions and ensure
+no evaluation-label leakage in probe selection.
+\end{itemize}
+
+\subsection{Statistical analysis and comparator evaluation}\label{methods:statistics}
+\begin{itemize}
+\item Define AUPRC, pooled versus chromosome-weighted aggregation, and
+unweighted macro-averages across variant classes. Map each figure panel to
+its aggregation scheme. TODO: specify standard-error calculation, resampling
+units if applicable, and treatment of small subsets.
+\item Describe loss--VEP correlations and fitted trend lines, including
+matched-region definitions and the endpoints entering each analysis.
+TODO: supply the exact statistical procedures used in the figure scripts.
+\item Pin comparator versions, checkpoints, data snapshots, and evaluation
+protocols. Document LLR for Marin DNA and Evo 2, calibrated LLR for GPN-Star,
+and the maximum L2 reference/alternate prediction score for AlphaGenome.
+Explain missing compatible probe results and other comparability limits;
+absence from a panel is not a performance finding.
+\end{itemize}
+
+\subsection{Efficiency measurements}\label{methods:efficiency}
+\begin{itemize}
+\item Define training-FLOP accounting and sources for comparator budgets.
+Separate final-model training costs from the full research sweep and tuning
+costs. TODO: give exact unrounded totals and the calculation behind the
+reported ratio.
+\item Specify GH200 steady-state scoring at deployed contexts of 256 tokens
+for Marin DNA and 8,192 for Evo 2 40B, including forward and reverse-complement
+passes and embedding extraction. TODO: document precision, batching, software,
+warmup, timing boundaries, and repeat measurements from the benchmark artifacts.
+\item Define variants per hour and the throughput ratio, and explain any
+extrapolation to million-variant runtimes. Distinguish deployed-context
+throughput from equal-context or per-token efficiency.
+\end{itemize}
+
 \section{Availability of source code and requirements}
 \todo
 \section{Data availability}
@@ -87,8 +601,63 @@ TODO
 \todo
 \section{Acknowledgements}
 \todo
-% Uncomment when real bibliography entries and citations are added.
-% \bibliography{paper}
+\bibliography{paper}
 \section*{Supplementary material}
-\todo
+% Supplementary numbering uses distinct PDF anchors.
+\setcounter{figure}{0}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\theHfigure}{supp.\arabic{figure}}
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{figures/mendelian_zero_shot_comparison.pdf}
+\caption{Zero-shot Mendelian benchmark comparison. Entries report AUPRC (\%); Macro Avg is the unweighted mean across variant classes. Marin DNA and Evo 2 use LLR, GPN-Star uses calibrated LLR, and AlphaGenome uses the maximum L2 reference/alternate prediction score.}\label{fig:benchmarks}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{figures/mendelian_probe_comparison.pdf}
+\caption{Linear-probe Mendelian benchmark comparison. AUPRC is a sample-size-weighted average across chromosomes and is not directly comparable with Figure~\ref{fig:benchmarks}. GPN-Star and AlphaGenome are absent because compatible probe results are unavailable.}\label{fig:benchmark-probes}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{figures/region_specialist_performance.pdf}
+\caption{Region-matched zero-shot Mendelian VEP for specialists and generalists. Performance is measured as AUPRC; error bars denote standard errors.}\label{fig:specialists}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{figures/mixture_zero_shot_trajectories.pdf}
+\caption{Zero-shot mixture trajectories. Pooled Mendelian AUPRC versus training tokens for three model-mixture lineages. Error bars denote standard errors.}\label{fig:mixture-llr}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{figures/mixture_probe_trajectories.pdf}
+\caption{Linear-probe mixture trajectories. Chromosome-weighted Mendelian AUPRC versus training tokens for three model-mixture lineages. Error bars denote standard errors.}\label{fig:mixture-probe}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{figures/vep_by_model_size.pdf}
+\caption{VEP across model scale. Zero-shot LLR and linear probes are evaluated on identical variants. Performance is chromosome-weighted AUPRC; error bars denote standard errors.}\label{fig:downstream}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{figures/vep_by_sequence_likelihood.pdf}
+\caption{VEP versus matched-region validation log-likelihood (negative loss) across eight parameter-scaling endpoints. Performance is chromosome-weighted AUPRC. Lines are least-squares fits; $r$ denotes Pearson correlation and error bars denote standard errors.}\label{fig:loss-vep}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{figures/optimizer_parameter_transfer.pdf}
+\caption{Adam $\beta_2$ and $\epsilon$ transfer. Target-scale loss is compared across optimizer settings at the same model sizes as Figure~\ref{fig:transfer}.}\label{fig:optimizer-transfer}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{figures/regional_hyperparameter_transfer.pdf}
+\caption{Region-specific hyperparameter transfer. Validation loss versus learning rate, $\beta_2$, and $\epsilon$, evaluated separately for CDS, upstream, and downstream regions.}\label{fig:regional-transfer}
+\end{figure}
 \end{document}
