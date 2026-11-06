@@ -64,8 +64,9 @@ recipe; leave numerical comparisons and their qualifications to Results.
 \item Marin DNA uses a standard Transformer to learn DNA sequence patterns
 from multiple species. Explain next-base prediction in plain language, then
 connect it to variant ranking: comparing reference and altered sequences can
-reveal changes inconsistent with learned constraints. Use the planned schematic
-in Figure~\ref{fig:model-overview} to orient the reader. Introduce the human
+reveal changes inconsistent with learned constraints. Use the planned training
+overview in Figure~\ref{fig:model-overview}A--B and the existing scoring
+diagram in Figure~\ref{fig:model-overview}C to orient the reader. Introduce the human
 Mendelian benchmark as distinguishing disease-associated from putatively
 benign variants. Keep architectural and benchmark details in Methods
 Sections~\nameref{methods:architecture} and~\nameref{methods:benchmarks}.
@@ -99,17 +100,30 @@ identified in the blog.
 \renewcommand{\arraystretch}{1.15}
 \begin{tabular}{|p{\dimexpr\linewidth-2\tabcolsep-2\arrayrulewidth\relax}|}
 \hline
-\textbf{From DNA to variant ranking}\par
-\textit{Planned schematic.} Multispecies DNA $\rightarrow$ next-base
-prediction $\rightarrow$ compare reference and alternate sequences
-$\rightarrow$ rank variants. Show two readouts: zero-shot likelihood scoring
-without variant labels, and a linear probe trained on frozen representations
-using labeled examples. \\[3pt]
+\textbf{A \quad Multispecies training sequences}\par
+\textit{Planned schematic.} Show DNA from multiple species and functional
+regions being assembled into a training mixture. Distinguish sequence
+selection from model inputs: the model receives individual DNA sequences.
+Keep detailed dataset provenance in Figure~\ref{fig:datasets}. \\[3pt]
+\hline
+\textbf{B \quad Learning to predict DNA}\par
+\textit{Planned schematic.} Show a standard causal Transformer reading a DNA
+sequence and predicting the next base. Indicate that training uses DNA
+sequence rather than variant-effect labels, and produces sequence
+probabilities and learned representations. \\[3pt]
+\hline
+\textbf{C \quad From sequences to variant scores}\par
+\includegraphics[width=\linewidth]{figures/variant_scoring_workflow.pdf}\par
+Zero-shot scoring compares reference and alternate sequence likelihoods
+without labeled variant examples. A linear probe uses labeled examples to
+learn from the frozen model's reference/alternate representations. \\[3pt]
 \hline
 \end{tabular}
-\caption{From DNA to variant ranking: planned schematic. Multispecies
-sequence training supports zero-shot likelihood scoring and a separate
-linear-probe readout trained with labeled variant examples.}
+\caption{From DNA to variant ranking: draft panel layout.
+\textbf{A}, Planned overview of multispecies training sequences.
+\textbf{B}, Planned next-base prediction schematic.
+\textbf{C}, Existing variant-scoring diagram, showing likelihood-based scoring
+and a linear probe trained on frozen reference/alternate representations.}
 \label{fig:model-overview}
 \end{figure}
 
@@ -534,7 +548,7 @@ excluded, merged, or otherwise treated differently before finalizing totals.}
 
 \subsection{Zero-shot scoring and linear probes}\label{methods:scoring}
 \begin{itemize}
-\item Introduce the two scoring workflows in Figure~\ref{fig:scoring-workflow}.
+\item Introduce the two scoring workflows in Figure~\ref{fig:model-overview}C.
 Define reference/alternate sequence construction, variant centering,
 LLR sign and aggregation, scoring windows, and forward/reverse-complement
 handling. TODO: specify exact equations and model-specific token handling.
@@ -546,12 +560,6 @@ preprocessing, and labeled-data usage from the evaluation implementation.
 handling of missing predictions. TODO: document all exclusions and ensure
 no evaluation-label leakage in probe selection.
 \end{itemize}
-
-\begin{figure}
-\centering
-\includegraphics[width=\linewidth]{figures/variant_scoring_workflow.pdf}
-\caption{Variant scoring approaches. Reference and alternate sequences are compared using sequence likelihoods or paired frozen-model embeddings supplied to a linear probe.}\label{fig:scoring-workflow}
-\end{figure}
 
 \subsection{Statistical analysis and comparator evaluation}\label{methods:statistics}
 \begin{itemize}
