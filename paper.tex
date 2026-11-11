@@ -32,18 +32,15 @@ Main text figures with missing panels are filled with explanatory text.}
 \section{Background}
 
 Optimization of genomic language models (gLMs) has involved substantial focus on
-specialized architectures~\citep{benegas2025review}. Examples include
-long-convolution or hybrid long-context models such as HyenaDNA and Evo
-2~\citep{nguyen2023hyenadna,brixi2026evo2}, and U-Net-like models such as
-NTv3~\citep{boshar2026ntv3}. Bidirectional models include DNABERT-2, GENA-LM,
-PlantCAD2, and TrinityDNA~\citep{zhou2024dnabert2,fishman2025genalm,zhai2026plantcad2,yang2025trinitydna};
-state-space or hybrid state-space approaches include HybriDNA, Caduceus, and
-PlantCAD2~\citep{ma2025hybridna,schiff2024caduceus,zhai2026plantcad2}. Other directions include
-reverse-complement equivariance in Caduceus, learned adaptive segmentation in
-dnaHNet and DNACHUNKER~\citep{shah2026dnahnet,kim2026dnachunker}, the hierarchical,
-multiscale Transformer used by megaDNA~\citep{shao2024megadna}, and emerging
-sparse-expert or adaptive architectures such as JanusDNA, PlantBiMoE, and
-MxDNA~\citep{duan2025janusdna,lin2025plantbimoe,qiao2024mxdna}.
+specialized architectures~\citep{benegas2025review}, including long-convolution
+and hybrid long-context models~\citep{nguyen2023hyenadna,brixi2026evo2},
+U-Net-like models~\citep{boshar2026ntv3}, bidirectional
+models~\citep{zhou2024dnabert2,fishman2025genalm,zhai2026plantcad2,yang2025trinitydna},
+and state-space or hybrid architectures~\citep{ma2025hybridna,schiff2024caduceus,zhai2026plantcad2}.
+Other directions include reverse-complement equivariance~\citep{schiff2024caduceus},
+adaptive tokenization~\citep{shah2026dnahnet,kim2026dnachunker,qiao2024mxdna},
+hierarchical Transformers~\citep{shao2024megadna}, and emerging hybrid and
+sparse-expert models~\citep{duan2025janusdna,lin2025plantbimoe}.
 We take a different approach: keep the architecture within the standard GPT
 family and focus on data curation and mixtures, training hyperparameters, and
 model scale. The experiments below test how far that simpler, standardized
@@ -51,17 +48,16 @@ recipe can go, using the shared infrastructure of Marin~\citep{marin}.
 
 \subsection{Single-sequence genomic language models}
 
-Many of the strongest genomic sequence models rely on whole-genome alignments,
-as in GPN-Star~\citep{ye2025gpnstar}, or functional-genomics measurements, as in
-AlphaGenome~\citep{avsec2026alphagenome}---resources concentrated in a small number
-of well-studied species because they are costly to produce and difficult to
-construct comprehensively. The Omnii research preview also suggests a role for
-alignment-derived information, although its exact contribution is not fully
-specified in that preview~\citep{omniipreview}.
+Many of the strongest genomic sequence models rely on whole-genome
+alignments~\citep{ye2025gpnstar} or functional-genomics
+measurements~\citep{avsec2026alphagenome}---resources concentrated in well-studied
+species because they are costly to produce and difficult to construct
+comprehensively. A recent research preview also suggests a role for
+alignment-derived information, but does not fully specify its
+contribution~\citep{omniipreview}.
 Unlabeled DNA sequence, by contrast, is available for a rapidly growing number
 of species~\cite{darwin2022sequence,lewin2022earth}.
 Alignment-free gLMs---also called single-sequence gLMs---can be
-trained directly on genomes and applied to
 trained directly on genomes and applied to
 evolutionary constraint prediction, sequence design, and transfer learning.
 Here, single-sequence refers to the model inputs; it does not exclude using
@@ -80,14 +76,11 @@ Many early gLMs were trained on the human genome alone, with little to no
 filtering. Subsequent work identified two important drivers of model performance:
 including multiple species, and enriching for functional regions rather than
 sampling uniformly from the majority-neutral background of mammalian
-genomes~\citep{benegas2025review}. Evidence for the value of multispecies sequence
-and functional-region selection comes from GPN, PlantCaduceus, PlantCAD2, and
-Shorkie~\citep{benegas2023dna,zhai2025plantcaduceus,zhai2026plantcad2,chao2025shorkie}.
-Related evidence comes from GPN-MSA, species-aware DNA language models,
-nucleotide-dependency analysis, Evo 2, and
-ARSENAL~\citep{benegas2025gpnmsa,karollus2024species,tomazdasilva2025nucleotide,brixi2026evo2,patel2026arsenal}.
-These studies use different architectures and supervision, but together motivate
-closer attention to which sequences enter training.
+genomes~\citep{benegas2025review}. Multispecies sequence models provide evidence
+for this emphasis on training-data composition~\citep{benegas2023dna,zhai2025plantcaduceus,zhai2026plantcad2,chao2025shorkie}.
+Alignment-based and species-aware modeling, analyses of learned nucleotide
+dependencies, and targeted regulatory pretraining offer complementary
+support~\citep{benegas2025gpnmsa,karollus2024species,tomazdasilva2025nucleotide,brixi2026evo2,patel2026arsenal}.
 
 In this work, we follow up on two findings from
 TraitGym~\citep{benegas2025traitgym}. First, 152M-parameter GPN-Promoter, trained
@@ -106,23 +99,16 @@ to introduce them.
 
 By GPT-style, we mean the deliberately simple approach of treating DNA as text
 and training a stock causal, autoregressive, decoder-only language model on it.
-This approach is not new; a substantial line of prior gLM work has used causal
-language modeling with GPT- or Llama-like architectures. Examples include GenSLM,
-DNAGPT, LOL-EVE, and METAGENE-1~\citep{zvyagin2022genslm,zhang2023dnagpt,shearer2024loleve,liu2025metagene1},
-as well as GENERATOR, GENERATOR-v2, Gene42, and
-Carbon~\citep{wu2025generator,li2026generatorv2,vishniakov2025gene42,allal2026carbon}.
-The closest human-DNA precedents are Carbon, GENERATOR, Gene42, DNAGPT, and the
-promoter-focused LOL-EVE; several of the others are important causal gLM examples
-but are less directly relevant to human VEP.
+Prior causal gLMs span viral and metagenomic
+modeling~\citep{zvyagin2022genslm,liu2025metagene1}, human-genome and
+promoter-focused prediction~\citep{zhang2023dnagpt,shearer2024loleve}, and
+long-context genomic generation and variant
+prediction~\citep{wu2025generator,li2026generatorv2,vishniakov2025gene42,allal2026carbon}.
 
 Our focus is whether this approach can reach the quality of a much larger
-single-sequence model on broad variant-effect evaluation. Recent models in this
-family do not all provide a direct comparison with Evo 2 40B. For example,
-Carbon-3B is implemented as a stock \texttt{LlamaForCausalLM}; its public zero-shot
-table compares to Evo 2 7B, with Carbon slightly ahead on BRCA2 and ClinVar
-noncoding, but behind on ClinVar coding and TraitGym
-Mendelian~\citep{carboncard}. This comparison does not establish performance
-relative to Evo 2 40B.
+single-sequence model on broad variant-effect evaluation. Comparisons against
+smaller checkpoints, such as the 7B baseline used in one recent model
+card~\citep{carboncard}, do not establish performance relative to Evo 2 40B.
 If the quality gap can be closed, GPT-style models have practical advantages for
 deployment. They run through familiar training and inference stacks and can
 benefit from existing hardware support, reducing dependence on model-specific
@@ -133,13 +119,11 @@ usability.
 
 Variant effect prediction (VEP) is one of the most important applications of
 gLMs. A useful VEP model can help prioritize variants for clinical interpretation
-in rare disease, hereditary cancer, and variants of uncertain significance.
-Examples of disease-focused variant interpretation include Evo 2, GPN-Star,
-Carbon, and EnTao-GPM~\citep{brixi2026evo2,ye2025gpnstar,allal2026carbon,lin2025entaogpm}.
-VEP can also help connect genetic association signals to disease mechanisms,
-target selection, and causal-variant prioritization in GWAS fine-mapping.
-GPN-Star, AlphaGenome, and ChromBPNet illustrate these applications in human
-genetics and regulatory-variant prediction~\citep{ye2025gpnstar,avsec2026alphagenome,pampari2024chrombpnet};
+in rare disease, hereditary cancer, and variants of uncertain
+significance~\citep{brixi2026evo2,ye2025gpnstar,allal2026carbon,lin2025entaogpm}.
+Regulatory-variant prediction can also help connect genetic association signals
+to disease mechanisms, target selection, and causal-variant prioritization in
+GWAS fine-mapping~\citep{ye2025gpnstar,avsec2026alphagenome,pampari2024chrombpnet};
 more broadly, human genetic evidence can support target--disease hypotheses in
 drug discovery~\citep{nelson2015support}. Such evidence may also inform patient
 stratification or mechanism-based cohort definition, although the present
@@ -174,12 +158,10 @@ Evo 2 40B provides a demanding, broadly evaluated baseline among single-sequence
 DNA models~\citep{brixi2026evo2}. Many newer models do not attempt a direct
 comparison with it across diverse genomic regions. The other reason Evo 2 40B
 matters is its training budget: its reported $2.25\times10^{24}$ training FLOPs
-represent a substantial investment. For context, reported language-model
-budgets place it above Gemma 2 27B, OLMo 2 32B, and Llama 3.1 8B, while a
-dense-accounting estimate places it well below Llama 3.1
-70B~\citep{olmo2card,llama31card}. These comparisons provide scale rather than
-an assessment of equivalent training tasks or total research expenditure;
-costing assumptions are given in Methods Section~\nameref{methods:efficiency}.
+represent an investment comparable in scale to major open-weight language-model
+training runs~\citep{olmo2card,llama31card}. These comparisons concern training
+compute, not equivalent tasks or total research expenditure; costing assumptions
+are given in Methods Section~\nameref{methods:efficiency}.
 Evo 2 40B is therefore a useful baseline for asking whether a simpler
 single-sequence gLM can be competitive. We address that question with a
 one-billion-parameter Marin DNA model, evaluating performance across genomic
