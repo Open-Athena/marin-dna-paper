@@ -24,43 +24,65 @@ TODO
 \end{keywords}
 \end{frontmatter}
 
-\textcolor{red}{JK: this is a narrative plan of the document, where each item plans a
-given paragraph. Figures are transferred directly from the blog for this draft.
+\textcolor{red}{JK: the Background is drafted in prose; subsequent sections remain
+a narrative plan, where each item plans a given paragraph.
+Figures are transferred directly from the blog for this draft.
 Main text figures with missing panels are filled with explanatory text.}
 
 \section{Background}
 
-Variant effect prediction estimates how a DNA or protein sequence change affects
-biological function and is imporant for [APPLICATIONS].
-It was an early example in which ML approaches outperformed more
-model driven methods [assess critcally; some citations and details].
-The recent state-of-the-art has been driven by incorporating more
-data (non-coding) and phylogenetically distant data [what is the absolute
-state of the arg in variant effect prediction?]
+% What is VEP, why is important, and how has it been done over the years.
+Predicting the consequences of genetic variation is a central challenge in
+genomics. Sequencing can identify millions of differences between genomes, but
+determining which alter biological function---and which contribute to disease---is
+much harder. Computational predictions help prioritize variants for experimental
+investigation and interpret associations between genotype and phenotype. Early
+approaches drew on evolutionary conservation to identify changes likely to disrupt
+protein function; subsequent methods integrated conservation with diverse
+functional annotations to prioritize variants across the
+genome~\citep{ng2001sift,kircher2014cadd}. Models trained on functional genomic
+measurements now also predict effects on processes such as gene regulation and
+RNA processing, providing complementary evidence about how variants
+act~\citep{sokolova2024review,avsec2026alphagenome}.
 
-A recent trend has been to train a more general genomic language models
-as a way to learn functional constraint from DNA~\citep{benegas2025review},
-with VEP as downstream task.  These are useful for organisms which
-are less well characterised, as general patterns can be learned.
-Briefly review these, with Evo2~\citep{brixi2026evo2}, being the latest.
-Mention it's a large expensive model to train and infer from.
+% GLMs have proved to be good at VEP
+Genomic language models offer a way to learn information relevant to variant
+effects directly from DNA sequences. Natural genomes reflect the constraints
+imposed by evolution: sequence changes that disrupt important functions are often
+removed by selection. By learning to predict nucleotides from their surrounding
+sequence, a model can capture some of these constraints and use them to assess
+alternative alleles. This approach does not require experimentally measured
+variant effects for training, making it attractive for organisms with limited
+functional genomic resources~\citep{benegas2023dna,benegas2025review}. Recent models
+have pursued this opportunity at increasing scale. Evo 2, trained on genomes
+spanning all domains of life, demonstrates the potential of large genomic
+language models for both biological prediction and sequence
+design~\citep{brixi2026evo2}.
 
-Along with the expense of training Evo2, GLMs tend to be boutique
-models which require a lot of expertise to work with and can't
-generally use existing infrastructure. Here we use a
-a standard Transformer architecture and simple tokenisation
-strategy to model DNA based.
-This uses infrastructure from
-the Marin large language model project~\cite{marin}, and
-the highly optimised unstream infrastructure for working
-with such models. Rather than complex models, we focus on data curation
-and hyperparameter optimisation to see how far we can get by
-building on this shared infrastructure, using VEP as the downstream evaluation task.
 
-Summarise the results 1B model competitive with Evo 2 40B on the
-evaluated Mendelian benchmark, with substantially lower training and inference
-costs. Close on the practical contribution of an accessible, standard modeling
-recipe and the benefits of building on shared open infrastructure.
+% What we contribute
+[FIXME this does not capture the alignment-free status at all. Rewrite]
+The computational demands of training and applying large models nevertheless
+limit their accessibility and make experimentation costly. This raises a
+practical question: how much predictive performance can be achieved with a
+smaller model through careful training-data selection and optimization? Here we
+investigate this question using Marin DNA, a genomic language model built with a
+standard Transformer architecture and nucleotide-level tokenization. We build on
+the shared training infrastructure of the Marin language-model
+project~\citep{marin}, allowing genomic modeling to benefit from existing tools
+and optimizations. Our focus is on how data curation, training choices, and model
+scale affect performance, using variant effect prediction as a concrete test of
+biological usefulness.
+
+% Results summary/roadmap.
+We show that a one-billion-parameter Marin DNA model achieves performance
+competitive with Evo 2 40B on the evaluated human Mendelian variant benchmark,
+with substantially lower training compute and faster variant scoring in the
+configurations compared. We further examine how training-sequence selection
+affects performance across genomic regions and how the benefits of scaling
+depend on the method used to derive variant scores. Together, these results
+establish an accessible modeling recipe for variant prediction and demonstrate
+the practical value of building genomic models on shared open infrastructure.
 
 \section{Results}
 % Each item is one paragraph brief. Lead with a finding, then give the minimum
@@ -278,6 +300,7 @@ contrasting the two readouts using existing Marin DNA results.}
 
 \section{Discussion}
 \begin{itemize}
+
 \item Develop the practical implications of a standard, openly developed
 training recipe. Revisit affordable genome-wide constraint mapping in less
 studied organisms and potential complementarity with alignments and
@@ -290,6 +313,10 @@ and further scaling. Separate demonstrated results from future longer-context,
 expression, complex-trait, and cross-species evaluations. Relate these goals
 to variant interpretation and causal-variant prioritization without implying
 that the present experiments validate those broader applications.
+\item We have focused on VEP, but there are many other ways in which a
+foundation model can be useful and evaluated~\cite{feng2025benchmarking}.
+Survey and discuss future work.
+
 \end{itemize}
 
 \section{Methods}
