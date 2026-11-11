@@ -24,34 +24,43 @@ TODO
 \end{keywords}
 \end{frontmatter}
 
-\section{Background}
-% Narrative scaffold: each item is one paragraph brief, not manuscript prose.
-% Draft the introduction in four paragraphs totaling approximately 300--400 words.
-
 \textcolor{red}{JK: this is a narrative plan of the document, where each item plans a
 given paragraph. Figures are transferred directly from the blog for this draft.
 Main text figures with missing panels are filled with explanatory text.}
 
-\begin{itemize}
-\item Introduce genomic language models as a way to learn functional
-constraints from DNA~\citep{benegas2025review}. Motivate single-sequence models
-for organisms with limited experimental resources or whole-genome alignments,
-and introduce variant effect prediction (VEP) as a concrete test of biological
-usefulness.
-\item Ask how far a standard GPT-style model can progress through data
-curation, optimization, and scale. Establish Evo 2 as a demanding reference
-for single-sequence VEP~\citep{brixi2026evo2}, without reviewing architectures,
-training budgets, or individual benchmarks here.
-\item Introduce Marin DNA and its use of Marin's open development
-infrastructure~\citep{marin}. Set out the three findings in reader-facing
-order: competitive human variant prediction at lower cost, improved regional
-performance through training-sequence selection, and gains from scaling that
-depend on how the model is read out. Keep this roadmap to one paragraph.
-\item State the headline: a 1B model competitive with Evo 2 40B on the
+\section{Background}
+
+Variant effect prediction estimates how a DNA or protein sequence change affects
+biological function and is imporant for [APPLICATIONS].
+It was an early example in which ML approaches outperformed more
+model driven methods [assess critcally; some citations and details].
+The recent state-of-the-art has been driven by incorporating more
+data (non-coding) and phylogenetically distant data [what is the absolute
+state of the arg in variant effect prediction?]
+
+A recent trend has been to train a more general genomic language models
+as a way to learn functional constraint from DNA~\citep{benegas2025review},
+with VEP as downstream task.  These are useful for organisms which
+are less well characterised, as general patterns can be learned.
+Briefly review these, with Evo2~\citep{brixi2026evo2}, being the latest.
+Mention it's a large expensive model to train and infer from.
+
+Along with the expense of training Evo2, GLMs tend to be boutique
+models which require a lot of expertise to work with and can't
+generally use existing infrastructure. Here we use a
+a standard Transformer architecture and simple tokenisation
+strategy to model DNA based.
+This uses infrastructure from
+the Marin large language model project~\cite{marin}, and
+the highly optimised unstream infrastructure for working
+with such models. Rather than complex models, we focus on data curation
+and hyperparameter optimisation to see how far we can get by
+building on this shared infrastructure, using VEP as the downstream evaluation task.
+
+Summarise the results 1B model competitive with Evo 2 40B on the
 evaluated Mendelian benchmark, with substantially lower training and inference
 costs. Close on the practical contribution of an accessible, standard modeling
-recipe; leave numerical comparisons and their qualifications to Results.
-\end{itemize}
+recipe and the benefits of building on shared open infrastructure.
 
 \section{Results}
 % Each item is one paragraph brief. Lead with a finding, then give the minimum
