@@ -67,6 +67,11 @@ generally available for other species. Human VEP therefore provides a
 well-supported test of whether a gLM has learned biologically meaningful
 sequence constraints, although it does not by itself establish transfer to
 other organisms.
+In practical applications,
+VEP may require scoring millions of candidate variants, potentially across
+many individuals or species. Computational efficiency is therefore an important
+consideration alongside predictive accuracy: models must be affordable to run,
+not just accurate on evaluation benchmarks.
 
 Optimization of gLMs has involved substantial focus on specialized
 architectures~\citep{benegas2025review}, including long-convolution and hybrid
@@ -109,23 +114,32 @@ diverse genomic regions remains challenging. Evo 2 40B provides a demanding,
 broadly evaluated baseline among single-sequence DNA
 models~\citep{brixi2026evo2}, but represents a substantial computational
 investment, comparable in training scale to major open-weight language-model
-runs~\citep{olmo2card,llama31card}. Moreover, performance varies substantially
-across functional regions and model sizes~\citep{benegas2025traitgym}.
-This raises the question of whether competitive performance requires
-increasingly
+runs~\citep{olmo2card,llama31card}. Crucially, the computational expense of
+large models continues after training. In our inference benchmarks, scoring
+one million variants with Evo 2 40B would require approximately 66 days on
+a single GH200 GPU, using its deployed 8,192-token context. Such costs can
+make routine, large-scale VEP impractical for researchers without substantial
+computational resources. Moreover, performance varies substantially across
+functional regions and model sizes~\citep{benegas2025traitgym}. This raises
+the question of whether useful variant-effect prediction requires increasingly
 large or specialized architectures, or whether simpler models can achieve
-comparable results through better training data and optimization.
+competitive accuracy at a fraction of the computational cost.
 
-Here, we take the latter approach with Marin DNA: keeping the architecture
-within the standard GPT family and focusing on data curation and mixtures,
-training hyperparameters, and model scale. By GPT-style, we mean treating DNA
-as text and training a stock causal, autoregressive, decoder-only language
-model on it. We investigate which functional regions to sample, how to balance
-their representation, and how performance changes with model scale, using the
-shared infrastructure of Marin~\citep{marin}. Standard architectures also
-offer practical advantages: they run through familiar training and inference
-stacks and benefit from existing hardware support, reducing dependence on
-model-specific kernels or bespoke architecture code.
+Here, we investigate whether careful data curation and optimization can make
+much smaller, standard architectures competitive with large genomic language
+models, while substantially reducing the cost of practical applications.
+With Marin DNA, we keep the architecture within the standard GPT family and
+focus on data curation and mixtures, training hyperparameters, and model scale.
+By GPT-style, we mean treating DNA as text and training a stock causal,
+autoregressive, decoder-only language model on it. We investigate which
+functional regions to sample, how to balance their representation, and how
+performance changes with model scale, using the shared infrastructure of
+Marin~\citep{marin}. Standard architectures also offer practical advantages:
+they run through familiar training and inference stacks and benefit from
+existing hardware support, reducing dependence on model-specific kernels or
+bespoke architecture code. Our aim is to develop models that combine useful
+predictive performance with the computational efficiency needed for
+large-scale genomic applications.
 
 We evaluate a one-billion-parameter Marin DNA model against Evo 2 40B across
 diverse classes of human genetic variants, alongside systematic experiments
@@ -162,21 +176,6 @@ OMIM~\citep{amberger2015omim}. We compare Marin DNA against Evo 2 40B,
 a demanding, broadly evaluated single-sequence baseline~\citep{brixi2026evo2},
 assessing both variant-prediction performance and computational cost.
 
-To make the scoring throughput in Figure~\ref{fig:throughput}B concrete,
-consider prioritizing one million candidate variants by scoring their reference
-and alternate sequences.
-At the recorded rental rate of \$2.29 per hour for one GH200 GPU, optimized FP8
-Marin DNA 1B would require approximately 41 minutes and \$1.56 of GPU scoring
-time, compared with approximately 3.6 days and \$196 for Evo 2 1B, 13 days and
-\$739 for Evo 2 7B, and 66 days and \$3,635 for Evo 2 40B.
-These estimates extrapolate measured steady-state throughput, including both
-strands and pooled embedding extraction, at the deployed context lengths of 256
-tokens for Marin DNA and 8,192 for Evo 2.
-They illustrate marginal scoring costs rather than equal-context efficiency or
-the total cost of preparing and analysing a dataset; benchmark configurations,
-the BF16 Marin DNA reference, and calculation details are given in Methods
-Section~\nameref{methods:efficiency} and Table~\ref{tab:scoring-cost}.
-
 \begin{itemize}
 \item The 1B model achieves competitive Mendelian variant prediction with
 substantially lower cost than Evo 2 40B~\citep{brixi2026evo2}. Lead with the
@@ -195,6 +194,20 @@ equal-context measurements or total research costs. Explain AUPRC as a
 ranking-performance measure where higher is better; refer to Methods
 Sections~\nameref{methods:statistics} and~\nameref{methods:efficiency} for
 details.
+\item To make the scoring throughput in Figure~\ref{fig:throughput}B concrete,
+consider prioritizing one million candidate variants by scoring their reference
+and alternate sequences.
+At the recorded rental rate of \$2.29 per hour for one GH200 GPU, optimized FP8
+Marin DNA 1B would require approximately 41 minutes and \$1.56 of GPU scoring
+time, compared with approximately 3.6 days and \$196 for Evo 2 1B, 13 days and
+\$739 for Evo 2 7B, and 66 days and \$3,635 for Evo 2 40B.
+These estimates extrapolate measured steady-state throughput, including both
+strands and pooled embedding extraction, at the deployed context lengths of 256
+tokens for Marin DNA and 8,192 for Evo 2.
+They illustrate marginal scoring costs rather than equal-context efficiency or
+the total cost of preparing and analysing a dataset; benchmark configurations,
+the BF16 Marin DNA reference, and calculation details are given in Methods
+Section~\nameref{methods:efficiency} and Table~\ref{tab:scoring-cost}.
 \item Competitive aggregate performance does not mean a win on every variant
 class or against every model family. Summarize regional strengths and
 exceptions from Supplementary Figures~\ref{fig:benchmarks}
@@ -203,6 +216,7 @@ of alignment-based GPN-Star and experimentally supervised AlphaGenome.
 Human evaluation establishes relevance to this benchmark, not transfer to
 other organisms. TODO: add the GPN-Star and AlphaGenome primary citations
 identified in the blog.
+
 \end{itemize}
 \begin{figure}
 \centering
