@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="504pt" height="205.2pt" viewBox="0 0 504 205.2" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>draw_model_overview.py</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 205.2 
+L 504 205.2 
+L 504 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 75.6 132.641895 
+Q 75.6 124.919513 75.6 118.315165 
+" clip-path="url(#p0605308f1a)" style="fill: none; stroke: #465e70; stroke-linecap: round"/>
+    <path d="M 73.6 122.315165 
+L 75.6 118.315165 
+L 77.6 122.315165 
+z
+" clip-path="url(#p0605308f1a)" style="fill: #465e70; stroke: #465e70; stroke-linecap: round"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 75.6 80.801895 
+Q 75.6 73.079513 75.6 66.475165 
+" clip-path="url(#p0605308f1a)" style="fill: none; stroke: #a54e2a; stroke-linecap: round"/>
+    <path d="M 73.6 70.475165 
+L 75.6 66.475165 
+L 77.6 70.475165 
+z
+" clip-path="url(#p0605308f1a)" style="fill: #a54e2a; stroke: #a54e2a; stroke-linecap: round"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 115.2 132.641895 
+Q 115.2 124.919513 115.2 118.315165 
+" clip-path="url(#p0605308f1a)" style="fill: none; stroke: #465e70; stroke-linecap: round"/>
+    <path d="M 113.2 122.315165 
+L 115.2 118.315165 
+L 117.2 122.315165 
+z
+" clip-path="url(#p0605308f1a)" style="fill: #465e70; stroke: #465e70; stroke-linecap: round"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 115.2 80.801895 
+Q 115.2 73.079513 115.2 66.475165 
+" clip-path="url(#p0605308f1a)" style="fill: none; stroke: #a54e2a; stroke-linecap: round"/>
+    <path d="M 113.2 70.475165 
+L 115.2 66.475165 
+L 117.2 70.475165 
+z
+" clip-path="url(#p0605308f1a)" style="fill: #a54e2a; stroke: #a54e2a; stroke-linecap: round"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 154.8 132.641895 
+Q 154.8 124.919513 154.8 118.315165 
+" clip-path="url(#p0605308f1a)" style="fill: none; stroke: #465e70; stroke-linecap: round"/>
+    <path d="M 152.8 122.315165 
+L 154.8 118.315165 
+L 156.8 122.315165 
+z
+" clip-path="url(#p0605308f1a)" style="fill: #465e70; stroke: #465e70; stroke-linecap: round"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 154.8 80.801895 
+Q 154.8 73.079513 154.8 66.475165 
+" clip-path="url(#p0605308f1a)" style="fill: none; stroke: #a54e2a; stroke-linecap: round"/>
+    <path d="M 152.8 70.475165 
+L 154.8 66.475165 
+L 156.8 70.475165 
+z
+" clip-path="url(#p0605308f1a)" style="fill: #a54e2a; stroke: #a54e2a; stroke-linecap: round"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 194.4 132.641895 
+Q 194.4 124.919513 194.4 118.315165 
+" clip-path="url(#p0605308f1a)" style="fill: none; stroke: #465e70; stroke-linecap: round"/>
+    <path d="M 192.4 122.315165 
+L 194.4 118.315165 
+L 196.4 122.315165 
+z
+" clip-path="url(#p0605308f1a)" style="fill: #465e70; stroke: #465e70; stroke-linecap: round"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 194.4 80.801895 
+Q 194.4 73.079513 194.4 66.475165 
+" clip-path="url(#p0605308f1a)" style="fill: none; stroke: #a54e2a; stroke-linecap: round"/>
+    <path d="M 192.4 70.475165 
+L 194.4 66.475165 
+L 196.4 70.475165 
+z
+" clip-path="url(#p0605308f1a)" style="fill: #a54e2a; stroke: #a54e2a; stroke-linecap: round"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 234 132.641895 
+Q 234 124.919513 234 118.315165 
+" clip-path="url(#p0605308f1a)" style="fill: none; stroke: #465e70; stroke-linecap: round"/>
+    <path d="M 232 122.315165 
+L 234 118.315165 
+L 236 122.315165 
+z
+" clip-path="url(#p0605308f1a)" style="fill: #465e70; stroke: #465e70; stroke-linecap: round"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 234 80.801895 
+Q 234 73.079513 234 66.475165 
+" clip-path="url(#p0605308f1a)" style="fill: none; stroke: #a54e2a; stroke-linecap: round"/>
+    <path d="M 232 70.475165 
+L 234 66.475165 
+L 236 70.475165 
+z
+" clip-path="url(#p0605308f1a)" style="fill: #a54e2a; stroke: #a54e2a; stroke-linecap: round"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 52.56 82.8 
+L 259.2 82.8 
+Q 262.8 82.8 262.8 86.4 
+L 262.8 111.6 
+Q 262.8 115.2 259.2 115.2 
+L 52.56 115.2 
+Q 48.96 115.2 48.96 111.6 
+L 48.96 86.4 
+Q 48.96 82.8 52.56 82.8 
+z
+" clip-path="url(#p0605308f1a)" style="fill: #f3f6f8; stroke: #465e70; stroke-width: 0.8; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 297.200391 72 
+Q 309.600771 72 320.883118 72 
+" clip-path="url(#p0605308f1a)" style="fill: none; stroke: #817866; stroke-linecap: round"/>
+    <path d="M 316.883118 70 
+L 320.883118 72 
+L 316.883118 74 
+z
+" clip-path="url(#p0605308f1a)" style="fill: #817866; stroke: #817866; stroke-linecap: round"/>
+   </g>
+   <g id="patch_14">
+    <path d="M 297.200391 127.44 
+Q 309.600771 127.44 320.883118 127.44 
+" clip-path="url(#p0605308f1a)" style="fill: none; stroke: #817866; stroke-linecap: round"/>
+    <path d="M 316.883118 125.44 
+L 320.883118 127.44 
+L 316.883118 129.44 
+z
+" clip-path="url(#p0605308f1a)" style="fill: #817866; stroke: #817866; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_1">
+    <path d="M 262.8 99 
+L 295.2 99 
+L 295.2 72 
+" clip-path="url(#p0605308f1a)" style="fill: none; stroke: #817866; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_2">
+    <path d="M 295.2 99 
+L 295.2 127.44 
+" clip-path="url(#p0605308f1a)" style="fill: none; stroke: #817866; stroke-linecap: square"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 15px; font-family: 'Lato'; text-anchor: middle; fill: #252522" x="252" y="18.61875" transform="rotate(-0 252 18.61875)">Predict each base from preceding bases</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 12px; font-family: 'Lato'; text-anchor: start; fill: #817866" x="8.64" y="53.65875" transform="rotate(-0 8.64 53.65875)">Target</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 12px; font-family: 'Lato'; text-anchor: start; fill: #817866" x="8.64" y="150.27" transform="rotate(-0 8.64 150.27)">Input</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 17px; font-family: 'Lato'; text-anchor: middle; fill: #a54e2a" x="75.6" y="55.2025" transform="rotate(-0 75.6 55.2025)">A</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 15px; font-family: 'Lato'; text-anchor: middle; fill: #465e70" x="75.6" y="151.1175" transform="rotate(-0 75.6 151.1175)">BOS</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 17px; font-family: 'Lato'; text-anchor: middle; fill: #a54e2a" x="115.2" y="55.2025" transform="rotate(-0 115.2 55.2025)">C</text>
+   </g>
+   <g id="text_7">
+    <text style="font-size: 15px; font-family: 'Lato'; text-anchor: middle; fill: #465e70" x="115.2" y="151.1175" transform="rotate(-0 115.2 151.1175)">A</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 17px; font-family: 'Lato'; text-anchor: middle; fill: #a54e2a" x="154.8" y="55.2025" transform="rotate(-0 154.8 55.2025)">G</text>
+   </g>
+   <g id="text_9">
+    <text style="font-size: 15px; font-family: 'Lato'; text-anchor: middle; fill: #465e70" x="154.8" y="151.1175" transform="rotate(-0 154.8 151.1175)">C</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 17px; font-family: 'Lato'; text-anchor: middle; fill: #a54e2a" x="194.4" y="55.2025" transform="rotate(-0 194.4 55.2025)">T</text>
+   </g>
+   <g id="text_11">
+    <text style="font-size: 15px; font-family: 'Lato'; text-anchor: middle; fill: #465e70" x="194.4" y="151.1175" transform="rotate(-0 194.4 151.1175)">G</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 17px; font-family: 'Lato'; text-anchor: middle; fill: #a54e2a" x="234" y="55.2025" transform="rotate(-0 234 55.2025)">…</text>
+   </g>
+   <g id="text_13">
+    <text style="font-size: 15px; font-family: 'Lato'; text-anchor: middle; fill: #465e70" x="234" y="151.1175" transform="rotate(-0 234 151.1175)">…</text>
+   </g>
+   <g id="text_14">
+    <text style="font-weight: 700; font-size: 14px; font-family: 'Lato'; text-anchor: middle; fill: #465e70" x="155.88" y="103.028281" transform="rotate(-0 155.88 103.028281)">Qwen3 causal Transformer</text>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 14px; font-family: 'Lato'; fill: #a54e2a" transform="translate(333.36 68.566938)">Sequence</text>
+    <text style="font-size: 14px; font-family: 'Lato'; fill: #a54e2a" transform="translate(333.36 83.343063)">probabilities</text>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 14px; font-family: 'Lato'; fill: #2b766b" transform="translate(333.36 124.006938)">Learned</text>
+    <text style="font-size: 14px; font-family: 'Lato'; fill: #2b766b" transform="translate(333.36 138.783063)">representations</text>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 12px; font-family: 'Lato'; text-anchor: middle; fill: #817866" x="155.52" y="170.43" transform="rotate(-0 155.52 170.43)">255 DNA bases + BOS = 256 tokens</text>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 13px; font-family: 'Lato'; text-anchor: middle; fill: #252522" x="252" y="194.401406" transform="rotate(-0 252 194.401406)">DNA training, without variant-effect labels</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p0605308f1a">
+   <rect x="0" y="0" width="504" height="205.2"/>
+  </clipPath>
+ </defs>
+</svg>
