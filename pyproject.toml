@@ -1,0 +1,7 @@
+[project]
+name = "marin-dna-paper-figures"
+version = "0.1.0"
+requires-python = ">=3.11,<3.14"
+dependencies = ["matplotlib==3.10.8", "numpy", "pandas", "scipy", "polars", "pyarrow", "scikit-learn", "pyyaml", "cairosvg", "wandb", "boto3", "seaborn"]
+[tool.uv]
+package = false

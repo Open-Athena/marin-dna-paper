@@ -9,3 +9,8 @@
 /paper.pdf
 .DS_Store
 __pycache__/
+
+.venv/
+figures/*.png
+plot_data/remote/
+plot_data/wandb/
