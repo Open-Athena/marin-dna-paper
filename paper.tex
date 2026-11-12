@@ -30,60 +30,44 @@ Figures are transferred directly from the blog for this draft.
 Main text figures with missing panels are filled with explanatory text.}
 
 
-
 \section{Background}
 
-Many of the strongest genomic sequence models rely on whole-genome
-alignments~\citep{ye2025gpnstar} or functional-genomics
-measurements~\citep{avsec2026alphagenome}---resources concentrated in well-studied
-species because they are costly to produce and difficult to construct
-comprehensively. Unlabeled DNA sequence, by contrast, is available for a rapidly
-growing number of species~\cite{darwin2022sequence,lewin2022earth}.
-Alignment-free gLMs---also called single-sequence gLMs---can be trained directly
-on genomes and applied to evolutionary constraint prediction, sequence design,
-and transfer learning. Here, single-sequence refers to the model inputs; it does
-not exclude using alignments to construct some of the training data. For humans
-and other well-studied species, single-sequence gLMs are still far from replacing
-alignment-based models or models supervised with functional-genomics data. Our
-near-term goal is to build useful models for species that lack high-quality
-whole-genome alignments and functional-genomics data. This motivates developing
-models that can learn useful sequence constraints with modest computational
-requirements.
+Genomic language models (gLMs) apply methods developed for natural language
+processing to DNA sequences, aiming to learn patterns of genomic structure and
+function directly from sequence data~\citep{benegas2025review}.
+Many of the strongest genomic sequence models, however, rely on
+whole-genome alignments~\citep{ye2025gpnstar} or functional-genomics
+measurements~\citep{avsec2026alphagenome}, which are only available
+for a handful of model organisms.
+Single-sequence gLMs, which operate on individual DNA
+sequences, offer an alternative that can be applied to evolutionary constraint
+prediction, sequence design, and transfer learning. Although such models are
+still far from replacing alignment-based or experimentally supervised approaches
+in well-studied species, they have particular potential for species that lack
+these resources.
+The growing availability of genome sequences across diverse species
+~\citep{darwin2022sequence,lewin2022earth} provides an opportunity to learn
+biologically useful representations without requiring extensive experimental measurements.
 
-Variant effect prediction (VEP) is one of the most important applications of
-gLMs. A useful VEP model can help prioritize variants for clinical interpretation
+Variant effect prediction (VEP) is one of the most important applications of gLMs.
+A useful VEP model can help prioritize variants for clinical interpretation
 in rare disease, hereditary cancer, and variants of uncertain
 significance~\citep{brixi2026evo2,ye2025gpnstar,allal2026carbon,lin2025entaogpm}.
 Regulatory-variant prediction can also help connect genetic association signals
 to disease mechanisms, target selection, and causal-variant prioritization in
-GWAS fine-mapping~\citep{ye2025gpnstar,avsec2026alphagenome,pampari2024chrombpnet};
-more broadly, human genetic evidence can support target--disease hypotheses in
-drug discovery~\citep{nelson2015support}.
+GWAS
+fine-mapping~\citep{ye2025gpnstar,avsec2026alphagenome,pampari2024chrombpnet}.
+Decades of clinical genetics curation
+and experimental studies provide a depth of human variant evidence that is not
+generally available for other species. Human VEP therefore provides a
+well-supported test of whether a gLM has learned biologically meaningful
+sequence constraints, although it does not by itself establish transfer to
+other organisms.
 
-VEP is also backed by decades of clinical genetics curation. ClinVar archives
-submitted reports relating human genomic variation to disease, cancer, drug
-response, and supporting evidence~\citep{landrum2020clinvar,clinvarresource};
-OMIM is a curated catalog of human genes, genetic disorders, and gene--phenotype
-relationships~\citep{amberger2015omim}. These resources provide a depth of human
-variant evidence that is not generally available for other species. That
-combination makes VEP a substantive test of whether a gLM has learned sequence
-constraints that matter for human biology. If a model has learned useful
-sequence-level constraints from DNA alone, it should help rank variants in
-places where direct experimental evidence is weak or nonexistent. This creates
-a deliberate mismatch between evaluation and intended use: although we expect
-single-sequence gLMs to be especially valuable for non-model organisms in the
-near term, we evaluate them in humans because comparable variant-effect data
-are not yet available across species. Human VEP therefore provides a
-well-supported test of learned functional constraint, but it does not by itself
-establish transfer to other organisms. In this work, we focus on predicting
-deleteriousness, pathogenicity, or, more generally, functional constraint. These
-related targets have distinct interpretations; our evaluation uses both
-clinically curated variants and experimentally measured effects.
-
-Optimization of genomic language models (gLMs) has involved substantial focus on
-specialized architectures~\citep{benegas2025review}, including long-convolution
-and hybrid long-context models~\citep{nguyen2023hyenadna,brixi2026evo2},
-U-Net-like models~\citep{boshar2026ntv3}, bidirectional
+Optimization of gLMs has involved substantial focus on specialized
+architectures~\citep{benegas2025review}, including long-convolution and hybrid
+long-context models~\citep{nguyen2023hyenadna,brixi2026evo2}, U-Net-like
+models~\citep{boshar2026ntv3}, bidirectional
 models~\citep{zhou2024dnabert2,fishman2025genalm,zhai2026plantcad2,yang2025trinitydna},
 and state-space or hybrid
 architectures~\citep{ma2025hybridna,schiff2024caduceus,zhai2026plantcad2}.
@@ -91,85 +75,60 @@ Other directions include reverse-complement
 equivariance~\citep{schiff2024caduceus}, adaptive
 tokenization~\citep{shah2026dnahnet,kim2026dnachunker,qiao2024mxdna},
 hierarchical Transformers~\citep{shao2024megadna}, and emerging hybrid and
-sparse-expert models~\citep{duan2025janusdna,lin2025plantbimoe}. Causal,
-autoregressive gLMs have also been applied to viral and metagenomic
-modeling~\citep{zvyagin2022genslm,liu2025metagene1}, human-genome and
-promoter-focused prediction~\citep{zhang2023dnagpt,shearer2024loleve}, and
-long-context genomic generation and variant
+sparse-expert models~\citep{duan2025janusdna,lin2025plantbimoe}. Standard
+causal, autoregressive architectures have also been applied to viral and
+metagenomic modeling~\citep{zvyagin2022genslm,liu2025metagene1}, human-genome
+and promoter-focused prediction~\citep{zhang2023dnagpt,shearer2024loleve},
+and long-context genomic generation and variant
 prediction~\citep{wu2025generator,li2026generatorv2,vishniakov2025gene42,allal2026carbon}.
 
-Many early gLMs were trained on the human genome alone, with little to no
-filtering. Subsequent work identified two important drivers of model performance:
-including multiple species, and enriching for functional regions rather than
-sampling uniformly from the majority-neutral background of mammalian
-genomes~\citep{benegas2025review}. Multispecies sequence models provide evidence
-for this emphasis on training-data
+Beyond model architecture, training-data composition is an important
+determinant of performance. Many early gLMs were trained on the human genome
+alone, with little to no filtering. Subsequent work identified two important
+drivers of model performance: including multiple species, and enriching for
+functional regions rather than sampling uniformly from the majority-neutral
+background of mammalian genomes~\citep{benegas2025review}. Multispecies
+sequence models provide evidence for this emphasis on training-data
 composition~\citep{benegas2023dna,zhai2025plantcaduceus,zhai2026plantcad2,chao2025shorkie}.
 Alignment-based and species-aware modeling, analyses of learned nucleotide
 dependencies, and targeted regulatory pretraining offer complementary
 support~\citep{benegas2025gpnmsa,karollus2024species,tomazdasilva2025nucleotide,brixi2026evo2,patel2026arsenal}.
+These findings suggest that which sequences a model encounters during training
+may be as important as the architecture used to learn from them.
 
-Two findings from TraitGym~\citep{benegas2025traitgym} highlight the importance
-of training-data composition. First, 152M-parameter GPN-Promoter, trained only
-on animal promoters, performed comparably to Evo 2 40B on human promoter
-variants. Second, Evo 2 improved substantially with scale overall but still
-struggled on distal variants. Enhancers were the only region type among those
-considered here not actively curated into its training data and were sparse
-among the intergenic regions it saw. This motivates investigating enhancer
-sampling, without establishing that sampling alone explains the performance gap.
+Despite these advances, achieving strong variant-effect prediction across
+diverse genomic regions remains challenging. Evo 2 40B provides a demanding,
+broadly evaluated baseline among single-sequence DNA
+models~\citep{brixi2026evo2}, but represents a substantial computational
+investment, comparable in training scale to major open-weight language-model
+runs~\citep{olmo2card,llama31card}. Moreover, performance varies substantially
+across functional regions and model sizes~\citep{benegas2025traitgym}.
+This raises the question of whether competitive performance requires increasingly
+large or specialized architectures, or whether simpler models can achieve
+comparable results through better training data and optimization.
 
-Evo 2 40B provides a demanding, broadly evaluated baseline among single-sequence
-DNA models~\citep{brixi2026evo2}. Many newer models do not attempt a direct
-comparison with it across diverse genomic regions. Evo 2 40B also represents a
-substantial computational investment: its reported $2.25\times10^{24}$ training
-FLOPs are comparable in scale to major open-weight language-model training
-runs~\citep{olmo2card,llama31card}. These comparisons concern training compute,
-not equivalent tasks or total research expenditure. Comparisons against smaller
-checkpoints, such as the 7B baseline used in one recent model
-card~\citep{carboncard}, do not establish performance relative to Evo 2 40B.
-Together, these observations raise the question of whether a simpler,
-substantially smaller single-sequence gLM can achieve competitive variant-effect
-prediction across diverse genomic regions.
+Here, we take the latter approach with Marin DNA: keeping the architecture
+within the standard GPT family and focusing on data curation and mixtures,
+training hyperparameters, and model scale. By GPT-style, we mean treating DNA
+as text and training a stock causal, autoregressive, decoder-only language
+model on it. We investigate which functional regions to sample, how to balance
+their representation, and how performance changes with model scale, using the
+shared infrastructure of Marin~\citep{marin}. Standard architectures also
+offer practical advantages: they run through familiar training and inference
+stacks and benefit from existing hardware support, reducing dependence on
+model-specific kernels or bespoke architecture code.
 
-We take a different approach: keep the architecture within the standard GPT
-family and focus on data curation and mixtures, training hyperparameters, and
-model scale. By GPT-style, we mean the deliberately simple approach of treating
-DNA as text and training a stock causal, autoregressive, decoder-only language
-model on it. Marin DNA treats dataset construction as a primary modeling lever:
-which species and evolutionary timescales to include, which functional regions
-to sample and how to identify them, how to weigh them, and when during training
-to introduce them. The experiments below test how far that simpler, standardized
-recipe can go, using the shared infrastructure of Marin~\citep{marin}. If the
-quality gap can be closed, GPT-style models have practical advantages for
-deployment. They run through familiar training and inference stacks and can
-benefit from existing hardware support, reducing dependence on model-specific
-kernels or bespoke architecture code. This matters for cost, flexibility, and
-usability.
-
-Our focus is whether this approach can reach the quality of a much larger
-single-sequence model on broad variant-effect evaluation. We address that
-question with a one-billion-parameter Marin DNA model, evaluating performance
-across genomic regions alongside training compute and variant-scoring
-throughput. Our evaluation uses both zero-shot scoring based on sequence
-likelihoods and linear probes trained on frozen model representations. These
-complementary approaches allow us to assess both the sequence constraints
-captured by the language-modeling objective and the information available in
-learned representations. We also investigate how training-data composition and
-model scale affect performance across different classes of genomic variants.
-
-We find that a standard one-billion-parameter Transformer can achieve
-competitive human variant-effect prediction relative to Evo 2 40B, with
-substantially lower final-model training compute and faster variant scoring
-under the reported configurations. We show that balancing the exposure of
-different functional regions during training improves performance across coding
-and regulatory variants, and that adding noncoding RNA and enhancer-region
-sequences is accompanied by improved prediction in some noncoding variant
-classes. Finally, we find that scaling can improve the information accessible
-through learned representations even when likelihood-based variant scores do
-not improve. Together, these results highlight the importance of training-data
-selection, optimization, and evaluation methodology in developing efficient
-genomic language models.
-
+We evaluate a one-billion-parameter Marin DNA model against Evo 2 40B across
+diverse classes of human genetic variants, alongside systematic experiments
+on training-data composition and model scaling. We find that a standard
+Transformer can achieve competitive variant-effect prediction at substantially
+lower computational cost. We show that training-sequence selection is
+important for performance across genomic regions, and that scaling can
+improve the information accessible through learned representations even when
+likelihood-based variant scores do not improve. Together, these results
+demonstrate the potential of simpler, more computationally efficient genomic
+language models, and highlight the importance of data composition and
+evaluation methodology in their development.
 
 \section{Results}
 % Each item is one paragraph brief. Lead with a finding, then give the minimum
@@ -177,16 +136,21 @@ genomic language models.
 % A schematic and three multipanel drafts carry the narrative. Bordered cells describe
 % unfinished panels; existing plots are retained until replacements are generated.
 \subsection{A compact Transformer achieves competitive variant prediction at much lower cost}
+
+To assess whether a compact, standard autoregressive model can learn
+biologically useful sequence constraints, we evaluate Marin DNA on human
+Mendelian variant effect prediction. The model is trained to predict the
+next nucleotide in DNA sequences without variant-effect labels.
+Variants can subsequently be ranked by comparing reference and alternate
+sequence likelihoods, or using a linear classifier trained on frozen
+model representations (Figure~1). Human clinical genetics provides
+extensive evidence for evaluating these predictions, including curated
+resources such as ClinVar~\citep{landrum2020clinvar,clinvarresource} and
+OMIM~\citep{amberger2015omim}. We compare Marin DNA against Evo 2 40B,
+a demanding, broadly evaluated single-sequence baseline~\citep{brixi2026evo2},
+assessing both variant-prediction performance and computational cost.
+
 \begin{itemize}
-\item Marin DNA uses a standard Transformer to learn DNA sequence patterns
-from multiple species. Explain next-base prediction in plain language, then
-connect it to variant ranking: comparing reference and altered sequences can
-reveal changes inconsistent with learned constraints. Use the planned training
-overview in Figure~\ref{fig:model-overview}A--B and the existing scoring
-diagram in Figure~\ref{fig:model-overview}C to orient the reader. Introduce the human
-Mendelian benchmark as distinguishing disease-associated from putatively
-benign variants. Keep architectural and benchmark details in Methods
-Sections~\nameref{methods:architecture} and~\nameref{methods:benchmarks}.
 \item The 1B model achieves competitive Mendelian variant prediction with
 substantially lower cost than Evo 2 40B~\citep{brixi2026evo2}. Lead with the
 aggregate comparison: a small zero-shot advantage and a larger advantage
@@ -276,13 +240,21 @@ Throughput is measured at deployed, rather than equal, context lengths.}
 \end{figure}
 
 \subsection{Training-sequence selection improves performance across genomic regions}
+
+The composition of training data can affect which functional constraints
+a genomic language model learns. Although enriching for functional
+regions avoids uniform sampling from the predominantly neutral genomic
+background, different functional regions may still be represented
+unequally. Previous work has demonstrated the benefits of multispecies
+training and functional-region enrichment~\citep{benegas2023dna,benegas2025review}.
+In TraitGym~\citep{benegas2025traitgym}, a 152M-parameter model trained
+only on animal promoters performed comparably to Evo 2 40B on human
+promoter variants, while Evo 2 struggled on distal variants. These
+observations motivate examining how the relative exposure of coding
+and upstream sequences, and the inclusion of noncoding RNA and
+enhancer-region sequences, affect prediction across variant classes.
+
 \begin{itemize}
-\item The choice of training DNA changes which variants a model predicts
-well. Explain the central intuition: abundant protein-coding sequence can
-dominate training unless less abundant regions receive deliberate exposure.
-Connect functional-region enrichment in GPN and promoter specialization in
-TraitGym to this question~\citep{benegas2023dna,benegas2025traitgym}, without
-recounting the sequence of experiments.
 \item Balanced sampling preserves performance across coding and upstream
 regions better than pooling in proportion to dataset size.
 Figure~\ref{fig:mixtures}A provides the direct comparison: allocating equal
@@ -334,14 +306,23 @@ of new training regions; complete trajectories remain in the supplement.}
 \end{figure}
 
 \subsection{Scaling improves representations beyond what likelihood scores reveal}
+
+
+Increasing model scale generally improves language-modeling performance,
+but improvements in sequence prediction need not translate directly
+into better variant-effect prediction. In particular, likelihood-based
+scoring measures how a sequence change affects the model's predictions,
+whereas linear probes assess the information accessible in its learned
+representations. We investigate this distinction by evaluating Marin DNA
+models across a range of parameter counts, comparing both readouts on
+matched variants. Alongside clinically curated Mendelian variants, we
+use saturation genome editing (SGE) datasets [TODO citation],
+which provide experimental
+measurements of variant effects. This allows us to examine whether the
+benefits of scaling depend on the evaluation task and scoring protocol.
+[TODO reference Method for details]
+
 \begin{itemize}
-\item Larger models generally improve variant prediction, but the improvement
-depends on how their information is read out. Explain that likelihood scoring
-asks how plausible an altered sequence is, while a linear probe asks what a
-simple trained predictor can extract from the model's representations. Point
-to the complete variant-class comparison in Supplementary
-Figure~\ref{fig:downstream}; leave fitting and scoring procedures in Methods
-Section~\nameref{methods:scoring}.
 \item Mendelian missense prediction reveals information that likelihood
 scores alone miss. Lead with Figure~\ref{fig:missense-scaling}A: as model size
 increases, likelihood-based ranking worsens beyond an intermediate size while
