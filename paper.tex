@@ -225,16 +225,12 @@ identified in the blog.
 \begin{tabular}{|p{\dimexpr\linewidth-2\tabcolsep-2\arrayrulewidth\relax}|}
 \hline
 \textbf{A \quad Multispecies training sequences}\par
-\textit{Planned schematic.} Show DNA from multiple species and functional
-regions being assembled into a training mixture. Distinguish sequence
-selection from model inputs: the model receives individual DNA sequences.
-Keep detailed dataset provenance in Figure~\ref{fig:datasets}. \\[3pt]
+\includegraphics[width=\linewidth]{figures/multispecies_training_sequences.pdf}
+\\[3pt]
 \hline
 \textbf{B \quad Learning to predict DNA}\par
-\textit{Planned schematic.} Show a standard causal Transformer reading a DNA
-sequence and predicting the next base. Indicate that training uses DNA
-sequence rather than variant-effect labels, and produces sequence
-probabilities and learned representations. \\[3pt]
+\includegraphics[width=\linewidth]{figures/next_base_prediction.pdf}
+\\[3pt]
 \hline
 \textbf{C \quad From sequences to variant scores}\par
 \includegraphics[width=\linewidth]{figures/variant_scoring_workflow.pdf}\par
@@ -243,11 +239,22 @@ without labeled variant examples. A linear probe uses labeled examples to
 learn from the frozen model's reference/alternate representations. \\[3pt]
 \hline
 \end{tabular}
-\caption{From DNA to variant ranking: draft panel layout.
-\textbf{A}, Planned overview of multispecies training sequences.
-\textbf{B}, Planned next-base prediction schematic.
-\textbf{C}, Existing variant-scoring diagram, showing likelihood-based scoring
-and a linear probe trained on frozen reference/alternate representations.}
+\caption{From DNA to variant ranking.
+\textbf{A}, DNA from multiple species is selected by functional region and
+sampled as individual sequences; the model does not receive a multispecies
+alignment. CDS, upstream, and downstream regions are annotation-derived;
+ncRNA and enhancer-region annotations are projected from human through
+whole-genome alignments. Downstream denotes sequence after the CDS end,
+not annotated 3-prime UTRs; enhancer regions denote the non-promoter cCRE
+collection. See Figure~\ref{fig:datasets} for detailed provenance.
+\textbf{B}, A Qwen3 causal Transformer learns to predict each base from its
+preceding sequence, producing sequence probabilities and learned
+representations. The abbreviated example shows shifted next-base targets.
+Panels A and B illustrate the later recipe with 255 DNA bases plus a BOS
+token, rather than the early 512-base experiments; mixture schedules are
+omitted. Training uses DNA without variant-effect labels.
+\textbf{C}, Variant scoring uses sequence likelihoods or a linear probe
+trained on frozen reference/alternate representations.}
 \label{fig:model-overview}
 \end{figure}
 
