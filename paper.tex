@@ -1038,6 +1038,12 @@ compatible probe results are unavailable.}\label{fig:benchmark-probes}
 \centering
 \includegraphics[width=\linewidth]{figures/region_specialist_performance.pdf}
 \caption{Region-matched zero-shot Mendelian VEP for specialists and generalists.
+The specialists are two early 1.7B-parameter MarinDNA models trained exclusively
+on upstream/promoter sequences or coding sequences (CDS), respectively, using
+512-base contexts without a BOS token. The upstream specialist is shown in the
+promoter and 5$'$ UTR panels; the CDS specialist is shown in the missense,
+splicing, and synonymous panels. Both are compared with Evo 2 (40B) and
+GPN-Star (M).
 Performance is measured as AUPRC; error bars denote standard
 errors.}\label{fig:specialists}
 \end{figure}
