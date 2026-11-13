@@ -414,9 +414,8 @@ def fetch_mixture(api) -> pd.DataFrame:
 
     `params`/`tokens` come from tags (`tokens` is the run's *own* new-portion token
     count); the lineage / mixture weights / cumulative token accounting live in
-    `src/figures/mixture_lineage.py`, keyed by the `mix` column here. All metrics
-    here are final (run.summary); per-eval trajectories (used for begin→end deltas)
-    live in `data_mixture_history.csv` via `fetch_mixture_history`.
+    `src/local_data.py`, keyed by the `mix` column here. All metrics
+    here are final (run.summary).
     """
     print(f"Fetching mixture-sweep runs from {WANDB_PROJECT} ...")
     rows: list[dict] = []
@@ -459,36 +458,6 @@ def fetch_mixture(api) -> pd.DataFrame:
     return df
 
 
-def fetch_mixture_history(api) -> pd.DataFrame:
-    """Per-eval TraitGym AUPRC trajectories for the mixture runs (long form).
-
-    One row per (run_name, mix, metric, step). Used for begin→end deltas (e.g.
-    Figure 7): the first logged eval lands at ~num_train_steps/10, the last at the
-    end of training. `run.history(keys=...)` AND-filters to the (sparse) eval steps
-    where all requested keys are present.
-    """
-    print(f"Fetching mixture-sweep history from {WANDB_PROJECT} ...")
-    frames: list[pd.DataFrame] = []
-    for run, mix in _mixture_runs(api):
-        df = run.history(keys=list(LM_EVAL_KEYS), samples=10000, pandas=True)
-        present = [k for k in LM_EVAL_KEYS if k in df.columns]
-        if df.empty or "_step" not in df.columns or not present:
-            print(f"  {mix}: no eval history")
-            continue
-        df = df[["_step", *present]].rename(columns={"_step": "step"})
-        long = df.melt(
-            id_vars=["step"], value_vars=present, var_name="metric", value_name="value"
-        ).dropna(subset=["value"])
-        long["run_name"] = run.name
-        long["mix"] = mix
-        frames.append(long)
-        print(f"  {mix}: {df['step'].nunique()} eval steps")
-    out = pd.concat(frames, ignore_index=True)
-    out["step"] = out["step"].astype(int)
-    out = out[["run_name", "mix", "metric", "step", "value"]]
-    return out.sort_values(["mix", "metric", "step"]).reset_index(drop=True)
-
-
 def main() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     api = wandb.Api(timeout=300)
@@ -512,11 +481,6 @@ def main() -> None:
     mixture_path = DATA_DIR / "data_mixture_results.csv"
     mixture_df.to_csv(mixture_path, index=False)
     print(f"Wrote {len(mixture_df)} rows to {mixture_path}")
-
-    mixture_history_df = fetch_mixture_history(api)
-    mixture_history_path = DATA_DIR / "data_mixture_history.csv"
-    mixture_history_df.to_csv(mixture_history_path, index=False)
-    print(f"Wrote {len(mixture_history_df)} rows to {mixture_history_path}")
 
 
 if __name__ == "__main__":
