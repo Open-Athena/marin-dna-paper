@@ -44,10 +44,20 @@ LOCAL_FIGURES := \
 	figures/optimizer_parameter_transfer.pdf \
 	figures/regional_hyperparameter_transfer.pdf
 
+# Generated SVGs only; the other SVGs in figures/ are source artwork.
+PLOT_SVGS := \
+	figures/multispecies_training_sequences.svg \
+	figures/next_base_prediction.svg \
+	figures/vep_performance_vs_throughput.svg \
+	figures/learning_rate_transfer.svg \
+	figures/sequence_loss_scaling.svg \
+	figures/optimizer_parameter_transfer.svg \
+	figures/regional_hyperparameter_transfer.svg
+
 .PHONY: all figures figures-all fetch-sweeps figure-clean clean mrproper
 all: paper.pdf
 
-figures: $(LOCAL_FIGURES) $(LOCAL_FIGURES:.pdf=.svg) figures/sequence_loss_scaling_fit.txt
+figures: $(LOCAL_FIGURES) $(PLOT_SVGS) figures/sequence_loss_scaling_fit.txt
 
 # Explicit regeneration includes figures whose source snapshots are external.
 figures-all: \
@@ -95,7 +105,7 @@ figure-next_base_prediction:
 fetch-figure-next_base_prediction:
 	$(PLOT) --fetch next_base_prediction
 
-figures/variant_scoring_workflow.pdf figures/variant_scoring_workflow.svg &: $(FIGURE_CODE) plot_data/artwork/variant_scoring_workflow.svg
+figures/variant_scoring_workflow.pdf: $(FIGURE_CODE) figures/variant_scoring_workflow.svg
 	$(PLOT) variant_scoring_workflow
 
 .PHONY: figure-variant_scoring_workflow fetch-figure-variant_scoring_workflow
@@ -133,7 +143,7 @@ figure-missense_readout_scaling:
 fetch-figure-missense_readout_scaling:
 	$(PLOT) --fetch missense_readout_scaling
 
-figures/training_dataset_provenance.pdf figures/training_dataset_provenance.svg &: $(FIGURE_CODE) plot_data/artwork/training_dataset_provenance.svg
+figures/training_dataset_provenance.pdf: $(FIGURE_CODE) figures/training_dataset_provenance.svg
 	$(PLOT) training_dataset_provenance
 
 .PHONY: figure-training_dataset_provenance fetch-figure-training_dataset_provenance
@@ -142,7 +152,7 @@ figure-training_dataset_provenance:
 fetch-figure-training_dataset_provenance:
 	$(PLOT) --fetch training_dataset_provenance
 
-figures/annotation_derived_training_pool.pdf figures/annotation_derived_training_pool.svg &: $(FIGURE_CODE) plot_data/artwork/annotation_derived_training_pool.svg
+figures/annotation_derived_training_pool.pdf: $(FIGURE_CODE) figures/annotation_derived_training_pool.svg
 	$(PLOT) annotation_derived_training_pool
 
 .PHONY: figure-annotation_derived_training_pool fetch-figure-annotation_derived_training_pool
@@ -151,7 +161,7 @@ figure-annotation_derived_training_pool:
 fetch-figure-annotation_derived_training_pool:
 	$(PLOT) --fetch annotation_derived_training_pool
 
-figures/training_mixture_histories.pdf figures/training_mixture_histories.svg &: $(FIGURE_CODE) plot_data/artwork/training_mixture_histories.svg
+figures/training_mixture_histories.pdf: $(FIGURE_CODE) figures/training_mixture_histories.svg
 	$(PLOT) training_mixture_histories
 
 .PHONY: figure-training_mixture_histories fetch-figure-training_mixture_histories
@@ -160,7 +170,7 @@ figure-training_mixture_histories:
 fetch-figure-training_mixture_histories:
 	$(PLOT) --fetch training_mixture_histories
 
-figures/hyperparameter_transfer_workflow.pdf figures/hyperparameter_transfer_workflow.svg &: $(FIGURE_CODE) plot_data/artwork/hyperparameter_transfer_workflow.svg
+figures/hyperparameter_transfer_workflow.pdf: $(FIGURE_CODE) figures/hyperparameter_transfer_workflow.svg
 	$(PLOT) hyperparameter_transfer_workflow
 
 .PHONY: figure-hyperparameter_transfer_workflow fetch-figure-hyperparameter_transfer_workflow
@@ -187,7 +197,7 @@ figure-sequence_loss_scaling:
 fetch-figure-sequence_loss_scaling:
 	$(PLOT) --fetch sequence_loss_scaling
 
-figures/evaluation_benchmarks.pdf figures/evaluation_benchmarks.svg &: $(FIGURE_CODE) plot_data/artwork/evaluation_benchmarks.svg
+figures/evaluation_benchmarks.pdf: $(FIGURE_CODE) figures/evaluation_benchmarks.svg
 	$(PLOT) evaluation_benchmarks
 
 .PHONY: figure-evaluation_benchmarks fetch-figure-evaluation_benchmarks
@@ -291,7 +301,7 @@ paper.pdf: $(PAPER_FIGURES) paper.tex paper.bib oup-contemporary.cls vancouver-a
 	pdflatex -interaction=nonstopmode -halt-on-error paper.tex
 
 figure-clean:
-	rm -f $(LOCAL_FIGURES) $(LOCAL_FIGURES:.pdf=.svg) figures/sequence_loss_scaling_fit.txt
+	rm -f $(LOCAL_FIGURES) $(PLOT_SVGS) figures/sequence_loss_scaling_fit.txt
 
 clean:
 	rm -f paper.aux paper.log paper.out paper.bbl paper.blg paper.fls paper.fdb_latexmk paper.synctex.gz

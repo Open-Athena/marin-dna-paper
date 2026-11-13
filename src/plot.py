@@ -7,7 +7,6 @@ import matplotlib
 matplotlib.use("Agg")
 import math
 import re
-import shutil
 import sys
 import tempfile
 import warnings
@@ -3380,17 +3379,18 @@ def render(output_dir: Path, name: str, draw, *, overview=False, reports=()) -> 
 
 
 def render_artwork(output_dir: Path, name: str) -> None:
-    """Copy the authored SVG and convert it to vector PDF without restyling."""
+    """Convert an existing figures/<name>.svg to PDF."""
     output_dir.mkdir(parents=True, exist_ok=True)
     try:
-        source = local_data.local_path(local_data.ROOT / "artwork" / f"{name}.svg")
+        source = local_data.local_path(
+            Path(__file__).resolve().parents[1] / "figures" / f"{name}.svg"
+        )
         with tempfile.TemporaryDirectory(
             prefix=".render-", dir=output_dir
         ) as temporary:
             staging = Path(temporary)
-            shutil.copyfile(source, staging / f"{name}.svg")
             cairosvg.svg2pdf(url=str(source), write_to=str(staging / f"{name}.pdf"))
-            _publish(staging, output_dir, [f"{name}.pdf", f"{name}.svg"])
+            _publish(staging, output_dir, [f"{name}.pdf"])
     except (local_data.MissingData, FileNotFoundError) as exc:
         raise click.ClickException(str(exc)) from exc
     click.echo(f"Built {name}")
@@ -3429,7 +3429,8 @@ def _loss_scaling_figure(staging: Path) -> Figure:
 def cli(ctx: click.Context, output_dir: Path, fetch: bool) -> None:
     """Generate a paper figure by its manuscript filename (without extension).
 
-    All commands write PDF and SVG. Builds are offline unless --fetch or
+    Plots write PDF and SVG; existing SVG diagrams are converted to PDF.
+    Builds are offline unless --fetch or
     FIGURE_FETCH=1 is explicitly supplied. Use Make for batches of figures.
     """
     previous = local_data.FETCH

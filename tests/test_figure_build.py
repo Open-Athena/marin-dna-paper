@@ -135,19 +135,23 @@ class FigureBuildTests(unittest.TestCase):
         self.assertEqual(plan.count("src/plot.py "), len(stems))
 
     def test_artwork_and_fit_report(self):
+        source = ROOT / "figures/variant_scoring_workflow.svg"
+        original = source.read_bytes()
         with tempfile.TemporaryDirectory() as directory:
             for name in ("variant_scoring_workflow", "sequence_loss_scaling"):
                 result = self.runner.invoke(plot.cli, ["--output-dir", directory, name])
                 self.assertEqual(
                     result.exit_code, 0, result.output + repr(result.exception)
                 )
-                for ext in ("pdf", "svg"):
+                for ext in (
+                    ("pdf",) if name == "variant_scoring_workflow" else ("pdf", "svg")
+                ):
                     self.assertGreater(
                         (Path(directory) / f"{name}.{ext}").stat().st_size, 100
                     )
-            self.assertEqual(
-                (Path(directory) / "variant_scoring_workflow.svg").read_bytes(),
-                (ROOT / "plot_data/artwork/variant_scoring_workflow.svg").read_bytes(),
+            self.assertEqual(source.read_bytes(), original)
+            self.assertFalse(
+                (Path(directory) / "variant_scoring_workflow.svg").exists()
             )
             report = (Path(directory) / "sequence_loss_scaling_fit.txt").read_text()
             self.assertIn("data points : 8", report)

@@ -21,15 +21,16 @@ uv run --locked python src/plot.py --output-dir /tmp/figures learning_rate_trans
 ```
 
 Every figure has a Click command matching its filename without the extension.
-Commands write PDF and SVG; `sequence_loss_scaling` also writes
-`sequence_loss_scaling_fit.txt`. Authored SVGs are converted to vector PDF.
+Plots write PDF and SVG; `sequence_loss_scaling` also writes
+`sequence_loss_scaling_fit.txt`. Existing SVG diagrams in `figures/` are converted
+to vector PDF. `plot_data/` holds the CSVs, model registry, and downloaded inputs.
 The overview diagrams use Lato when available. SVG text stays editable.
 
 The Makefile explicitly lists the paper's figures and their bundled inputs.
 All plotting and saving is in `src/plot.py`; `src/local_data.py` contains shared
 input loaders, source URLs, model metadata, and lineage definitions.
 `src/metrics.py` contains the chromosome-weighted AUPRC and bootstrap calculations.
-There is no figure manifest or generated Makefile.
+The plotting code’s original license is retained in `src/LICENSE`.
 
 ## External snapshots
 
@@ -50,11 +51,10 @@ make fetch-sweeps                          # Refresh four W&B sweep/history CSVs
 Fetching is explicit and may require AWS or W&B credentials. Remote inputs are
 cached under `plot_data/remote/<scheme>/<host>/<path>` and are gitignored.
 `FIGURE_FETCH=1` is also supported for explicit retrieval. Normal builds are offline.
-See [plot_data/README.md](plot_data/README.md) for the input inventory and provenance.
 
 `make clean` removes LaTeX intermediates; `make mrproper` also removes `paper.pdf`.
 `make figure-clean` removes only outputs reproducible from bundled inputs, retaining
-the external figures' checked-in PDFs.
+the source SVGs and external figures' checked-in PDFs.
 
 Run the offline build and scientific-calculation checks with:
 
