@@ -1,0 +1,500 @@
+Assembly Accession	Assembly Name	Organism Name	Organism Taxonomic ID	Assembly Level	Assembly Stats Total Sequence Length	species	genus	family	order	class	phylum	kingdom	domain
+GCF_000002985.6	WBcel235	Caenorhabditis elegans	6239	Complete Genome	100272607	Caenorhabditis elegans	Caenorhabditis	Rhabditidae	Rhabditida	Chromadorea	Nematoda	Metazoa	Eukaryota
+GCF_049306965.1	GRCz12tu	Danio rerio	7955	Complete Genome	1448791966	Danio rerio	Danio	Danionidae	Cypriniformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_000001215.4	Release 6 plus ISO1 MT	Drosophila melanogaster	7227	Chromosome	143706478	Drosophila melanogaster	Drosophila	Drosophilidae	Diptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_016699485.2	bGalGal1.mat.broiler.GRCg7b	Gallus gallus	9031	Chromosome	1053315467	Gallus gallus	Gallus	Phasianidae	Galliformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_000001635.27	GRCm39	Mus musculus	10090	Chromosome	2728206152	Mus musculus	Mus	Muridae	Rodentia	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_000001405.40	GRCh38.p14	Homo sapiens	9606	Chromosome	3099441038	Homo sapiens	Homo	Hominidae	Primates	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_032362555.1	ilAmyTran1.1	Amyelois transitella	680683	Complete Genome	327376598	Amyelois transitella	Amyelois	Pyralidae	Lepidoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_038396675.1	HydraT2T_AEP	Hydra vulgaris	6087	Complete Genome	911675201	Hydra vulgaris	Hydra	Hydridae	Anthoathecata	Hydrozoa	Cnidaria	Metazoa	Eukaryota
+GCF_047663525.1	IASCAAS_PekinDuck_T2T	Anas platyrhynchos	8839	Complete Genome	1261969826	Anas platyrhynchos	Anas	Anatidae	Anseriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_037993035.2	T2T-MFA8v1.1	Macaca fascicularis	9541	Complete Genome	3060038958	Macaca fascicularis	Macaca	Cercopithecidae	Primates	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_001040885.1	S_ratti_ED321	Strongyloides ratti	34506	Chromosome	43150242	Strongyloides ratti	Strongyloides	Strongyloididae	Rhabditida	Chromadorea	Nematoda	Metazoa	Eukaryota
+GCF_024713945.1	ASM2471394v1	Dermatophagoides farinae	6954	Chromosome	62428314	Dermatophagoides farinae	Dermatophagoides	Pyroglyphidae	Sarcoptiformes	Arachnida	Arthropoda	Metazoa	Eukaryota
+GCF_947507565.1	ooOscLobu1.1	Oscarella lobularis	121494	Chromosome	65248392	Oscarella lobularis	Oscarella	Oscarellidae	Homosclerophorida	Homoscleromorpha	Porifera	Metazoa	Eukaryota
+GCF_050580445.1	ASM5058044v1	Brevipalpus obovatus	246614	Chromosome	67286437	Brevipalpus obovatus	Brevipalpus	Tenuipalpidae	Trombidiformes	Arachnida	Arthropoda	Metazoa	Eukaryota
+GCF_022539665.2	CSIRO_AGI_Dcar_HiC_V3	Daphnia carinata	120202	Chromosome	108144665	Daphnia carinata	Daphnia	Daphniidae	Diplostraca	Branchiopoda	Arthropoda	Metazoa	Eukaryota
+GCF_000224145.3	KH	Ciona intestinalis	7719	Chromosome	115212710	Ciona intestinalis	Ciona	Cionidae	Phlebobranchia	Ascidiacea	Chordata	Metazoa	Eukaryota
+GCF_036172545.1	AGI_CSIRO_Cbre_v1	Culicoides brevitarsis	469753	Chromosome	129492607	Culicoides brevitarsis	Culicoides	Ceratopogonidae	Diptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_963675165.1	odHalPani1.1	Halichondria panicea	6063	Chromosome	131456761	Halichondria panicea	Halichondria	Halichondriidae	Suberitida	Demospongiae	Porifera	Metazoa	Eukaryota
+GCF_024334085.1	ASM2433408v1	Lutzomyia longipalpis	7200	Chromosome	147838017	Lutzomyia longipalpis	Lutzomyia	Psychodidae	Diptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_014905175.1	ASM1490517v1	Aphidius gifuensis	684658	Chromosome	156944493	Aphidius gifuensis	Aphidius	Braconidae	Hymenoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_943735745.2	idAnoBellAS_SP24_06.2	Anopheles bellator	139047	Chromosome	169575294	Anopheles bellator	Anopheles	Culicidae	Diptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_917208135.1	iyAthRosa1.1	Athalia rosae	37344	Chromosome	171955050	Athalia rosae	Athalia	Athaliidae	Hymenoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_039881205.1	ESF131.1	Euwallacea similis	1736056	Chromosome	177600458	Euwallacea similis	Euwallacea	Curculionidae	Coleoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_014466175.1	ASM1446617v1	Vespula pensylvanica	30213	Chromosome	179370016	Vespula pensylvanica	Vespula	Vespidae	Hymenoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_963422355.1	ooCorCand1.1	Corticium candelabrum	121492	Chromosome	185491545	Corticium candelabrum	Corticium	Plakinidae	Homosclerophorida	Homoscleromorpha	Porifera	Metazoa	Eukaryota
+GCF_949628265.1	ieCloDipt1.1	Cloeon dipterum	197152	Chromosome	190111064	Cloeon dipterum	Cloeon	Baetidae	Ephemeroptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_007210705.1	Tcal_SD_v2.1	Tigriopus californicus	6832	Chromosome	191142546	Tigriopus californicus	Tigriopus	Harpacticidae	Harpacticoida	Hexanauplia	Arthropoda	Metazoa	Eukaryota
+GCF_019399895.1	Cobs3.1	Cardiocondyla obscurior	286306	Chromosome	193020115	Cardiocondyla obscurior	Cardiocondyla	Formicidae	Hymenoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_947623445.1	kaClaLepa1.1	Clavelina lepadiformis	159417	Chromosome	210074726	Clavelina lepadiformis	Clavelina	Clavelinidae	Aplousobranchia	Ascidiacea	Chordata	Metazoa	Eukaryota
+GCF_907164935.1	iOsmBic2.1	Osmia bicornis bicornis	1437191	Chromosome	222969496	Osmia bicornis	Osmia	Megachilidae	Hymenoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_029169275.1	AcerK_1.0	Apis cerana	7461	Chromosome	223040589	Apis cerana	Apis	Apidae	Hymenoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_031761385.1	Nec_am_Ar_1.0	Necator americanus	51031	Chromosome	234457255	Necator americanus	Necator	Ancylostomatidae	Rhabditida	Chromadorea	Nematoda	Metazoa	Eukaryota
+GCF_031307605.1	icTriCast1.1	Tribolium castaneum	7070	Chromosome	241845558	Tribolium castaneum	Tribolium	Tenebrionidae	Coleoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_018135715.1	MEX_DaPlex	Danaus plexippus	13037	Chromosome	245173502	Danaus plexippus	Danaus	Nymphalidae	Lepidoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_912999745.1	ilPapMach1.1	Papilio machaon	76193	Chromosome	252114018	Papilio machaon	Papilio	Papilionidae	Lepidoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_026283585.1	UHH_iyHylVolc1.0_haploid	Hylaeus volcanicus	313075	Chromosome	252651163	Hylaeus volcanicus	Hylaeus	Colletidae	Hymenoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_905147795.1	ilPieRapa1.1	Pieris rapae	64459	Chromosome	256355036	Pieris rapae	Pieris	Pieridae	Lepidoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_024364675.1	icAetTumi1.1	Aethina tumida	116153	Chromosome	259967705	Aethina tumida	Aethina	Nitidulidae	Coleoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_021155785.1	iyNeoFabr1.1	Neodiprion fabricii	2872261	Chromosome	260422217	Neodiprion fabricii	Neodiprion	Diprionidae	Hymenoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_026151205.1	MBARI_Bmic_1.0	Bolinopsis microptera	2820187	Chromosome	265435384	Bolinopsis microptera	Bolinopsis	Bolinopsidae	Lobata	Tentaculata	Ctenophora	Metazoa	Eukaryota
+GCF_964204645.1	tnTubPoly1.2	Tubulanus polymorphus	672921	Chromosome	267806677	Tubulanus polymorphus	Tubulanus	Tubulanidae	Tubulaniformes	Palaeonemertea	Nemertea	Metazoa	Eukaryota
+GCF_932526225.1	jaNemVect1.1	Nematostella vectensis	45351	Chromosome	269418438	Nematostella vectensis	Nematostella	Edwardsiidae	Actiniaria	Anthozoa	Cnidaria	Metazoa	Eukaryota
+GCF_019457755.1	ASM1945775v1	Venturia canescens	32260	Chromosome	290760430	Venturia canescens	Venturia	Ichneumonidae	Hymenoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_036711975.1	IU_Otau_3.0	Onthophagus taurus	166361	Chromosome	290855388	Onthophagus taurus	Onthophagus	Scarabaeidae	Coleoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_009193385.2	Nvit_psr_1.1	Nasonia vitripennis	7425	Chromosome	297309692	Nasonia vitripennis	Nasonia	Pteromalidae	Hymenoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_014529535.1	BU_Bcop_v1	Bradysia coprophila	38358	Chromosome	309728657	Bradysia coprophila	Bradysia	Sciaridae	Diptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_932276165.1	ilPluXylo3.1	Plutella xylostella	51655	Chromosome	323302761	Plutella xylostella	Plutella	Plutellidae	Lepidoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_901709675.1	fSynAcu1.2	Syngnathus acus	161584	Chromosome	324331233	Syngnathus acus	Syngnathus	Syngnathidae	Syngnathiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_003676215.2	ASM367621v3	Rhopalosiphum maidis	43146	Chromosome	326023155	Rhopalosiphum maidis	Rhopalosiphum	Aphididae	Hemiptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_964030605.1	jaAcrPala1.3	Acropora palmata	6131	Chromosome	333946596	Acropora palmata	Acropora	Acroporidae	Scleractinia	Anthozoa	Cnidaria	Metazoa	Eukaryota
+GCF_036669915.1	ASM3666991v2	Pocillopora verrucosa	203993	Chromosome	353416094	Pocillopora verrucosa	Pocillopora	Pocilloporidae	Scleractinia	Anthozoa	Cnidaria	Metazoa	Eukaryota
+GCF_964355755.1	ecAntMedi1.1	Antedon mediterranea	105859	Chromosome	354494601	Antedon mediterranea	Antedon	Antedonidae	Comatulida	Crinoidea	Echinodermata	Metazoa	Eukaryota
+GCF_030705265.1	ASM3070526v1	Helicoverpa armigera	29058	Chromosome	355232002	Helicoverpa armigera	Helicoverpa	Noctuidae	Lepidoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_000237925.1	ASM23792v2	Schistosoma mansoni	6183	Chromosome	364518427	Schistosoma mansoni	Schistosoma	Schistosomatidae	Strigeidida	Trematoda	Platyhelminthes	Metazoa	Eukaryota
+GCF_003711565.1	ASM371156v2	Takifugu flavidus	433684	Chromosome	366286831	Takifugu flavidus	Takifugu	Tetraodontidae	Tetraodontiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_050908995.1	iyAndCera1_principal	Andrena cerasifolii	2819439	Chromosome	369980408	Andrena cerasifolii	Andrena	Andrenidae	Hymenoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_964204865.1	kaStyClav1.hap1.2	Styela clava	7725	Chromosome	376784849	Styela clava	Styela	Styelidae	Stolidobranchia	Ascidiacea	Chordata	Metazoa	Eukaryota
+GCF_910592395.1	tnLinLong1.2	Lineus longissimus	88925	Chromosome	391165532	Lineus longissimus	Lineus	Lineidae	Heteronemertea	Pilidiophora	Nemertea	Metazoa	Eukaryota
+GCF_050436995.1	ilAntGemm2 primary	Anticarsia gemmatalis	129554	Chromosome	391691109	Anticarsia gemmatalis	Anticarsia	Erebidae	Lepidoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_907165205.1	icCocSept1.1	Coccinella septempunctata	41139	Chromosome	398849173	Coccinella septempunctata	Coccinella	Coccinellidae	Coleoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_950023065.1	ihPlaCitr1.1	Planococcus citri	170843	Chromosome	403646906	Planococcus citri	Planococcus	Pseudococcidae	Hemiptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_040956055.1	CSIRO-AGI_Bhir_v1	Brachionichthys hirsutus	412623	Chromosome	406634837	Brachionichthys hirsutus	Brachionichthys	Brachionichthyidae	Lophiiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_022045245.1	ASM2204524v1	Lucilia cuprina	7375	Chromosome	409159265	Lucilia cuprina	Lucilia	Calliphoridae	Diptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_026250575.1	icDioCari1.1	Diorhabda carinulata	1163345	Chromosome	415369604	Diorhabda carinulata	Diorhabda	Chrysomelidae	Coleoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_902459465.1	eAstRub1.3	Asterias rubens	7604	Chromosome	417601740	Asterias rubens	Asterias	Asteriidae	Forcipulatida	Asteroidea	Echinodermata	Metazoa	Eukaryota
+GCF_900634795.4	fBetSpl5.4	Betta splendens	158456	Chromosome	426984265	Betta splendens	Betta	Osphronemidae	Anabantiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_905147365.1	ilAriAges1.1	Aricia agestis	91739	Chromosome	435265205	Aricia agestis	Aricia	Lycaenidae	Lepidoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_021917145.1	fHypTra1	Hypomesus transpacificus	137520	Chromosome	437273953	Hypomesus transpacificus	Hypomesus	Osmeridae	Osmeriformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_028554725.1	idZeuCucr1.2	Zeugodacus cucurbitae	28588	Chromosome	439243742	Zeugodacus cucurbitae	Zeugodacus	Tephritidae	Diptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_003073045.1	ASM307304v1	Pomacea canaliculata	400727	Chromosome	440143917	Pomacea canaliculata	Pomacea	Ampullariidae	Architaenioglossa	Gastropoda	Mollusca	Metazoa	Eukaryota
+GCF_051020985.1	iyNomMela1	Nomia melanderi	2448451	Chromosome	447524585	Nomia melanderi	Nomia	Halictidae	Hymenoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_035083965.1	klBraLanc5.hap2	Branchiostoma lanceolatum	7740	Chromosome	458287516	Branchiostoma lanceolatum	Branchiostoma	Branchiostomatidae	Amphioxiformes	Leptocardii	Chordata	Metazoa	Eukaryota
+GCF_030269925.1	ASM3026992v2	Bombyx mori	7091	Chromosome	461688958	Bombyx mori	Bombyx	Bombycidae	Lepidoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_014839805.1	JHU_Msex_v1.0	Manduca sexta	7130	Chromosome	470021481	Manduca sexta	Manduca	Sphingidae	Lepidoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_000523025.1	Cse_v1.0	Cynoglossus semilaevis	244447	Chromosome	470182763	Cynoglossus semilaevis	Cynoglossus	Cynoglossidae	Pleuronectiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_051622035.1	ASM5162203v2	Arctopsyche grandis	121162	Chromosome	475702301	Arctopsyche grandis	Arctopsyche	Hydropsychidae	Trichoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_024362695.1	ilPecGoss1.1	Pectinophora gossypiella	13191	Chromosome	476494545	Pectinophora gossypiella	Pectinophora	Gelechiidae	Lepidoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_949316345.1	fPunPun2.1	Pungitius pungitius	134920	Chromosome	480434100	Pungitius pungitius	Pungitius	Gasterosteidae	Perciformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_029227915.1	HSymV2.1	Hydractinia symbiolongicarpus	13093	Chromosome	480922349	Hydractinia symbiolongicarpus	Hydractinia	Hydractiniidae	Anthoathecata	Hydrozoa	Cnidaria	Metazoa	Eukaryota
+GCF_963855985.1	ilOstNubi1.1	Ostrinia nubilalis	29057	Chromosome	495500553	Ostrinia nubilalis	Ostrinia	Crambidae	Lepidoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_948474715.1	ilCydAmpl1.1	Cydia amplana	1869771	Chromosome	504318984	Cydia amplana	Cydia	Tortricidae	Lepidoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_945859705.1	idEpiBalt1.1	Episyrphus balteatus	286459	Chromosome	535345329	Episyrphus balteatus	Episyrphus	Syrphidae	Diptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_022379125.1	ASM2237912v1	Scophthalmus maximus	52904	Chromosome	538217135	Scophthalmus maximus	Scophthalmus	Scophthalmidae	Pleuronectiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_964019385.1	ocSycCili1.1	Sycon ciliatum	27933	Chromosome	539574681	Sycon ciliatum	Sycon	Sycettidae	Leucosolenida	Calcarea	Porifera	Metazoa	Eukaryota
+GCF_958299795.1	jaPorLute2.1	Porites lutea	51062	Chromosome	541644883	Porites lutea	Porites	Poritidae	Scleractinia	Anthozoa	Cnidaria	Metazoa	Eukaryota
+GCF_900963305.1	fEcheNa1.1	Echeneis naucrates	173247	Chromosome	544212633	Echeneis naucrates	Echeneis	Echeneidae	Carangiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_040054535.1	ASM4005453v1	Antennarius striatus	241820	Chromosome	548561997	Antennarius striatus	Antennarius	Antennariidae	Lophiiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_963678975.1	odDysAvar1.4	Dysidea avara	196820	Chromosome	550830897	Dysidea avara	Dysidea	Dysideidae	Dictyoceratida	Demospongiae	Porifera	Metazoa	Eukaryota
+GCF_900634625.1	fParRan2.1	Parambassis ranga	210632	Chromosome	551012959	Parambassis ranga	Parambassis	Ambassidae		Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_900324465.2	fAnaTes1.2	Anabas testudineus	64144	Chromosome	555641398	Anabas testudineus	Anabas	Anabantidae	Anabantiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_031168955.1	ASM3116895v1	Gadus macrocephalus	80720	Chromosome	555681083	Gadus macrocephalus	Gadus	Gadidae	Gadiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_905475395.1	inChrCarn1.1	Chrysoperla carnea	189513	Chromosome	560232532	Chrysoperla carnea	Chrysoperla	Chrysopidae	Neuroptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_963853765.1	xbMagGiga1.1	Magallana gigas	29159	Chromosome	563985803	Magallana gigas	Magallana	Ostreidae	Ostreida	Bivalvia	Mollusca	Metazoa	Eukaryota
+GCF_900700375.1	fDenClu1.1	Denticeps clupeoides	299321	Chromosome	567401054	Denticeps clupeoides	Denticeps	Denticipitidae	Clupeiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_020382885.2	fScaArg1.pri	Scatophagus argus	75038	Chromosome	570785501	Scatophagus argus	Scatophagus	Scatophagidae		Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_009769545.1	fCycLum1.pri	Cyclopterus lumpus	8103	Chromosome	572885595	Cyclopterus lumpus	Cyclopterus	Cyclopteridae	Perciformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_043641665.1	fEnoArm2.hap1	Enoplosus armatus	215367	Chromosome	579881259	Enoplosus armatus	Enoplosus	Enoplosidae	Centrarchiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_027744825.2	RoL_Sspl_1.0	Synchiropus splendidus	270530	Chromosome	582881826	Synchiropus splendidus	Synchiropus	Callionymidae	Syngnathiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_024713975.1	ASM2471397v2	Paralichthys olivaceus	8255	Chromosome	588170514	Paralichthys olivaceus	Paralichthys	Paralichthyidae	Pleuronectiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_013358815.1	fEleEle1.pri	Electrophorus electricus	8005	Chromosome	589358956	Electrophorus electricus	Electrophorus	Gymnotidae	Gymnotiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_900324485.2	fMasArm1.2	Mastacembelus armatus	205130	Chromosome	591935101	Mastacembelus armatus	Mastacembelus	Mastacembelidae	Synbranchiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_009819705.1	fHipHip1.pri	Hippoglossus hippoglossus	8267	Chromosome	596775069	Hippoglossus hippoglossus	Hippoglossus	Pleuronectidae	Pleuronectiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_019176455.1	IFAPA_SoseM_1	Solea senegalensis	28829	Chromosome	603518608	Solea senegalensis	Solea	Soleidae	Pleuronectiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_036324505.1	JC_Emac_rtc_rv5	Eleginops maclovinus	56733	Chromosome	606289673	Eleginops maclovinus	Eleginops	Eleginopidae	Perciformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_015846415.1	ASM1584641v1	Triplophysa dalaica	1582913	Chromosome	607923607	Triplophysa dalaica	Triplophysa	Nemacheilidae	Cypriniformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_900634415.1	fCotGob3.1	Cottoperca gobio	56716	Chromosome	609391784	Cottoperca gobio	Cottoperca	Bovichtidae	Perciformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_032854445.1	CUHK_Ljap_v2	Liolophura sinensis	3198878	Chromosome	609495693	Liolophura sinensis	Liolophura	Chitonidae	Chitonida	Polyplacophora	Mollusca	Metazoa	Eukaryota
+GCF_918797505.1	PGI_BMITA_v3	Bemisia tabaci	7038	Chromosome	609949642	Bemisia tabaci	Bemisia	Aleyrodidae	Hemiptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_017976425.1	fToxJac2.pri	Toxotes jaculatrix	941984	Chromosome	621503431	Toxotes jaculatrix	Toxotes	Toxotidae		Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_002237135.1	ASM223713v2	Teleopsis dalmanni	139649	Chromosome	623660103	Teleopsis dalmanni	Teleopsis	Diopsidae	Diptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_029220125.1	NWPU_hadal_v1	Pseudoliparis swirei	2059687	Chromosome	626438928	Pseudoliparis swirei	Pseudoliparis	Liparidae	Perciformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_022458985.1	CIBA_Mcephalus_1.1	Mugil cephalus	48193	Chromosome	634849760	Mugil cephalus	Mugil	Mugilidae	Mugiliformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_013103735.1	CSU_Ecrag_1.0	Etheostoma cragini	417921	Chromosome	643078674	Etheostoma cragini	Etheostoma	Percidae	Perciformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_017976325.1	fCheRos1.pri	Chelmon rostratus	109905	Chromosome	644191893	Chelmon rostratus	Chelmon	Chaetodontidae	Chaetodontiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_042242105.1	fPemKlu1.hap1	Pempheris klunzingeri	3127111	Chromosome	646252061	Pempheris klunzingeri	Pempheris	Pempheridae	Acropomatiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_016086655.4	UVic_Lsal_1.4	Lepeophtheirus salmonis	72036	Chromosome	647090668	Lepeophtheirus salmonis	Lepeophtheirus	Caligidae	Siphonostomatoida	Hexanauplia	Arthropoda	Metazoa	Eukaryota
+GCF_021018895.1	ASM2101889v1	Seriola aureovittata	2871759	Chromosome	647095223	Seriola aureovittata	Seriola	Carangidae	Carangiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_027596085.1	Afim_UVic_2022	Anoplopoma fimbria	229290	Chromosome	653543715	Anoplopoma fimbria	Anoplopoma	Anoplopomatidae	Perciformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_902362185.1	fChaCha1.1	Chanos chanos	29144	Chromosome	656912816	Chanos chanos	Chanos	Chanidae	Gonorynchiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_000972845.2	L_crocea_2.0	Larimichthys crocea	215358	Chromosome	657923191	Larimichthys crocea	Larimichthys	Sciaenidae		Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_037975245.1	ASM3797524v1	Apostichopus japonicus	307972	Chromosome	671643915	Apostichopus japonicus	Apostichopus	Stichopodidae	Aspidochirotida	Holothuroidea	Echinodermata	Metazoa	Eukaryota
+GCF_001640805.2	TLL_Latcal_v3	Lates calcarifer	8187	Chromosome	673797687	Lates calcarifer	Lates	Centropomidae		Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_033026475.1	Channa argus male v1.0	Channa argus	215402	Chromosome	675457141	Channa argus	Channa	Channidae	Anabantiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_019740435.1	SWU_Gaff_1.0	Gambusia affinis	33528	Chromosome	680149392	Gambusia affinis	Gambusia	Poeciliidae	Cyprinodontiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_001649575.2	ASM164957v2	Kryptolebias marmoratus	37003	Chromosome	680638340	Kryptolebias marmoratus	Kryptolebias	Rivulidae	Cyprinodontiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_904848185.1	fAcaLat1.1	Acanthopagrus latus	8177	Chromosome	685127588	Acanthopagrus latus	Acanthopagrus	Sparidae	Spariformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_016859285.1	ASM1685928v1	Xiphias gladius	8245	Chromosome	691763775	Xiphias gladius	Xiphias	Xiphiidae	Istiophoriformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_030014155.1	HZAU_Pvac_v1	Tachysurus vachellii	175792	Chromosome	692104899	Tachysurus vachellii	Tachysurus	Bagridae	Siluriformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_932274485.2	xgPatVulg1.2	Patella vulgata	6465	Chromosome	695367781	Patella vulgata	Patella	Patellidae		Gastropoda	Mollusca	Metazoa	Eukaryota
+GCF_020085105.1	ASM2008510v1	Siniperca chuatsi	119488	Chromosome	718804017	Siniperca chuatsi	Siniperca	Sinipercidae	Centrarchiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_963930695.1	fLabBer1.1	Labrus bergylta	56723	Chromosome	720210020	Labrus bergylta	Labrus	Labridae	Labriformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_018831695.1	ASM1883169v1	Puntigrus tetrazona	1606681	Chromosome	730801986	Puntigrus tetrazona	Puntigrus	Cyprinidae	Cypriniformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_002234675.1	ASM223467v1	Oryzias latipes	8090	Chromosome	734040372	Oryzias latipes	Oryzias	Adrianichthyidae	Beloniformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_014805685.1	ASM1480568v1	Silurus meridionalis	175797	Chromosome	742579920	Silurus meridionalis	Silurus	Siluridae	Siluriformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_009829125.3	fPerMag1.2.pri	Periophthalmus magnuspinnatus	409849	Chromosome	752605561	Periophthalmus magnuspinnatus	Periophthalmus	Gobiidae	Gobiiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_963678635.1	txSymRosc1.1	Symsagittifera roscoffensis	84072	Chromosome	753507827	Symsagittifera roscoffensis	Symsagittifera	Sagittiferidae	Acoela		Xenacoelomorpha	Metazoa	Eukaryota
+GCF_963691925.1	fScoSco1.1	Scomber scombrus	13677	Chromosome	764141294	Scomber scombrus	Scomber	Scombridae	Scombriformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_027358585.1	fPanHyp1.pri	Pangasianodon hypophthalmus	310915	Chromosome	764974446	Pangasianodon hypophthalmus	Pangasianodon	Pangasiidae	Siluriformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_963576615.1	tzWatSuba1.1	Watersipora subatra	2589382	Chromosome	783738342	Watersipora subatra	Watersipora	Watersiporidae	Cheilostomatida	Gymnolaemata	Bryozoa	Metazoa	Eukaryota
+GCF_900964775.1	fSclFor1.1	Scleropages formosus	113540	Chromosome	784546363	Scleropages formosus	Scleropages	Osteoglossidae	Osteoglossiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_900700415.2	Ch_v2.0.2	Clupea harengus	7950	Chromosome	786308905	Clupea harengus	Clupea	Clupeidae	Clupeiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_052324685.1	BGAUD_0.2	Brachyhypopomus gauderio	698409	Chromosome	796923666	Brachyhypopomus gauderio	Brachyhypopomus	Hypopomidae	Gymnotiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_902148845.1	fSalaFa1.1	Salarias fasciatus	181472	Chromosome	797490645	Salarias fasciatus	Salarias	Blenniidae	Blenniiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_015220745.1	fSebUmb1.pri	Sebastes umbrosus	72105	Chromosome	800904020	Sebastes umbrosus	Sebastes	Sebastidae	Perciformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_037042905.1	Lp3.0	Lytechinus pictus	7653	Chromosome	811721768	Lytechinus pictus	Lytechinus	Toxopneustidae	Temnopleuroida	Echinoidea	Echinodermata	Metazoa	Eukaryota
+GCF_023375685.1	Billie_1.0	Ictalurus furcatus	66913	Chromosome	825459183	Ictalurus furcatus	Ictalurus	Ictaluridae	Siluriformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_021292245.1	ASM2129224v1	Micropterus dolomieu	147949	Chromosome	829570727	Micropterus dolomieu	Micropterus	Centrarchidae	Centrarchiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_902150065.1	fMyrMur1.1	Myripristis murdjan	586833	Chromosome	835254674	Myripristis murdjan	Myripristis	Holocentridae	Holocentriformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_041381155.1	Ai_NY	Argopecten irradians	31199	Chromosome	845889701	Argopecten irradians	Argopecten	Pectinidae	Pectinida	Bivalvia	Mollusca	Metazoa	Eukaryota
+GCF_947242115.1	xgBioGlab47.1	Biomphalaria glabrata	6526	Chromosome	850620091	Biomphalaria glabrata	Biomphalaria	Planorbidae		Gastropoda	Mollusca	Metazoa	Eukaryota
+GCF_022539595.1	ASM2253959v1	Amphiprion ocellaris	80972	Chromosome	863468154	Amphiprion ocellaris	Amphiprion	Pomacentridae		Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_017639745.1	fMelBoe1.pri	Melanotaenia boesemani	1250792	Chromosome	865575964	Melanotaenia boesemani	Melanotaenia	Melanotaeniidae	Atheriniformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_900246225.1	fAstCal1.2	Astatotilapia calliptera	8154	Chromosome	880428986	Astatotilapia calliptera	Astatotilapia	Cichlidae	Cichliformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_019924925.1	HZGC01	Ctenopharyngodon idella	7959	Chromosome	893198495	Ctenopharyngodon idella	Ctenopharyngodon	Xenocyprididae	Cypriniformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_008729295.1	YSFRI_Pleo_2.0	Plectropomus leopardus	160734	Chromosome	895688574	Plectropomus leopardus	Plectropomus	Serranidae	Perciformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_964275005.1	eeDiaSeto1	Diadema setosum	31175	Chromosome	912728646	Diadema setosum	Diadema	Diadematidae	Diadematoida	Echinoidea	Echinodermata	Metazoa	Eukaryota
+GCF_011004845.1	fEsoLuc1.pri	Esox lucius	8010	Chromosome	918731919	Esox lucius	Esox	Esocidae	Esociformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_048594095.1	PKINGS_0.4	Paramormyrops kingsleyae	1676925	Chromosome	933939706	Paramormyrops kingsleyae	Paramormyrops	Mormyridae	Osteoglossiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_900634775.1	fGouWil2.1	Gouania willdenowi	441366	Chromosome	937150793	Gouania willdenowi	Gouania	Gobiesocidae	Blenniiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_027942865.1	fOdoBon6.hap1	Odontesthes bonariensis	219752	Chromosome	945823896	Odontesthes bonariensis	Odontesthes	Atherinopsidae	Atheriniformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_013368585.1	fMegCyp1.pri	Megalops cyprinoides	118141	Chromosome	959241634	Megalops cyprinoides	Megalops	Megalopidae	Elopiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_024256425.1	CGAR_prim_01v2	Clarias gariepinus	13013	Chromosome	969604269	Clarias gariepinus	Clarias	Clariidae	Siluriformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_018555375.3	ASM1855537v3	Anguilla rostrata	7938	Chromosome	976090453	Anguilla rostrata	Anguilla	Anguillidae	Anguilliformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_027358695.1	aSpeBom1.2.pri	Spea bombifrons	233779	Chromosome	987655159	Spea bombifrons	Spea	Pelobatidae	Anura	Amphibia	Chordata	Metazoa	Eukaryota
+GCF_036373705.1	fAmiCal2.hap1	Amia ocellicauda	2972642	Chromosome	989103751	Amia ocellicauda	Amia	Amiidae	Amiiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_905115235.1	iHerIll2.2.curated.20191125	Hermetia illucens	343691	Chromosome	1004932590	Hermetia illucens	Hermetia	Stratiomyidae	Diptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_017591435.1	ASM1759143v1	Portunus trituberculatus	210409	Chromosome	1005046021	Portunus trituberculatus	Portunus	Portunidae	Decapoda	Malacostraca	Arthropoda	Metazoa	Eukaryota
+GCF_001522545.3	Parus_major1.1	Parus major	9157	Chromosome	1020293992	Parus major	Parus	Paridae	Passeriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_902827115.2	fPseGeo1.2	Pseudochaenichthys georgianus	52239	Chromosome	1026205435	Pseudochaenichthys georgianus	Pseudochaenichthys	Channichthyidae	Perciformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_000738735.6	ASM73873v6	Corvus cornix cornix	932674	Chromosome	1030864775	Corvus cornix	Corvus	Corvidae	Passeriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_029582105.1	OMel1.0	Oenanthe melanoleuca	2939378	Chromosome	1036256795	Oenanthe melanoleuca	Oenanthe	Muscicapidae	Passeriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_002078875.1	NumMel1.0	Numida meleagris	8996	Chromosome	1043247365	Numida meleagris	Numida	Numididae	Galliformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_030506205.2	PD_genome_1.1	Paramisgurnus dabryanus	90735	Chromosome	1043469091	Paramisgurnus dabryanus	Paramisgurnus	Cobitidae	Cypriniformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_030014385.1	fTriRos1.hap1	Trichomycterus rosablanca	2290929	Chromosome	1045025885	Trichomycterus rosablanca	Trichomycterus	Trichomycteridae	Siluriformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_036169615.1	bHelExo1.hap1	Heliangelus exortis	472823	Chromosome	1049650714	Heliangelus exortis	Heliangelus	Trochilidae	Apodiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_022539315.1	serCan2020	Serinus canaria	9135	Chromosome	1050336073	Serinus canaria	Serinus	Fringillidae	Passeriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_901933205.1	STF_HiC	Camarhynchus parvulus	87175	Chromosome	1051609828	Camarhynchus parvulus	Camarhynchus	Thraupidae	Passeriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_015708825.1	ASM1570882v1	Lethenteron reissneri	7753	Chromosome	1063012140	Lethenteron reissneri	Lethenteron	Petromyzontidae	Petromyzontiformes	Hyperoartia	Chordata	Metazoa	Eukaryota
+GCF_030463535.1	fSalBra1.hap2	Salminus brasiliensis	930266	Chromosome	1066483687	Salminus brasiliensis	Salminus	Bryconidae	Characiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_009819655.1	bSylAtr1.pri	Sylvia atricapilla	48155	Chromosome	1066786587	Sylvia atricapilla	Sylvia	Sylviidae	Passeriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_963082655.1	idStoCalc2.1	Stomoxys calcitrans	35570	Chromosome	1070934565	Stomoxys calcitrans	Stomoxys	Muscidae	Diptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_037126465.1	ASM3712646v1	Ornithodoros turicata	34597	Chromosome	1071349989	Ornithodoros turicata	Ornithodoros	Argasidae	Ixodida	Arachnida	Arthropoda	Metazoa	Eukaryota
+GCF_015832195.1	Motacilla_alba_V1.0_pri	Motacilla alba alba	1094192	Chromosome	1072653902	Motacilla alba	Motacilla	Motacillidae	Passeriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_026979565.1	bVidCha1 merged haplotype	Vidua chalybeata	81927	Chromosome	1080440577	Vidua chalybeata	Vidua	Estrildidae	Passeriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_014356525.2	ASM1435652v1	Nilaparvata lugens	108931	Chromosome	1085539448	Nilaparvata lugens	Nilaparvata	Delphacidae	Hemiptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_012460135.2	BPBGC_Mater_1.1	Molothrus ater	84834	Chromosome	1087219985	Molothrus ater	Molothrus	Icteridae	Passeriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_009829145.1	bChiLan1.pri	Chiroxiphia lanceolata	296741	Chromosome	1089631598	Chiroxiphia lanceolata	Chiroxiphia	Pipridae	Passeriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_020740795.1	bApuApu2.pri.cur	Apus apus	8895	Chromosome	1100361224	Apus apus	Apus	Apodidae	Apodiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_015227805.2	bHirRus1.pri.v3	Hirundo rustica	43150	Chromosome	1105955550	Hirundo rustica	Hirundo	Hirundinidae	Passeriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_021018805.1	Cam_Psub_1.2	Prinia subflava	208062	Chromosome	1119947663	Prinia subflava	Prinia	Cisticolidae	Passeriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_043381705.1	CAS_Ptep_4.0	Parasteatoda tepidariorum	114398	Chromosome	1123819019	Parasteatoda tepidariorum	Parasteatoda	Theridiidae	Araneae	Arachnida	Arthropoda	Metazoa	Eukaryota
+GCF_028769735.1	RI_Zleu_2.0	Zonotrichia leucophrys gambelii	257770	Chromosome	1123996003	Zonotrichia leucophrys	Zonotrichia	Passerellidae	Passeriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_009819885.2	bCatUst1.pri.v2	Catharus ustulatus	91951	Chromosome	1131616530	Catharus ustulatus	Catharus	Turdidae	Passeriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_963514075.1	fConCon1.1	Conger conger	82655	Chromosome	1136402888	Conger conger	Conger	Congridae	Anguilliformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_037392515.1	JCU_Hal_asi_v2	Haliotis asinina	109174	Chromosome	1143434573	Haliotis asinina	Haliotis	Haliotidae	Lepetellida	Gastropoda	Mollusca	Metazoa	Eukaryota
+GCF_047495875.1	PitAlb_v1	Pithys albifrons albifrons	3385563	Chromosome	1144301792	Pithys albifrons	Pithys	Thamnophilidae	Passeriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_033807715.1	fColSai1.1	Cololabis saira	129043	Chromosome	1146345828	Cololabis saira	Cololabis	Belonidae	Beloniformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_027791375.1	UM_Iind_1.1	Indicator indicator	1002788	Chromosome	1147325966	Indicator indicator	Indicator	Indicatoridae	Piciformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_004027225.2	bStrHab1.2.pri	Strigops habroptila	2489341	Chromosome	1148597545	Strigops habroptila	Strigops	Psittacidae	Psittaciformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_016097555.1	Gae_host_genome	Gigantopelta aegis	1735272	Chromosome	1149605642	Gigantopelta aegis	Gigantopelta	Peltospiridae	Neomphalida	Gastropoda	Mollusca	Metazoa	Eukaryota
+GCF_021462225.1	DD_fGirMul_XY1	Girardinichthys multiradiatus	208333	Chromosome	1150004004	Girardinichthys multiradiatus	Girardinichthys	Goodeidae	Cyprinodontiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_041260155.1	AS_Pfla_20210202	Ptychodera flava	63121	Chromosome	1161750505	Ptychodera flava	Ptychodera	Ptychoderidae		Enteropneusta	Hemichordata	Metazoa	Eukaryota
+GCF_963662255.1	bCinCin1.1	Cinclus cinclus	127875	Chromosome	1170837027	Cinclus cinclus	Cinclus	Cinclidae	Passeriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_012275295.1	bMelUnd1.mat.Z	Melopsittacus undulatus	13146	Chromosome	1171617451	Melopsittacus undulatus	Melopsittacus	Psittaculidae	Psittaciformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_017976375.1	bCucCan1.pri	Cuculus canorus	55661	Chromosome	1180136575	Cuculus canorus	Cuculus	Cuculidae	Cuculiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_029633855.1	fHopMal1.hap1	Hoplias malabaricus	27720	Chromosome	1186354877	Hoplias malabaricus	Hoplias	Erythrinidae	Characiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_014839835.1	bDryPub1.pri	Dryobates pubescens	118200	Chromosome	1187939694	Dryobates pubescens	Dryobates	Picidae	Piciformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_015220075.1	bFalRus1.pri	Falco rusticolus	120794	Chromosome	1195829278	Falco rusticolus	Falco	Falconidae	Falconiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_031753505.1	ASM3175350v1	Anomalospiza imberbis	187417	Chromosome	1198243876	Anomalospiza imberbis	Anomalospiza	Passeridae	Passeriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_040954835.1	fLepOcu1.hap2	Lepisosteus oculatus	7918	Chromosome	1200589847	Lepisosteus oculatus	Lepisosteus	Lepisosteidae	Semionotiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_011125445.2	MU-UCD_Fhet_4.1	Fundulus heteroclitus	8078	Chromosome	1203489213	Fundulus heteroclitus	Fundulus	Fundulidae	Cyprinodontiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_028858725.1	bColStr4.1.hap1	Colius striatus	57412	Chromosome	1212464869	Colius striatus	Colius	Coliidae	Coliiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_026914265.1	ASM2691426v1	Mya arenaria	6604	Chromosome	1216068291	Mya arenaria	Mya	Myidae	Myida	Bivalvia	Mollusca	Metazoa	Eukaryota
+GCF_011004875.1	bBalReg1.pri	Balearica regulorum gibbericeps	100784	Chromosome	1221032548	Balearica regulorum	Balearica	Gruidae	Gruiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_015220715.1	fPygNat1.pri	Pygocentrus nattereri	42514	Chromosome	1222050449	Pygocentrus nattereri	Pygocentrus	Serrasalmidae	Characiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_024679245.1	ASM2467924v1	Pseudorasbora parva	51549	Chromosome	1228852188	Pseudorasbora parva	Pseudorasbora	Gobionidae	Cypriniformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_900496995.4	bAquChr1.4	Aquila chrysaetos chrysaetos	223781	Chromosome	1233704830	Aquila chrysaetos	Aquila	Accipitridae	Accipitriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_018139145.2	ASM1813914v2	Gymnogyps californianus	33616	Chromosome	1240248578	Gymnogyps californianus	Gymnogyps	Cathartidae	Accipitriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_034638445.1	ASM3463844v1	Ciconia boyciana	52775	Chromosome	1240615254	Ciconia boyciana	Ciconia	Ciconiidae	Ciconiiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_037325665.1	US_GU_Lsax_2.0	Littorina saxatilis	31220	Chromosome	1256192465	Littorina saxatilis	Littorina	Littorinidae	Littorinimorpha	Gastropoda	Mollusca	Metazoa	Eukaryota
+GCF_013368605.1	bNycGra1.pri	Nyctibius grandis	48427	Chromosome	1256393467	Nyctibius grandis	Nyctibius	Nyctibiidae	Nyctibiiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_028389875.1	bPtePen1.pri	Rhea pennata	8795	Chromosome	1269000025	Rhea pennata	Rhea	Rheidae	Rheiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_032884065.1	ASM3288406v1	Artemia franciscana	6661	Chromosome	1270721945	Artemia franciscana	Artemia	Artemiidae	Anostraca	Branchiopoda	Arthropoda	Metazoa	Eukaryota
+GCF_015220805.1	bPogPus1.pri	Pogoniulus pusillus	488313	Chromosome	1272338968	Pogoniulus pusillus	Pogoniulus	Lybiidae	Piciformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_949628215.1	bGulAri2.1	Phalacrocorax aristotelis	126867	Chromosome	1279116138	Phalacrocorax aristotelis	Phalacrocorax	Phalacrocoracidae	Suliformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_036013445.1	bCalNic1.hap1	Caloenas nicobarica	187106	Chromosome	1285834579	Caloenas nicobarica	Caloenas	Columbidae	Columbiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_036588685.1	PNRI_Mtr1.1.1.hap1	Mytilus trossulus	6551	Chromosome	1298571991	Mytilus trossulus	Mytilus	Mytilidae	Mytilida	Bivalvia	Mollusca	Metazoa	Eukaryota
+GCF_030463565.1	bPelCri1.pri	Pelecanus crispus	36300	Chromosome	1314568463	Pelecanus crispus	Pelecanus	Pelecanidae	Pelecaniformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_030936135.1	bGavSte3.hap2	Gavia stellata	37040	Chromosome	1321270170	Gavia stellata	Gavia	Gaviidae	Gaviiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_902148855.1	fSphaOr1.1	Sphaeramia orbicularis	375764	Chromosome	1342662642	Sphaeramia orbicularis	Sphaeramia	Apogonidae	Kurtiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_964106895.1	bNumArq3.hap1.1	Numenius arquata	31919	Chromosome	1348859203	Numenius arquata	Numenius	Scolopacidae	Charadriiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_965638725.1	bAptPat1.pri.cur	Aptenodytes patagonicus	9234	Chromosome	1352580174	Aptenodytes patagonicus	Aptenodytes	Spheniscidae	Sphenisciformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_028500815.1	bRisTri1.patW.cur.20221130	Rissa tridactyla	75485	Chromosome	1353621101	Rissa tridactyla	Rissa	Laridae	Charadriiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_965140245.1	bAthNoc1.hap1.1	Athene noctua	126797	Chromosome	1355857592	Athene noctua	Athene	Strigidae	Strigiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_964195595.1	bCalBor7.hap1.2	Calonectris borealis	1323832	Chromosome	1366185058	Calonectris borealis	Calonectris	Procellariidae	Procellariiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_023375975.1	AstMex3_surface	Astyanax mexicanus	7994	Chromosome	1373169186	Astyanax mexicanus	Astyanax	Acestrorhamphidae	Characiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_009819535.1	rLacAgi1.pri	Lacerta agilis	80427	Chromosome	1391387079	Lacerta agilis	Lacerta	Lacertidae	Squamata	Lepidosauria	Chordata	Metazoa	Eukaryota
+GCF_034702125.1	IST_EnEncr_1.0	Engraulis encrasicolus	184585	Chromosome	1435183673	Engraulis encrasicolus	Engraulis	Engraulidae	Clupeiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_032062135.1	UCB_Pads_2.0	Pyxicephalus adspersus	30357	Chromosome	1440301248	Pyxicephalus adspersus	Pyxicephalus	Pyxicephalidae	Anura	Amphibia	Chordata	Metazoa	Eukaryota
+GCF_000004195.4	UCB_Xtro_10.0	Xenopus tropicalis	8364	Chromosome	1451283599	Xenopus tropicalis	Xenopus	Pipidae	Anura	Amphibia	Chordata	Metazoa	Eukaryota
+GCF_040807025.1	bStrCam1.hap1	Struthio camelus	8801	Chromosome	1452018929	Struthio camelus	Struthio	Struthionidae	Struthioniformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_019202785.1	ASM1920278v2	Penaeus chinensis	139456	Chromosome	1466063637	Penaeus chinensis	Penaeus	Penaeidae	Decapoda	Malacostraca	Arthropoda	Metazoa	Eukaryota
+GCF_036370855.1	bDroNov1.hap1	Dromaius novaehollandiae	8790	Chromosome	1468706110	Dromaius novaehollandiae	Dromaius	Dromaiidae	Casuariiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_043380555.1	NfurGRZ-RIMD1	Nothobranchius furzeri	105023	Chromosome	1479182959	Nothobranchius furzeri	Nothobranchius	Nothobranchiidae	Cyprinodontiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_029633865.1	fLamInc1.hap2	Lampris incognitus	2546036	Chromosome	1482357630	Lampris incognitus	Lampris	Lampridae	Lampriformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_030867145.1	bOpiHoa1.hap1	Opisthocomus hoazin	30419	Chromosome	1482459898	Opisthocomus hoazin	Opisthocomus	Opisthocomidae	Opisthocomiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_036417845.1	bAptMan1.hap1	Apteryx mantelli	2696672	Chromosome	1504396159	Apteryx mantelli	Apteryx	Apterygidae	Apterygiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_035149785.1	rCanAsp1.hap2	Candoia aspera	51853	Chromosome	1530810380	Candoia aspera	Candoia	Boidae	Squamata	Lepidosauria	Chordata	Metazoa	Eukaryota
+GCF_010883055.1	B_treatae_v1	Belonocnema kinseyi	2817044	Chromosome	1538686255	Belonocnema kinseyi	Belonocnema	Cynipidae	Hymenoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_017654505.1	ASM1765450v1	Polyodon spathula	7913	Chromosome	1542066908	Polyodon spathula	Polyodon	Polyodontidae	Acipenseriformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_039555335.1	Afil_fr2py	Amphiura filiformis	82378	Chromosome	1570979288	Amphiura filiformis	Amphiura	Amphiuridae	Amphilepidida	Ophiuroidea	Echinodermata	Metazoa	Eukaryota
+GCF_032445375.1	Brsri_v3	Bacillus rossius redtenbacheri	93214	Chromosome	1605073380	Bacillus rossius	Bacillus	Bacillidae	Phasmatodea	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_035046505.1	rTilSci1.hap2	Tiliqua scincoides	71010	Chromosome	1623332312	Tiliqua scincoides	Tiliqua	Scincidae	Squamata	Lepidosauria	Chordata	Metazoa	Eukaryota
+GCF_041734735.1	ASM4173473v1	Babylonia areolata	304850	Chromosome	1651990951	Babylonia areolata	Babylonia	Buccinidae	Neogastropoda	Gastropoda	Mollusca	Metazoa	Eukaryota
+GCF_009769535.1	rThaEle1.pri	Thamnophis elegans	35005	Chromosome	1672190305	Thamnophis elegans	Thamnophis	Colubridae	Squamata	Lepidosauria	Chordata	Metazoa	Eukaryota
+GCF_921293095.1	ioIscEleg1.1	Ischnura elegans	197161	Chromosome	1722738530	Ischnura elegans	Ischnura	Coenagrionidae	Odonata	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_049243985.1	Ppicta_v3.0	Paroedura picta	143630	Chromosome	1751518920	Paroedura picta	Paroedura	Gekkonidae	Squamata	Lepidosauria	Chordata	Metazoa	Eukaryota
+GCF_024679095.1	ASM2467909v1	Eriocheir sinensis	95602	Chromosome	1765827443	Eriocheir sinensis	Eriocheir	Varunidae	Decapoda	Malacostraca	Arthropoda	Metazoa	Eukaryota
+GCF_947563725.1	qqArgBrue1.1	Argiope bruennichi	94029	Chromosome	1778384155	Argiope bruennichi	Argiope	Araneidae	Araneae	Arachnida	Arthropoda	Metazoa	Eukaryota
+GCF_029931775.1	rEulEur1.hap1	Euleptes europaea	460621	Chromosome	1781916107	Euleptes europaea	Euleptes	Sphaerodactylidae	Squamata	Lepidosauria	Chordata	Metazoa	Eukaryota
+GCF_023053635.1	rElgMul1.1.pri	Elgaria multicarinata webbii	159646	Chromosome	1790500004	Elgaria multicarinata	Elgaria	Anguidae	Squamata	Lepidosauria	Chordata	Metazoa	Eukaryota
+GCF_047335585.1	Pvi2.1	Pogona vitticeps	103695	Chromosome	1793327715	Pogona vitticeps	Pogona	Agamidae	Squamata	Lepidosauria	Chordata	Metazoa	Eukaryota
+GCF_020536995.1	UMN_Dpol_1.0	Dreissena polymorpha	45954	Chromosome	1797942340	Dreissena polymorpha	Dreissena	Dreissenidae	Myida	Bivalvia	Mollusca	Metazoa	Eukaryota
+GCF_035594765.1	rAnoCar3.1.pri	Anolis carolinensis	28377	Chromosome	1850740401	Anolis carolinensis	Anolis	Dactyloidae	Squamata	Lepidosauria	Chordata	Metazoa	Eukaryota
+GCF_021730395.1	MADL_Memer_1	Mercenaria mercenaria	6596	Chromosome	1858199728	Mercenaria mercenaria	Mercenaria	Veneridae	Venerida	Bivalvia	Mollusca	Metazoa	Eukaryota
+GCF_004115215.2	mOrnAna1.pri.v4	Ornithorhynchus anatinus	9258	Chromosome	1859264908	Ornithorhynchus anatinus	Ornithorhynchus	Ornithorhynchidae	Monotremata	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_902713425.1	fAciRut3.2 maternal haplotype	Acipenser ruthenus	7906	Chromosome	1899794300	Acipenser ruthenus	Acipenser	Acipenseridae	Acipenseriformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_019175285.1	SceUnd_v1.1	Sceloporus undulatus	8520	Chromosome	1905484175	Sceloporus undulatus	Sceloporus	Phrynosomatidae	Squamata	Lepidosauria	Chordata	Metazoa	Eukaryota
+GCF_031021105.1	rEryReg1.hap1	Erythrolamprus reginae	121349	Chromosome	1964049041	Erythrolamprus reginae	Erythrolamprus	Dipsadidae	Squamata	Lepidosauria	Chordata	Metazoa	Eukaryota
+GCF_027574615.1	DD_ASM_mEF_20220401	Eptesicus fuscus	29078	Chromosome	2008057866	Eptesicus fuscus	Eptesicus	Vespertilionidae	Chiroptera	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_036562045.2	ASM3656204v1	Rhinolophus sinicus	89399	Chromosome	2036377185	Rhinolophus sinicus	Rhinolophus	Rhinolophidae	Chiroptera	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_009834535.1	BCGSAC_Cfer_1.0	Camelus ferus	419612	Chromosome	2087077296	Camelus ferus	Camelus	Camelidae	Artiodactyla	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_004126475.2	mPhyDis1.pri.v3	Phyllostomus discolor	89673	Chromosome	2108832841	Phyllostomus discolor	Phyllostomus	Phyllostomidae	Chiroptera	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_013100865.1	CAS_Tse_1.0	Trachemys scripta elegans	31138	Chromosome	2126182493	Trachemys scripta	Trachemys	Emydidae	Testudines		Chordata	Metazoa	Eukaryota
+GCF_015237465.2	rCheMyd1.pri.v2	Chelonia mydas	8469	Chromosome	2134358617	Chelonia mydas	Chelonia	Cheloniidae	Testudines		Chordata	Metazoa	Eukaryota
+GCF_026930045.1	Udiv.v.3.1	Uloborus diversus	327109	Chromosome	2151890133	Uloborus diversus	Uloborus	Uloboridae	Araneae	Arachnida	Arthropoda	Metazoa	Eukaryota
+GCF_040894005.1	aEngPut4.maternal	Engystomops pustulosus	76066	Chromosome	2158203323	Engystomops pustulosus	Engystomops	Leptodactylidae	Anura	Amphibia	Chordata	Metazoa	Eukaryota
+GCF_009764565.3	rDerCor1.pri.v4	Dermochelys coriacea	27794	Chromosome	2164762090	Dermochelys coriacea	Dermochelys	Dermochelyidae	Testudines		Chordata	Metazoa	Eukaryota
+GCF_004210375.1	ASM421037v1	Tachypleus tridentatus	6853	Chromosome	2167470406	Tachypleus tridentatus	Tachypleus	Limulidae	Xiphosura	Merostomata	Arthropoda	Metazoa	Eukaryota
+GCF_033958435.1	ASM3395843v1	Carettochelys insculpta	44489	Chromosome	2180317067	Carettochelys insculpta	Carettochelys	Carettochelyidae	Testudines		Chordata	Metazoa	Eukaryota
+GCF_025860055.1	RBS_HiC_50CHRs	Xyrauchen texanus	154827	Chromosome	2186806939	Xyrauchen texanus	Xyrauchen	Catostomidae	Cypriniformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_028641065.1	Leri_hhj_1	Leucoraja erinaceus	7782	Chromosome	2190844947	Leucoraja erinaceus	Leucoraja	Rajidae	Rajiformes	Chondrichthyes	Chordata	Metazoa	Eukaryota
+GCF_047948215.1	ASM4794821v1	Lycorma delicatula	130591	Chromosome	2201051051	Lycorma delicatula	Lycorma	Fulgoridae	Hemiptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_038994185.2	USDA_Dalb.pri_finalv2	Dermacentor albipictus	60249	Chromosome	2210616132	Dermacentor albipictus	Dermacentor	Ixodidae	Ixodida	Arachnida	Arthropoda	Metazoa	Eukaryota
+GCF_023159225.1	ASM2315922v1	Perognathus longimembris pacificus	214514	Chromosome	2212099196	Perognathus longimembris	Perognathus	Heteromyidae	Rodentia	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_015852505.1	mTacAcu1.pri	Tachyglossus aculeatus	9261	Chromosome	2213004214	Tachyglossus aculeatus	Tachyglossus	Tachyglossidae	Monotremata	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_027789765.1	aDenEbr1.pat	Dendropsophus ebraccatus	150705	Chromosome	2214937069	Dendropsophus ebraccatus	Dendropsophus	Hylidae	Anura	Amphibia	Chordata	Metazoa	Eukaryota
+GCF_028583425.1	MPM_Emac_v1.0	Eublepharis macularius	481883	Chromosome	2237379946	Eublepharis macularius	Eublepharis	Eublepharidae	Squamata	Lepidosauria	Chordata	Metazoa	Eukaryota
+GCF_049634645.1	ASM4963464v1	Pelodiscus sinensis	13735	Chromosome	2243870947	Pelodiscus sinensis	Pelodiscus	Trionychidae	Testudines		Chordata	Metazoa	Eukaryota
+GCF_020740605.2	mLemCat1.pri	Lemur catta	9447	Chromosome	2245584463	Lemur catta	Lemur	Lemuridae	Primates	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_003597395.2	CheloAbing_2.0	Chelonoidis abingdonii	106734	Chromosome	2256468705	Chelonoidis abingdonii	Chelonoidis	Testudinidae	Testudines		Chordata	Metazoa	Eukaryota
+GCF_009764475.1	sPriPec2.1.pri	Pristis pectinata	685728	Chromosome	2267840987	Pristis pectinata	Pristis	Pristidae	Rhinopristiformes	Chondrichthyes	Chordata	Metazoa	Eukaryota
+GCF_000317375.1	MicOch1.0	Microtus ochrogaster	79684	Chromosome	2287340943	Microtus ochrogaster	Microtus	Cricetidae	Rodentia	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_027244095.1	rHemCap1.1.pri	Hemicordylus capensis	884348	Chromosome	2294751221	Hemicordylus capensis	Hemicordylus	Cordylidae	Squamata	Lepidosauria	Chordata	Metazoa	Eukaryota
+GCF_018296145.1	Otsh_v2.0	Oncorhynchus tshawytscha	74940	Chromosome	2294842546	Oncorhynchus tshawytscha	Oncorhynchus	Salmonidae	Salmoniformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_018350215.1	P.leo_Ple1_pat1.1	Panthera leo	9689	Chromosome	2297552363	Panthera leo	Panthera	Felidae	Carnivora	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_021130785.1	UT_GWSS_2.1	Homalodisca vitripennis	197043	Chromosome	2304988238	Homalodisca vitripennis	Homalodisca	Cicadellidae	Hemiptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_030035675.1	rRhiFlo1.hap2	Rhineura floridana	261503	Chromosome	2307419594	Rhineura floridana	Rhineura	Rhineuridae	Squamata	Lepidosauria	Chordata	Metazoa	Eukaryota
+GCF_027579695.1	fNeoGra1.pri	Neoarius graeffei	443677	Chromosome	2341916362	Neoarius graeffei	Neoarius	Ariidae	Siluriformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_001194135.2	ASM119413v2	Octopus bimaculoides	37653	Chromosome	2342518435	Octopus bimaculoides	Octopus	Octopodidae	Octopoda	Cephalopoda	Mollusca	Metazoa	Eukaryota
+GCF_018345385.1	ASM1834538v1	Vulpes lagopus	494514	Chromosome	2345533697	Vulpes lagopus	Vulpes	Canidae	Carnivora	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_030867095.1	rAllMis1	Alligator mississippiensis	8496	Chromosome	2346779227	Alligator mississippiensis	Alligator	Alligatoridae	Crocodylia		Chordata	Metazoa	Eukaryota
+GCF_040939455.1	M.murinus_Inina_mat1.0	Microcebus murinus	30608	Chromosome	2350949499	Microcebus murinus	Microcebus	Cheirogaleidae	Primates	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_006229205.1	meerkat_22Aug2017_6uvM2_HiC	Suricata suricatta	37032	Chromosome	2353578744	Suricata suricatta	Suricata	Herpestidae	Carnivora	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_016161935.1	ASM1616193v1	Mauremys reevesii	260615	Chromosome	2367590653	Mauremys reevesii	Mauremys	Geoemydidae	Testudines		Chordata	Metazoa	Eukaryota
+GCF_008692025.1	mPhoSin1.pri	Phocoena sinus	42100	Chromosome	2371524154	Phocoena sinus	Phocoena	Phocoenidae	Artiodactyla	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_009873245.2	mBalMus1.pri.v3	Balaenoptera musculus	9771	Chromosome	2374852541	Balaenoptera musculus	Balaenoptera	Balaenopteridae	Artiodactyla	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_011762595.2	mTurTru1.mat.Y	Tursiops truncatus	9739	Chromosome	2378505825	Tursiops truncatus	Tursiops	Delphinidae	Artiodactyla	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_964656455.1	mHalGry1.hap1.1	Halichoerus grypus	9711	Chromosome	2400061917	Halichoerus grypus	Halichoerus	Phocidae	Carnivora	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_027595985.1	mSorAra2.pri	Sorex araneus	42254	Chromosome	2405993548	Sorex araneus	Sorex	Soricidae	Eulipotyphla	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_009762305.2	mZalCal1.pri.v2	Zalophus californianus	9704	Chromosome	2409668595	Zalophus californianus	Zalophus	Otariidae	Carnivora	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_023699985.2	Ovbor_1.2	Odocoileus virginianus	9874	Chromosome	2423246854	Odocoileus virginianus	Odocoileus	Cervidae	Artiodactyla	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_023065955.2	UrsArc2.0	Ursus arctos	9644	Chromosome	2423401459	Ursus arctos	Ursus	Ursidae	Carnivora	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_016906955.1	ROS_Pafr_v1	Phacochoerus africanus	41426	Chromosome	2435083091	Phacochoerus africanus	Phacochoerus	Suidae	Artiodactyla	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_902655055.1	mLutLut1.2	Lutra lutra	9657	Chromosome	2438442342	Lutra lutra	Lutra	Mustelidae	Carnivora	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_902500255.1	fThaAma1.1	Thalassophryne amazonica	390379	Chromosome	2446592878	Thalassophryne amazonica	Thalassophryne	Batrachoididae	Batrachoidiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_002837175.3	ASM283717v5	Physeter macrocephalus	9755	Chromosome	2496209109	Physeter macrocephalus	Physeter	Physeteridae	Artiodactyla	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_037783145.1	EquPr2	Equus przewalskii	9798	Chromosome	2499640368	Equus przewalskii	Equus	Equidae	Perissodactyla	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_030028045.1	mHipAmp2.hap2	Hippopotamus amphibius kiboko	575201	Chromosome	2538242855	Hippopotamus amphibius	Hippopotamus	Hippopotamidae	Artiodactyla	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_030435755.1	mOchPri1.hap1	Ochotona princeps	9978	Chromosome	2555444530	Ochotona princeps	Ochotona	Ochotonidae	Lagomorpha	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_040802235.1	MJ_LKY	Manis javanica	9974	Chromosome	2559979548	Manis javanica	Manis	Manidae	Pholidota	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_036850995.1	mSacLep1_pri_phased_curated	Saccopteryx leptura	249018	Chromosome	2576497192	Saccopteryx leptura	Saccopteryx	Emballonuridae	Chiroptera	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_019923935.1	NDDB_SH_1	Bubalus bubalis	89462	Chromosome	2622444281	Bubalus bubalis	Bubalus	Bovidae	Artiodactyla	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_036320965.1	ASM3632096v1	Panulirus ornatus	150431	Chromosome	2652407876	Panulirus ornatus	Panulirus	Palinuridae	Decapoda	Malacostraca	Arthropoda	Metazoa	Eukaryota
+GCF_025265405.1	mMesDen1 primary haplotype	Mesoplodon densirostris	48708	Chromosome	2683375131	Mesoplodon densirostris	Mesoplodon	Ziphiidae	Artiodactyla	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_047511675.1	mMarFla1.hap1	Marmota flaviventris	93162	Chromosome	2704651887	Marmota flaviventris	Marmota	Sciuridae	Rodentia	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_950295315.1	mEriEur2.1	Erinaceus europaeus	9365	Chromosome	2720683831	Erinaceus europaeus	Erinaceus	Erinaceidae	Eulipotyphla	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_048565385.1	mSaiBol1.pri	Saimiri boliviensis	27679	Chromosome	2747459968	Saimiri boliviensis	Saimiri	Cebidae	Primates	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_964237555.1	mOryCun1.1	Oryctolagus cuniculus	9986	Chromosome	2804657419	Oryctolagus cuniculus	Oryctolagus	Leporidae	Lagomorpha	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_027409185.1	mCynVol1.pri	Cynocephalus volans	110931	Chromosome	2814418120	Cynocephalus volans	Cynocephalus	Cynocephalidae	Dermoptera	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_047511655.1	mCasCan1.hap1v2	Castor canadensis	51338	Chromosome	2814832999	Castor canadensis	Castor	Castoridae	Rodentia	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_006542625.1	Asia_NLE_v1	Nomascus leucogenys	61853	Chromosome	2843966406	Nomascus leucogenys	Nomascus	Hylobatidae	Primates	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_020740685.1	mJacJac1.mat.Y.cur	Jaculus jaculus	51337	Chromosome	2863848715	Jaculus jaculus	Jaculus	Dipodidae	Rodentia	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_021869965.1	sRhiTyp1.1	Rhincodon typus	259920	Chromosome	2881325413	Rhincodon typus	Rhincodon	Rhincodontidae	Orectolobiformes	Chondrichthyes	Chordata	Metazoa	Eukaryota
+GCF_027406575.1	mNycCou1.pri	Nycticebus coucang	9470	Chromosome	2917154053	Nycticebus coucang	Nycticebus	Lorisidae	Primates	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_037176945.1	fLatCha1.pri	Latimeria chalumnae	7897	Chromosome	2947609019	Latimeria chalumnae	Latimeria	Coelacanthidae	Coelacanthiformes		Chordata	Metazoa	Eukaryota
+GCF_046742065.1	ASM4674206v1	Oratosquilla oratoria	337810	Chromosome	2965624169	Oratosquilla oratoria	Oratosquilla	Squillidae	Stomatopoda	Malacostraca	Arthropoda	Metazoa	Eukaryota
+GCF_038048845.1	aMixFle1.hap1	Mixophyes fleayi	3061075	Chromosome	2969628263	Mixophyes fleayi	Mixophyes	Limnodynastidae	Anura	Amphibia	Chordata	Metazoa	Eukaryota
+GCF_028021215.1	mEscRob2.pri	Eschrichtius robustus	9764	Chromosome	2982418581	Eschrichtius robustus	Eschrichtius	Eschrichtiidae	Artiodactyla	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_020826845.1	mDicBic1.mat.cur	Diceros bicornis minor	77932	Chromosome	3005519209	Diceros bicornis	Diceros	Rhinocerotidae	Perissodactyla	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_902635505.1	mSarHar1.11	Sarcophilus harrisii	9305	Chromosome	3086657325	Sarcophilus harrisii	Sarcophilus	Dasyuridae	Dasyuromorphia	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_040412425.1	ASM4041242v1	Macrobrachium rosenbergii	79674	Chromosome	3176521071	Macrobrachium rosenbergii	Macrobrachium	Palaemonidae	Decapoda	Malacostraca	Arthropoda	Metazoa	Eukaryota
+GCF_030684315.1	sSteTig4.hap1	Stegostoma tigrinum	3053191	Chromosome	3198515386	Stegostoma tigrinum	Stegostoma	Stegostomatidae	Orectolobiformes	Chondrichthyes	Chordata	Metazoa	Eukaryota
+GCF_023851605.1	mTamTet1.pri	Tamandua tetradactyla	48850	Chromosome	3205724741	Tamandua tetradactyla	Tamandua	Myrmecophagidae	Pilosa	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_015220235.1	mChoDid1.pri	Choloepus didactylus	27675	Chromosome	3214686105	Choloepus didactylus	Choloepus	Megalonychidae	Pilosa	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_040183065.1	P.americana_PAMFEO1_priV1	Periplaneta americana	6978	Chromosome	3231918202	Periplaneta americana	Periplaneta	Blattidae	Blattodea	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_035084215.1	sHepPer1.hap1	Heptranchias perlo	212740	Chromosome	3249915908	Heptranchias perlo	Heptranchias	Hexanchidae	Hexanchiformes	Chondrichthyes	Chordata	Metazoa	Eukaryota
+GCF_019393635.1	mDroGli1.pri	Dromiciops gliroides	33562	Chromosome	3303199800	Dromiciops gliroides	Dromiciops	Microbiotheriidae	Microbiotheria	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_036971445.1	sNarBan1.hap1	Narcine bancroftii	1343680	Chromosome	3328432768	Narcine bancroftii	Narcine	Narcinidae	Torpediniformes	Chondrichthyes	Chordata	Metazoa	Eukaryota
+GCF_011100635.1	mTriVul1.pri	Trichosurus vulpecula	9337	Chromosome	3359330516	Trichosurus vulpecula	Trichosurus	Phalangeridae	Diprotodontia	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_035609145.1	aEleCoq1.hap1	Eleutherodactylus coqui	57060	Chromosome	3371297528	Eleutherodactylus coqui	Eleutherodactylus	Eleutherodactylidae	Anura	Amphibia	Chordata	Metazoa	Eukaryota
+GCF_024166365.1	mEleMax1 primary haplotype	Elephas maximus indicus	99487	Chromosome	3401247148	Elephas maximus	Elephas	Elephantidae	Proboscidea	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_028372415.1	mMacEug1.pri_v2	Notamacropus eugenii	9315	Chromosome	3447464908	Notamacropus eugenii	Notamacropus	Macropodidae	Diprotodontia	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_963921235.1	sMobHyp1.1	Mobula hypostoma	723540	Chromosome	3475679493	Mobula hypostoma	Mobula	Myliobatidae	Myliobatiformes	Chondrichthyes	Chordata	Metazoa	Eukaryota
+GCF_027887165.1	mMonDom1.pri	Monodelphis domestica	13616	Chromosome	3586166573	Monodelphis domestica	Monodelphis	Didelphidae	Didelphimorphia	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_030445035.2	mDasNov1.1.hap2	Dasypus novemcinctus	9361	Chromosome	3610534858	Dasypus novemcinctus	Dasypus	Dasypodidae	Cingulata	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_900747795.2	fErpCal1.3	Erpetoichthys calabaricus	27687	Chromosome	3613534470	Erpetoichthys calabaricus	Erpetoichthys	Polypteridae	Polypteriformes	Cladistia	Chordata	Metazoa	Eukaryota
+GCF_037893015.1	bilby.v1.9.chrom.fasta	Macrotis lagotis	92651	Chromosome	3655715178	Macrotis lagotis	Macrotis	Peramelidae	Peramelemorphia	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_050947455.1	aRhiDar2.hap1	Rhinoderma darwinii	43563	Chromosome	3657511227	Rhinoderma darwinii	Rhinoderma	Rhinodermatidae	Anura	Amphibia	Chordata	Metazoa	Eukaryota
+GCF_040206685.1	aAscTru1.hap1	Ascaphus truei	8439	Chromosome	3722616900	Ascaphus truei	Ascaphus	Ascaphidae	Anura	Amphibia	Chordata	Metazoa	Eukaryota
+GCF_902459505.1	aGeoSer1.1	Geotrypetes seraphini	260995	Chromosome	3779413726	Geotrypetes seraphini	Geotrypetes	Dermophiidae	Gymnophiona	Amphibia	Chordata	Metazoa	Eukaryota
+GCF_040869285.1	UKY_Mglu_1.0	Myxine glutinosa	7769	Chromosome	3829258836	Myxine glutinosa	Myxine	Myxinidae	Myxiniformes	Myxini	Chordata	Metazoa	Eukaryota
+GCF_050624435.1	mTenEca1.hap1	Tenrec ecaudatus	94439	Chromosome	3922859826	Tenrec ecaudatus	Tenrec	Tenrecidae	Afrosoricida	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_038502225.1	ASM3850222v1	Cherax quadricarinatus	27406	Chromosome	3954007681	Cherax quadricarinatus	Cherax	Parastacidae	Decapoda	Malacostraca	Arthropoda	Metazoa	Eukaryota
+GCF_020745735.1	sHemOce1.pat.X.cur.	Hemiscyllium ocellatum	170820	Chromosome	3983466396	Hemiscyllium ocellatum	Hemiscyllium	Hemiscylliidae	Orectolobiformes	Chondrichthyes	Chordata	Metazoa	Eukaryota
+GCF_000181795.1	Trichinella spiralis-3.7.1	Trichinella spiralis	6334	Scaffold	63525422	Trichinella spiralis	Trichinella	Trichinellidae	Trichinellida	Enoplea	Nematoda	Metazoa	Eukaryota
+GCF_000002995.4	B_malayi-4.0	Brugia malayi	6279	Scaffold	87155713	Brugia malayi	Brugia	Onchocercidae	Rhabditida	Chromadorea	Nematoda	Metazoa	Eukaryota
+GCF_000239435.1	ASM23943v1	Tetranychus urticae	32264	Scaffold	90815494	Tetranychus urticae	Tetranychus	Tetranychidae	Trombidiformes	Arachnida	Arthropoda	Metazoa	Eukaryota
+GCF_000150275.1	v1.0	Trichoplax adhaerens	10228	Scaffold	105631681	Trichoplax adhaerens	Trichoplax	Trichoplacidae	Trichoplacea	Uniplacotomia	Placozoa	Metazoa	Eukaryota
+GCF_000006295.1	JCVI_LOUSE_1.0	Pediculus humanus corporis	121224	Scaffold	110781312	Pediculus humanus	Pediculus	Pediculidae	Psocodea	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_000524195.1	ASM52419v1	Echinococcus granulosus	6210	Scaffold	110837706	Echinococcus granulosus	Echinococcus	Taeniidae	Cyclophyllidea	Cestoda	Platyhelminthes	Metazoa	Eukaryota
+GCF_028296485.1	nextdenovo-longstitch-racon4-pilon3	Oppia nitens	1686743	Scaffold	126096124	Oppia nitens	Oppia	Oppiidae	Sarcoptiformes	Arachnida	Arthropoda	Metazoa	Eukaryota
+GCF_000255335.2	Mocc_1.1	Galendromus occidentalis	34638	Scaffold	151460383	Galendromus occidentalis	Galendromus	Phytoseiidae	Mesostigmata	Arachnida	Arthropoda	Metazoa	Eukaryota
+GCF_000341935.2	Ccin1v2	Cephus cinctus	211228	Scaffold	160731354	Cephus cinctus	Cephus	Cephidae	Hymenoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_000090795.2	v1.1	Amphimedon queenslandica	400682	Scaffold	164242647	Amphimedon queenslandica	Amphimedon	Niphatidae	Haplosclerida	Demospongiae	Porifera	Metazoa	Eukaryota
+GCF_019649055.1	Prichtersi_v1.0	Paramacrobiotus metropolitanus	2943436	Scaffold	170509133	Paramacrobiotus metropolitanus	Paramacrobiotus	Macrobiotidae	Parachela	Eutardigrada	Tardigrada	Metazoa	Eukaryota
+GCF_009176525.2	AAFC_CNas_1.1	Contarinia nasturtii	265458	Scaffold	185885008	Contarinia nasturtii	Contarinia	Cecidomyiidae	Diptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_000612105.2	Oabi_2.0	Orussus abietinus	222816	Scaffold	186398216	Orussus abietinus	Orussus	Orussidae	Hymenoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_000599845.2	Tpre_2.0	Trichogramma pretiosum	7493	Scaffold	187641947	Trichogramma pretiosum	Trichogramma	Trichogrammatidae	Hymenoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_025399875.1	Caltech_Dcor_3.1	Dalotia coriaria	877792	Scaffold	193876233	Dalotia coriaria	Dalotia	Staphylinidae	Coleoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_001412225.1	Nicve_v1.0	Nicrophorus vespilloides	110193	Scaffold	195273382	Nicrophorus vespilloides	Nicrophorus	Silphidae	Coleoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_002217175.1	ASM221717v1	Folsomia candida	158441	Scaffold	221702752	Folsomia candida	Folsomia	Isotomidae	Entomobryomorpha	Collembola	Arthropoda	Metazoa	Eukaryota
+GCF_000326865.2	Helobdella robusta v1.0	Helobdella robusta	6412	Scaffold	235049875	Helobdella robusta	Helobdella	Glossiphoniidae	Rhynchobdellida	Clitellata	Annelida	Metazoa	Eukaryota
+GCF_012932325.1	TpBJ-2018v1	Thrips palmi	161013	Scaffold	237830083	Thrips palmi	Thrips	Thripidae	Thysanoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_009602425.1	ASM960242v1	Actinia tenebrosa	6105	Scaffold	238179736	Actinia tenebrosa	Actinia	Actiniidae	Actiniaria	Anthozoa	Cnidaria	Metazoa	Eukaryota
+GCF_001417965.1	Aiptasia genome 1.1	Exaiptasia diaphana	2652724	Scaffold	256132296	Exaiptasia diaphana	Exaiptasia	Aiptasiidae	Actiniaria	Anthozoa	Cnidaria	Metazoa	Eukaryota
+GCF_013076305.1	ASM1307630v1	Rhopilema esculentum	499914	Scaffold	256689583	Rhopilema esculentum	Rhopilema	Rhizostomatidae	Rhizostomeae	Scyphozoa	Cnidaria	Metazoa	Eukaryota
+GCF_023614345.1	UGA_ACOO_1.1	Adelges cooleyi	133065	Scaffold	270197466	Adelges cooleyi	Adelges	Adelgidae	Hemiptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_000503995.2	CerSol_1.0	Ceratosolen solmsi marchali	326594	Scaffold	276157622	Ceratosolen solmsi	Ceratosolen	Agaonidae	Hymenoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_025091365.1	ASM2509136v1	Daktulosphaira vitifoliae	58002	Scaffold	282588554	Daktulosphaira vitifoliae	Daktulosphaira	Phylloxeridae	Hemiptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_000699045.2	Apla_2.0	Agrilus planipennis	224129	Scaffold	353056831	Agrilus planipennis	Agrilus	Buprestidae	Coleoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_019393585.1	ZJU_Lbou_2.1	Leptopilina boulardi	63433	Scaffold	354804354	Leptopilina boulardi	Leptopilina	Figitidae	Hymenoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_000327385.1	Helro1	Lottia gigantea	225164	Scaffold	359505668	Lottia gigantea	Lottia	Lottiidae		Gastropoda	Mollusca	Metazoa	Eukaryota
+GCF_002532875.2	vjacob_1.0	Varroa jacobsoni	62625	Scaffold	364328871	Varroa jacobsoni	Varroa	Varroidae	Mesostigmata	Arachnida	Arthropoda	Metazoa	Eukaryota
+GCF_001949145.1	OKI-Apl_1.0	Acanthaster planci	133434	Scaffold	383843944	Acanthaster planci	Acanthaster	Acanthasteridae	Valvatida	Asteroidea	Echinodermata	Metazoa	Eukaryota
+GCF_000591075.1	Eaff_2.0	Eurytemora carolleeae	1294199	Scaffold	389032277	Eurytemora carolleeae	Eurytemora	Temoridae	Calanoida	Hexanauplia	Arthropoda	Metazoa	Eukaryota
+GCF_014805625.2	Yale_Gfus_2	Glossina fuscipes	7396	Scaffold	389358103	Glossina fuscipes	Glossina	Glossinidae	Diptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_029955315.1	icCylForm1.1	Cylas formicarius	197179	Scaffold	391099484	Cylas formicarius	Cylas	Brentidae	Coleoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_001039355.2	LinAna2.0	Lingula anatina	7574	Scaffold	406282338	Lingula anatina	Lingula	Lingulidae	Lingulida	Lingulata	Brachiopoda	Metazoa	Eukaryota
+GCF_902728285.1	Clytia hemisphaerica genome assembly	Clytia hemisphaerica	252671	Scaffold	420978673	Clytia hemisphaerica	Clytia	Clytiidae	Leptothecata	Hydrozoa	Cnidaria	Metazoa	Eukaryota
+GCF_041222505.1	WU_Ecla_fem_2.2	Epargyreus clarus	520877	Scaffold	451785667	Epargyreus clarus	Epargyreus	Hesperiidae	Lepidoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_008802855.1	Ppyr1.3	Photinus pyralis	7054	Scaffold	471511253	Photinus pyralis	Photinus	Lampyridae	Coleoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_000696155.1	ZooNev1.0	Zootermopsis nevadensis	136037	Scaffold	485009472	Zootermopsis nevadensis	Zootermopsis	Termopsidae	Blattodea	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_002042975.1	ofav_dov_v1	Orbicella faveolata	48498	Scaffold	485532801	Orbicella faveolata	Orbicella	Merulinidae	Scleractinia	Anthozoa	Cnidaria	Metazoa	Eukaryota
+GCF_000648675.2	Clec_2.1	Cimex lectularius	79782	Scaffold	510833625	Cimex lectularius	Cimex	Cimicidae	Hemiptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_000485595.1	Priapulus_caudatus-5.0.1	Priapulus caudatus	37621	Scaffold	511723334	Priapulus caudatus	Priapulus	Priapulidae	Priapulimorphida	Priapulimorpha	Priapulida	Metazoa	Eukaryota
+GCF_023055335.1	fCliAna1.0.p	Clinocottus analis	304258	Scaffold	538100726	Clinocottus analis	Clinocottus	Cottidae	Perciformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_000764305.2	Hazt_2.0.2	Hyalella azteca	294128	Scaffold	542348180	Hyalella azteca	Hyalella	Hyalellidae	Amphipoda	Malacostraca	Arthropoda	Metazoa	Eukaryota
+GCF_000648655.2	Cflo_2.0	Copidosoma floridanum	29053	Scaffold	553956141	Copidosoma floridanum	Copidosoma	Encyrtidae	Hymenoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_023349555.1	fCebVio1.0.p	Cebidichthys violaceus	271503	Scaffold	575643635	Cebidichthys violaceus	Cebidichthys	Stichaeidae	Perciformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_049639745.1	Rpr	Rhodnius prolixus	13249	Scaffold	588460904	Rhodnius prolixus	Rhodnius	Reduviidae	Hemiptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_011630105.1	ASM1163010v1	Anneissia japonica	1529436	Scaffold	589628371	Anneissia japonica	Anneissia	Comatulidae	Comatulida	Crinoidea	Echinodermata	Metazoa	Eukaryota
+GCF_004916995.1	NCSU_SB_2.0	Morone saxatilis	34816	Scaffold	598109547	Morone saxatilis	Morone	Moronidae		Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_004355925.1	GSC_Weel_1.0	Anarrhichthys ocellatus	433405	Scaffold	612774492	Anarrhichthys ocellatus	Anarrhichthys	Anarhichadidae	Perciformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_000715545.1	OpiViv1.0	Opisthorchis viverrini	6198	Scaffold	620452578	Opisthorchis viverrini	Opisthorchis	Opisthorchiidae	Opisthorchiida	Trematoda	Platyhelminthes	Metazoa	Eukaryota
+GCF_022577435.1	fEmbJac1.0.p	Embiotoca jacksoni	100190	Scaffold	634668633	Embiotoca jacksoni	Embiotoca	Embiotocidae		Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_000735185.1	NC01	Notothenia coriiceps	8208	Scaffold	636595335	Notothenia coriiceps	Notothenia	Nototheniidae	Perciformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_001952655.1	M_albus_1.0	Monopterus albus	43700	Scaffold	684127526	Monopterus albus	Monopterus	Synbranchidae	Synbranchiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_000390285.2	Agla_2.0	Anoplophora glabripennis	217634	Scaffold	706952781	Anoplophora glabripennis	Anoplophora	Cerambycidae	Coleoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_003589595.1	ASM358959v1	Hyposmocoma kahamanoa	1477025	Scaffold	731440758	Hyposmocoma kahamanoa	Hyposmocoma	Cosmopterigidae	Lepidoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_030686945.1	ASM3068694v2	Centruroides vittatus	120091	Scaffold	760156134	Centruroides vittatus	Centruroides	Buthidae	Scorpiones	Arachnida	Arthropoda	Metazoa	Eukaryota
+GCF_011947565.3	Ppol_2.1	Pollicipes pollicipes	41117	Scaffold	769714693	Pollicipes pollicipes	Pollicipes	Pollicipedidae	Pollicipedomorpha	Thecostraca	Arthropoda	Metazoa	Eukaryota
+GCF_000003605.3	Skow_1.2	Saccoglossus kowalevskii	10224	Scaffold	775049609	Saccoglossus kowalevskii	Saccoglossus	Harrimaniidae		Enteropneusta	Hemichordata	Metazoa	Eukaryota
+GCF_003426905.1	ASM342690v1	Ctenocephalides felis	7515	Scaffold	775452550	Ctenocephalides felis	Ctenocephalides	Pulicidae	Siphonaptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_000002235.5	Spur_5.0	Strongylocentrotus purpuratus	7668	Scaffold	921840143	Strongylocentrotus purpuratus	Strongylocentrotus	Strongylocentrotidae	Camarodonta	Echinoidea	Echinodermata	Metazoa	Eukaryota
+GCF_000002075.1	AplCal3.0	Aplysia californica	6500	Scaffold	927296314	Aplysia californica	Aplysia	Aplysiidae	Aplysiida	Gastropoda	Mollusca	Metazoa	Eukaryota
+GCF_003342845.1	notPer1	Nothoprocta perdicaria	30464	Scaffold	965904370	Nothoprocta perdicaria	Nothoprocta	Tinamidae	Tinamiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_902827175.1	fGymAcu1.1	Gymnodraco acuticeps	8218	Scaffold	996888495	Gymnodraco acuticeps	Gymnodraco	Bathydraconidae	Perciformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_038088225.1	pur_monq_1.0	Cyrtonyx montezumae	9017	Scaffold	1011858581	Cyrtonyx montezumae	Cyrtonyx	Odontophoridae	Galliformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_002891405.2	Csec_1.0	Cryptotermes secundus	105785	Scaffold	1018932804	Cryptotermes secundus	Cryptotermes	Kalotermitidae	Blattodea	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_030028575.1	MMel_1.1	Malurus melanocephalus	175006	Scaffold	1020668800	Malurus melanocephalus	Malurus	Maluridae	Passeriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_000732505.1	C_variegatus-1.0	Cyprinodon variegatus	28743	Scaffold	1035167975	Cyprinodon variegatus	Cyprinodon	Cyprinodontidae	Cyprinodontiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_000695815.1	ASM69581v1	Acanthisitta chloris	57068	Scaffold	1035876403	Acanthisitta chloris	Acanthisitta	Acanthisittidae	Passeriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_001447265.1	Sturnus_vulgaris-1.0	Sturnus vulgaris	9172	Scaffold	1036755994	Sturnus vulgaris	Sturnus	Sturnidae	Passeriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_000691845.1	ASM69184v1	Merops nubicus	57421	Scaffold	1062961556	Merops nubicus	Merops	Meropidae	Coraciiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_000710305.1	ASM71030v1	Buceros rhinoceros silvestris	175836	Scaffold	1065782791	Buceros rhinoceros	Buceros	Bucerotidae	Bucerotiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_016745375.1	EPA_FHM_2.0	Pimephales promelas	90988	Scaffold	1066412313	Pimephales promelas	Pimephales	Leuciscidae	Cypriniformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_000699245.1	ASM69924v1	Pterocles gutturalis	240206	Scaffold	1069324295	Pterocles gutturalis	Pterocles	Pteroclidae	Pterocliformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_000703405.1	ASM70340v1	Apaloderma vittatum	57397	Scaffold	1070836417	Apaloderma vittatum	Apaloderma	Trogonidae	Trogoniformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_022539395.1	myiCay2020	Myiozetetes cayanensis	478635	Scaffold	1075628138	Myiozetetes cayanensis	Myiozetetes	Tyrannidae	Passeriformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_000695195.1	ASM69519v1	Chlamydotis macqueenii	187382	Scaffold	1086566339	Chlamydotis macqueenii	Chlamydotis	Otididae	Otidiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_000695765.1	ASM69576v1	Mesitornis unicolor	54374	Scaffold	1087290853	Mesitornis unicolor	Mesitornis	Mesitornithidae	Mesitornithiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_000690775.1	ASM69077v1	Eurypyga helias	54383	Scaffold	1088019637	Eurypyga helias	Eurypyga	Eurypygidae	Eurypygiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_000700745.2	ASM70074v2	Antrostomus carolinensis	279965	Scaffold	1118829799	Antrostomus carolinensis	Antrostomus	Caprimulgidae	Caprimulgiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_000690535.1	ASM69053v1	Cariama cristata	54380	Scaffold	1132245425	Cariama cristata	Cariama	Cariamidae	Cariamiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_000691785.1	ASM69178v1	Leptosomus discolor	188344	Scaffold	1136244952	Leptosomus discolor	Leptosomus	Leptosomidae	Leptosomiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_000696795.3	Hhal_1.1	Halyomorpha halys	286706	Scaffold	1150087594	Halyomorpha halys	Halyomorpha	Pentatomidae	Hemiptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_000687285.1	ASM68728v1	Phaethon lepturus	97097	Scaffold	1152958507	Phaethon lepturus	Phaethon	Phaethontidae	Phaethontiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_000709365.1	ASM70936v1	Tauraco erythrolophus	121530	Scaffold	1155540733	Tauraco erythrolophus	Tauraco	Musophagidae	Musophagiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_000687185.1	ASM68718v1	Egretta garzetta	188379	Scaffold	1206484573	Egretta garzetta	Egretta	Ardeidae	Pelecaniformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_000708025.1	ASM70802v2	Charadrius vociferus	50402	Scaffold	1219859583	Charadrius vociferus	Charadrius	Charadriidae	Charadriiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_000708225.1	ASM70822v1	Nipponia nippon	128390	Scaffold	1223846297	Nipponia nippon	Nipponia	Threskiornithidae	Pelecaniformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_018691265.1	T.alba_DEE_v4.0	Tyto alba	56313	Scaffold	1249867532	Tyto alba	Tyto	Tytonidae	Strigiformes	Aves	Chordata	Metazoa	Eukaryota
+GCF_000186305.1	Python_molurus_bivittatus-5.0.2	Python bivittatus	176946	Scaffold	1435034535	Python bivittatus	Python	Pythonidae	Squamata	Lepidosauria	Chordata	Metazoa	Eukaryota
+GCF_004798865.1	ASM479886v1	Varanus komodoensis	61221	Scaffold	1507945839	Varanus komodoensis	Varanus	Varanidae	Squamata	Lepidosauria	Chordata	Metazoa	Eukaryota
+GCF_900518735.1	EBS10Xv2-PRI	Pseudonaja textilis	8673	Scaffold	1590035073	Pseudonaja textilis	Pseudonaja	Elapidae	Squamata	Lepidosauria	Chordata	Metazoa	Eukaryota
+GCF_022747635.1	ioHetAmer1.1.p	Hetaerina americana	62018	Scaffold	1629772411	Hetaerina americana	Hetaerina	Calopterygidae	Odonata	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_001527695.2	P.Mucros_1.0	Protobothrops mucrosquamatus	103944	Scaffold	1673859098	Protobothrops mucrosquamatus	Protobothrops	Viperidae	Squamata	Lepidosauria	Chordata	Metazoa	Eukaryota
+GCF_000260355.1	ConCri1.0	Condylura cristata	143302	Scaffold	1769662895	Condylura cristata	Condylura	Talpidae	Eulipotyphla	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_001595765.1	Mnat.v1	Miniopterus natalensis	291302	Scaffold	1803099001	Miniopterus natalensis	Miniopterus	Miniopteridae	Chiroptera	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_014176215.1	mRouAeg1.p	Rousettus aegyptiacus	9407	Scaffold	1893602072	Rousettus aegyptiacus	Rousettus	Pteropodidae	Chiroptera	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_001723895.1	CroPor_comp1	Crocodylus porosus	8502	Scaffold	2049519336	Crocodylus porosus	Crocodylus	Crocodylidae	Crocodylia		Chordata	Metazoa	Eukaryota
+GCF_000935625.1	ASM93562v1	Nanorana parkeri	125878	Scaffold	2053849526	Nanorana parkeri	Nanorana	Dicroglossidae	Anura	Amphibia	Chordata	Metazoa	Eukaryota
+GCF_021234165.1	CSHL_Meso_final	Pteronotus mesoamericanus	1884717	Scaffold	2074649091	Pteronotus mesoamericanus	Pteronotus	Mormoopidae	Chiroptera	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_001890085.2	ASM189008v1	Hipposideros armiger	186990	Scaffold	2236309530	Hipposideros armiger	Hipposideros	Hipposideridae	Chiroptera	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_018991925.1	GMGI_Hamer_2.0	Homarus americanus	6706	Scaffold	2292059586	Homarus americanus	Homarus	Nephropidae	Decapoda	Malacostraca	Arthropoda	Metazoa	Eukaryota
+GCF_014108415.1	mMolMol1.p	Molossus molossus	27622	Scaffold	2315568481	Molossus molossus	Molossus	Molossidae	Chiroptera	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_012274545.1	DMR_v1.0_HiC	Fukomys damarensis	885580	Scaffold	2334358650	Fukomys damarensis	Fukomys	Bathyergidae	Rodentia	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_008692635.1	BGI_CrCroc_1.0	Crocuta crocuta	9678	Scaffold	2348360376	Crocuta crocuta	Crocuta	Hyaenidae	Carnivora	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_005190385.1	NGI_Narwhal_1	Monodon monoceros	40151	Scaffold	2355574979	Monodon monoceros	Monodon	Monodontidae	Artiodactyla	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_000276665.1	ChiLan1.0	Chinchilla lanigera	34839	Scaffold	2390852391	Chinchilla lanigera	Chinchilla	Chinchillidae	Rodentia	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_000321225.1	Oros_1.0	Odobenus rosmarus divergens	9708	Scaffold	2400133628	Odobenus rosmarus	Odobenus	Odobenidae	Carnivora	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_000442215.2	Lipotes_vexillifer_v1.1	Lipotes vexillifer	118797	Scaffold	2419479385	Lipotes vexillifer	Lipotes	Lipotidae	Artiodactyla	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_000181295.1	OtoGar3	Otolemur garnettii	30611	Scaffold	2519724550	Otolemur garnettii	Otolemur	Galagidae	Primates	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_010614865.2	ASM1061486v2	Stegodyphus dumicola	202533	Scaffold	2551176228	Stegodyphus dumicola	Stegodyphus	Eresidae	Araneae	Arachnida	Arthropoda	Metazoa	Eukaryota
+GCF_001723915.1	GavGan_comp1	Gavialis gangeticus	94835	Scaffold	2640775248	Gavialis gangeticus	Gavialis	Gavialidae	Crocodylia		Chordata	Metazoa	Eukaryota
+GCF_000956105.1	Pcoq_1.0	Propithecus coquereli	379532	Scaffold	2798135037	Propithecus coquereli	Propithecus	Indriidae	Primates	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_022376915.1	ASM2237691v1	Moschus berezovskii	68408	Scaffold	2813355390	Moschus berezovskii	Moschus	Moschidae	Artiodactyla	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_000334495.1	TupChi_1.0	Tupaia chinensis	246437	Scaffold	2846580235	Tupaia chinensis	Tupaia	Tupaiidae	Scandentia	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_000260255.1	OctDeg1.0	Octodon degus	10160	Scaffold	2995872505	Octodon degus	Octodon	Octodontidae	Rodentia	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_000622305.1	S.galili_v1.0	Nannospalax galili	1026970	Scaffold	3061408210	Nannospalax galili	Nannospalax	Spalacidae	Rodentia	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_000243295.1	TriManLat1.0	Trichechus manatus latirostris	127582	Scaffold	3103791524	Trichechus manatus	Trichechus	Trichechidae	Sirenia	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_034190915.1	mCavPor4.1	Cavia porcellus	10141	Scaffold	3145520116	Cavia porcellus	Cavia	Caviidae	Rodentia	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_000164805.1	Tarsius_syrichta-2.0.1	Carlito syrichta	1868482	Scaffold	3453847770	Carlito syrichta	Carlito	Tarsiidae	Primates	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_028583685.1	PetGlider_PUasm1.0	Petaurus breviceps papuanus	3040969	Scaffold	3464704272	Petaurus breviceps	Petaurus	Petauridae	Diprotodontia	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_900497805.2	bare-nosed wombat genome assembly	Vombatus ursinus	29139	Scaffold	3486580222	Vombatus ursinus	Vombatus	Vombatidae	Diprotodontia	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_000299155.1	EleEdw1.0	Elephantulus edwardii	28737	Scaffold	3843982861	Elephantulus edwardii	Elephantulus	Macroscelididae	Macroscelidea	Mammalia	Chordata	Metazoa	Eukaryota
+GCF_022539635.2	CSIRO-AGI_Ctep_v1	Chironomus tepperi	113505	Contig	202325903	Chironomus tepperi	Chironomus	Chironomidae	Diptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_004324835.1	DenGig_1.0	Dendronephthya gigantea	151771	Contig	286131786	Dendronephthya gigantea	Dendronephthya	Nephtheidae	Malacalcyonacea	Anthozoa	Cnidaria	Metazoa	Eukaryota
+GCF_024137725.1	Cenicafe_Pnas_1.2	Prorops nasuta	863751	Contig	295123319	Prorops nasuta	Prorops	Bethylidae	Hymenoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_024137745.1	Cenicafe_Pcof_1.1	Phymastichus coffea	108790	Contig	421229823	Phymastichus coffea	Phymastichus	Eulophidae	Hymenoptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_046128005.1	CSIRO-AGI_Gbla_v1	Genypterus blacodes	154954	Contig	463765610	Genypterus blacodes	Genypterus	Ophidiidae	Ophidiiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_029603195.1	ASM2960319v2	Condylostylus longicornis	2530218	Contig	543988939	Condylostylus longicornis	Condylostylus	Dolichopodidae	Diptera	Insecta	Arthropoda	Metazoa	Eukaryota
+GCF_046127955.1	CSIRO-AGI_Nayr_v1	Nelusetta ayraudi	303726	Contig	576472122	Nelusetta ayraudi	Nelusetta	Monacanthidae	Tetraodontiformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_028476545.2	ASM2847654v3	Physella acuta	109671	Contig	702002063	Physella acuta	Physella	Physidae		Gastropoda	Mollusca	Metazoa	Eukaryota
+GCF_026898505.1	AGI_CSIRO_Cger_v1	Centroberyx gerrardi	166262	Contig	735610683	Centroberyx gerrardi	Centroberyx	Berycidae	Beryciformes	Actinopteri	Chordata	Metazoa	Eukaryota
+GCF_019059575.1	NRLGWU_Aamphi_draft	Amphibalanus amphitrite	1232801	Contig	807604242	Amphibalanus amphitrite	Amphibalanus	Balanidae	Balanomorpha	Thecostraca	Arthropoda	Metazoa	Eukaryota
+GCF_026122565.2	CSIRO-AGI_Emac_v2	Emydura macquarii macquarii	1129001	Contig	1924425589	Emydura macquarii	Emydura	Chelidae	Testudines		Chordata	Metazoa	Eukaryota
+GCF_030222135.1	86718_ANA_hifiasm-v0.15.2.pri	Aotus nancymaae	37293	Contig	3097886253	Aotus nancymaae	Aotus	Aotidae	Primates	Mammalia	Chordata	Metazoa	Eukaryota

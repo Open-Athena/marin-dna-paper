@@ -1,0 +1,262 @@
+{
+  "source": "TimeTree live higher-taxon web export",
+  "retrieved": "2026-11-17",
+  "citation": "https://doi.org/10.1093/molbev/msac174",
+  "sources": [
+    {
+      "rank": "class",
+      "url": "https://www.timetree.org/ajax/direct_download?direct-download-format=newick&direct-download-id=211973&direct-download-rank=class",
+      "sha256": "5a011ecfb5c062d14116ac2dd9584bc44766b34cf6e299409c1c4e108cdc7be4",
+      "tips": 93,
+      "root_age_ma": 750.1030800000002,
+      "cache_date_utc": "2026-11-17"
+    },
+    {
+      "rank": "order",
+      "url": "https://www.timetree.org/ajax/direct_download?direct-download-format=newick&direct-download-id=211973&direct-download-rank=order",
+      "sha256": "bcf435c6d6df4785caf24df4d8fe7cdc7df48056912dbeb8bde8a7a7a74b86fe",
+      "tips": 526,
+      "root_age_ma": 750.1030800000002,
+      "cache_date_utc": "2026-11-17"
+    }
+  ],
+  "interpretation": "TimeTree reference topology and dates; group-level tips at present. Terminal branches collapse within-group diversification. No species substitutions used.",
+  "source_cache": "plot_data/remote/https/www.timetree.org/cohort_figure (not redistributed)",
+  "panels": {
+    "animals": {
+      "root_age_ma": 750.1030800000002,
+      "axis_max_ma": 800,
+      "annotation": 499,
+      "projection": 108
+    },
+    "mammals": {
+      "root_age_ma": 181.19192,
+      "axis_max_ma": 200,
+      "annotation": 81,
+      "projection": 108
+    }
+  },
+  "class_group_mapping": {
+    "Porifera": [
+      "Calcarea",
+      "Demospongiae",
+      "Hexactinellida",
+      "Homoscleromorpha"
+    ],
+    "Ctenophora": [
+      "Tentaculata"
+    ],
+    "Placozoa": [
+      "Uniplacotomia"
+    ],
+    "Cnidaria": [
+      "Anthozoa",
+      "Cubozoa",
+      "Hydrozoa",
+      "Myxozoa",
+      "Scyphozoa"
+    ],
+    "Xenacoelomorpha": [
+      "Acoela (no class)",
+      "Xenoturbellidae (no class)"
+    ],
+    "Mollusca": [
+      "Bivalvia",
+      "Caudofoveata",
+      "Cephalopoda",
+      "Gastropoda",
+      "Monoplacophora",
+      "Polyplacophora",
+      "Scaphopoda",
+      "Solenogastres"
+    ],
+    "Annelida": [
+      "Clitellata",
+      "Hrabeiella (no class)",
+      "Polychaeta",
+      "Sipuncula"
+    ],
+    "Nemertea": [
+      "Enopla",
+      "Palaeonemertea",
+      "Pilidiophora"
+    ],
+    "Platyhelminthes": [
+      "Cestoda",
+      "Monogenea",
+      "Rhabditophora",
+      "Trematoda"
+    ],
+    "Brachiopoda": [
+      "Craniata",
+      "Lingulata",
+      "Rhynchonellata"
+    ],
+    "Bryozoa": [
+      "Gymnolaemata",
+      "Phylactolaemata",
+      "Stenolaemata"
+    ],
+    "Priapulida": [
+      "Priapulimorpha"
+    ],
+    "Nematoda": [
+      "Chromadorea",
+      "Enoplea"
+    ],
+    "Tardigrada": [
+      "Eutardigrada",
+      "Heterotardigrada"
+    ],
+    "Arthropoda": [
+      "Arachnida",
+      "Branchiopoda",
+      "Cephalocarida",
+      "Chilopoda",
+      "Collembola",
+      "Diplopoda",
+      "Diplura (no class)",
+      "Hexanauplia",
+      "Ichthyostraca",
+      "Insecta",
+      "Malacostraca",
+      "Merostomata",
+      "Mystacocarida",
+      "Ostracoda",
+      "Pauropoda",
+      "Protura",
+      "Pycnogonida",
+      "Remipedia",
+      "Symphyla",
+      "Thecostraca"
+    ],
+    "Echinodermata": [
+      "Asteroidea",
+      "Crinoidea",
+      "Echinoidea",
+      "Holothuroidea",
+      "Ophiuroidea"
+    ],
+    "Hemichordata": [
+      "Enteropneusta"
+    ],
+    "Leptocardii": [
+      "Leptocardii"
+    ],
+    "Ascidiacea": [
+      "Ascidiacea"
+    ],
+    "Myxini": [
+      "Myxini"
+    ],
+    "Hyperoartia": [
+      "Hyperoartia"
+    ],
+    "Chondrichthyes": [
+      "Chondrichthyes"
+    ],
+    "ray_finned": [
+      "Actinopteri",
+      "Cladistia"
+    ],
+    "Coelacanthiformes": [
+      "Coelacanthiformes (no class)"
+    ],
+    "Amphibia": [
+      "Amphibia"
+    ],
+    "Mammalia": [
+      "Mammalia"
+    ],
+    "Lepidosauria": [
+      "Lepidosauria"
+    ],
+    "Testudines": [
+      "Testudinata (no class)"
+    ],
+    "Crocodylia": [
+      "Crocodylia (no class)"
+    ],
+    "Aves": [
+      "Aves"
+    ]
+  },
+  "order_group_mapping": {
+    "Monotremata": [
+      "Monotremata"
+    ],
+    "Didelphimorphia": [
+      "Didelphimorphia"
+    ],
+    "Dasyuromorphia": [
+      "Dasyuromorphia"
+    ],
+    "Diprotodontia": [
+      "Diprotodontia"
+    ],
+    "Microbiotheria": [
+      "Microbiotheria"
+    ],
+    "Peramelemorphia": [
+      "Peramelemorphia"
+    ],
+    "Afrosoricida": [
+      "Chrysochloridae (no order)",
+      "Tenrecidae (no order)"
+    ],
+    "Macroscelidea": [
+      "Macroscelidea"
+    ],
+    "Tubulidentata": [
+      "Tubulidentata"
+    ],
+    "Hyracoidea": [
+      "Hyracoidea"
+    ],
+    "Proboscidea": [
+      "Proboscidea"
+    ],
+    "Sirenia": [
+      "Sirenia"
+    ],
+    "Cingulata": [
+      "Cingulata"
+    ],
+    "Pilosa": [
+      "Pilosa"
+    ],
+    "Rodentia": [
+      "Rodentia"
+    ],
+    "Lagomorpha": [
+      "Lagomorpha"
+    ],
+    "Scandentia": [
+      "Scandentia"
+    ],
+    "Dermoptera": [
+      "Dermoptera"
+    ],
+    "Primates": [
+      "Primates"
+    ],
+    "Eulipotyphla": [
+      "Eulipotyphla"
+    ],
+    "Chiroptera": [
+      "Chiroptera"
+    ],
+    "Carnivora": [
+      "Carnivora"
+    ],
+    "Pholidota": [
+      "Pholidota"
+    ],
+    "Perissodactyla": [
+      "Perissodactyla"
+    ],
+    "Artiodactyla": [
+      "Artiodactyla"
+    ]
+  }
+}

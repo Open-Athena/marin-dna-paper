@@ -1,0 +1,56 @@
+panel,taxon,label,annotation_genomes,projection_genomes
+animals,Porifera,Sponges,6,0
+animals,Ctenophora,Comb jellies,1,0
+animals,Placozoa,Placozoans,1,0
+animals,Cnidaria,"Corals, anemones & jellyfish",12,0
+animals,Xenacoelomorpha,Xenacoelomorph worms,1,0
+animals,Mollusca,Molluscs,18,0
+animals,Annelida,Segmented worms,1,0
+animals,Nemertea,Ribbon worms,2,0
+animals,Platyhelminthes,Flatworms,3,0
+animals,Brachiopoda,Lamp shells,1,0
+animals,Bryozoa,Bryozoans,1,0
+animals,Priapulida,Priapulid worms,1,0
+animals,Nematoda,Roundworms,5,0
+animals,Tardigrada,Water bears,1,0
+animals,Arthropoda,Arthropods (including insects),117,0
+animals,Echinodermata,"Sea stars, urchins & relatives",9,0
+animals,Hemichordata,Acorn worms & relatives,2,0
+animals,Leptocardii,Lancelets,1,0
+animals,Ascidiacea,Tunicates,3,0
+animals,Myxini,Hagfish,1,0
+animals,Hyperoartia,Lampreys,1,0
+animals,Chondrichthyes,"Sharks, rays & chimaeras",8,0
+animals,ray_finned,Ray-finned fishes,110,0
+animals,Coelacanthiformes,Coelacanths,1,0
+animals,Amphibia,Amphibians,11,0
+animals,Mammalia,Mammals → panel B,81,108
+animals,Lepidosauria,"Lizards, snakes & tuatara",18,0
+animals,Testudines,Turtles,8,0
+animals,Crocodylia,Crocodilians,3,0
+animals,Aves,Birds,71,0
+mammals,Monotremata,Platypus & echidnas,2,0
+mammals,Didelphimorphia,Opossums,1,0
+mammals,Dasyuromorphia,"Quolls, devils & relatives",1,0
+mammals,Diprotodontia,"Kangaroos, koalas & relatives",4,0
+mammals,Microbiotheria,Monito del monte,1,0
+mammals,Peramelemorphia,Bandicoots & bilbies,1,0
+mammals,Afrosoricida,Tenrecs & golden moles,1,2
+mammals,Macroscelidea,Elephant shrews,1,1
+mammals,Tubulidentata,Aardvarks,0,1
+mammals,Hyracoidea,Hyraxes,0,1
+mammals,Proboscidea,Elephants,1,1
+mammals,Sirenia,Manatees & dugongs,1,1
+mammals,Cingulata,Armadillos,1,2
+mammals,Pilosa,Sloths & anteaters,2,2
+mammals,Rodentia,Rodents,11,25
+mammals,Lagomorpha,"Rabbits, hares & pikas",2,2
+mammals,Scandentia,Tree shrews,1,1
+mammals,Dermoptera,Colugos,1,1
+mammals,Primates,Primates,11,15
+mammals,Eulipotyphla,"Shrews, moles & hedgehogs",3,4
+mammals,Chiroptera,Bats,9,11
+mammals,Carnivora,Carnivorans,9,13
+mammals,Pholidota,Pangolins,1,1
+mammals,Perissodactyla,"Horses, rhinos & tapirs",2,3
+mammals,Artiodactyla,Even-toed ungulates & whales,14,21
