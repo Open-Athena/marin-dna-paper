@@ -18,6 +18,7 @@ PAPER_FIGURES := \
 	figures/learning_rate_transfer.pdf \
 	figures/sequence_loss_scaling.pdf \
 	figures/evaluation_benchmarks.pdf \
+	figures/dataset_timetree.pdf \
 	figures/mendelian_zero_shot_comparison.pdf \
 	figures/mendelian_probe_comparison.pdf \
 	figures/region_specialist_performance.pdf \
@@ -74,6 +75,7 @@ figures-all: \
 	figure-learning_rate_transfer \
 	figure-sequence_loss_scaling \
 	figure-evaluation_benchmarks \
+	figure-dataset_timetree \
 	figure-mendelian_zero_shot_comparison \
 	figure-mendelian_probe_comparison \
 	figure-region_specialist_performance \
@@ -293,6 +295,16 @@ figure-regional_hyperparameter_transfer:
 	$(PLOT) regional_hyperparameter_transfer
 fetch-figure-regional_hyperparameter_transfer:
 	$(PLOT) --fetch regional_hyperparameter_transfer
+
+# Use the bundled PDF for ordinary builds; regeneration requires cached exports.
+figures/dataset_timetree.pdf:
+	$(FIGURE_PYTHON) src/plot_dataset_timetree.py
+
+.PHONY: figure-dataset_timetree fetch-figure-dataset_timetree
+figure-dataset_timetree:
+	$(FIGURE_PYTHON) src/plot_dataset_timetree.py
+fetch-figure-dataset_timetree:
+	$(FIGURE_PYTHON) src/plot_dataset_timetree.py --fetch
 
 paper.pdf: $(PAPER_FIGURES) paper.tex paper.bib oup-contemporary.cls vancouver-authoryear.bst
 	pdflatex -interaction=nonstopmode -halt-on-error paper.tex

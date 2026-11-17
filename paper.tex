@@ -508,6 +508,8 @@ used during dataset construction but were not supplied to the model during
 training.
 Dataset composition and sampling during training are described in
 Section~\nameref{methods:mixtures}.
+The taxonomic coverage of the two cohorts, spanning 18 animal phyla,
+is summarised in Supplementary Figure~\ref{fig:dataset-timetree}.
 
 For the annotation-derived datasets, we selected 499 NCBI RefSeq animal
 assemblies, with one assembly per taxonomic family.
@@ -1117,6 +1119,7 @@ reported ratio.
 \section{Acknowledgements}
 \todo
 \bibliography{paper}
+\clearpage
 \section*{Supplementary material}
 \setcounter{table}{0}
 \renewcommand{\thetable}{S\arabic{table}}
@@ -1160,6 +1163,24 @@ historical training jobs.}\label{tab:dataset-provenance}
 \setcounter{figure}{0}
 \renewcommand{\thefigure}{S\arabic{figure}}
 \renewcommand{\theHfigure}{supp.\arabic{figure}}
+\begin{figure*}[tp]
+\centering
+\includegraphics[width=\linewidth]{figures/dataset_timetree.pdf}
+\caption{Taxonomic coverage of the Marin DNA training datasets on an
+evolutionary timescale. \textbf{A}, The 499 annotation-derived animal genomes
+(blue) and 108 alignment-projected mammalian genomes (orange), grouped by
+higher taxa. \textbf{B}, Mammalian orders, with a fourfold expansion of the
+time axis (200--0 million years ago, compared with 800--0 in panel A).
+Counts are shown separately for each cohort; the 30 species shared between
+cohorts are counted in both, giving 577 unique species overall.
+Branch lengths and topology use TimeTree higher-taxon exports accessed
+17 November 2026~\citep{kumar2022timetree}, rather than a phylogeny inferred
+from the training sequences. Tips represent taxonomic groups at the present;
+terminal branches include diversification collapsed within each group.
+Dates are point estimates, with uncertainty omitted.}
+\label{fig:dataset-timetree}
+\end{figure*}
+
 \begin{figure}
 \centering
 \includegraphics[width=\linewidth]{figures/mendelian_zero_shot_comparison.pdf}

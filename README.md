@@ -16,18 +16,19 @@ make                                      # Bundled figures, then paper.pdf
 make figures                              # The 13 figures with bundled inputs
 make figures/learning_rate_transfer.pdf    # Incremental build of one figure
 make figure-learning_rate_transfer        # Force regeneration of one figure
-uv run --locked python src/plot.py --help  # All 22 paper figures
+uv run --locked python src/plot.py --help  # 22 figures; time tree uses a separate script
 uv run --locked python src/plot.py --output-dir /tmp/figures learning_rate_transfer
 ```
 
-Every figure has a Click command matching its filename without the extension.
+The 22 figures in `src/plot.py` have Click commands matching their filenames without the extension.
+The supplementary cohort time tree uses `src/plot_dataset_timetree.py` and has matching Make targets.
 Plots write PDF and SVG; `sequence_loss_scaling` also writes
 `sequence_loss_scaling_fit.txt`. Existing SVG diagrams in `figures/` are converted
 to vector PDF. `plot_data/` holds the CSVs, model registry, and downloaded inputs.
 The overview diagrams use Lato when available. SVG text stays editable.
 
 The Makefile explicitly lists the paper's figures and their bundled inputs.
-All plotting and saving is in `src/plot.py`; `src/local_data.py` contains shared
+The main figure recipes are in `src/plot.py`; `src/local_data.py` contains shared
 input loaders, source URLs, model metadata, and lineage definitions.
 `src/metrics.py` contains the chromosome-weighted AUPRC and bootstrap calculations.
 The plotting code’s original license is retained in `src/LICENSE`.
@@ -44,7 +45,7 @@ Changing plotting code does not automatically regenerate these external figures.
 make fetch-figure-vep_by_model_size         # Fetch missing inputs, then render
 uv run --locked python src/plot.py --fetch vep_by_model_size
 make figure-vep_by_model_size              # Regenerate from downloaded inputs
-make figures-all                          # Force all 22; fails if inputs are missing
+make figures-all                          # Force all 23; fails if inputs are missing
 make fetch-sweeps                          # Refresh four W&B sweep/history CSVs
 ```
 
@@ -69,19 +70,3 @@ Add `--fetch` to retrieve or refresh TimeTree's higher-taxon exports; the raw ex
 The offline renderer preserves source node ages while collapsing taxonomic groups and obtains counts from `data/dataset_provenance/`.
 `plot_data/dataset_timetree_sources.json` records source URLs, hashes, and the mapping between source taxa and figure groups.
 The two panels have explicitly different time axes; terminal branches include diversification hidden inside each group, and age uncertainty is not drawn.
-
-`uv run --locked python src/plot_evo2_diversity.py` renders the matching OpenGenome2 metadata overview in `figures/evo2_taxonomic_diversity.*`.
-Its `--fetch` option downloads the pinned species metadata and TimeTree eukaryote export into the same ignored cache area.
-The figure combines a dated eukaryotic tree with bacterial and archaeal phylum-count bars; it explicitly distinguishes the released metadata from a complete training-corpus census.
-Aggregated counts and source hashes are saved in `plot_data/evo2_*`.
-
-`uv run --locked python src/plot_dtol_diversity.py` renders the matching Darwin Tree of Life snapshot in `figures/dtol_taxonomic_diversity.*`.
-The supplied CSV and exact-name NCBI taxonomy resolution are bundled in `data/dtol_provenance/`; counts use distinct resolved taxon IDs, not ToL specimen IDs.
-This snapshot contains 1,826 taxa, all marked Annotation Complete. The overview colours animals, green plants and fungi, and a second panel expands the 1,219 insects on a 4× time-axis zoom.
-The default render is offline; `--fetch` retrieves the two required TimeTree exports. Counts and dated-tree mappings are written to `plot_data/dtol_*`.
-To resolve a replacement CSV, first cache `https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz` at `plot_data/remote/https/ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz`, then run `uv run --locked python src/resolve_dtol_taxonomy.py /path/to/dtol.csv`.
-Resolution requires an unambiguous exact scientific name or NCBI synonym; unmapped names or plotting groups fail explicitly. Source hashes and dates are recorded alongside the resolved taxonomy.
-
-`uv run --locked python src/compare_marin_dtol.py` compares taxonomic richness, species overlap and composition between the combined Marin cohorts and the supplied DToL snapshot.
-Both use the same NCBI taxonomy snapshot; Marin's two cohorts are deduplicated by species taxon ID. Tables and provenance are saved in `plot_data/marin_dtol_*`.
-Add `--resolve` to regenerate `plot_data/marin_comparison_taxonomy.csv` from the cached taxonomy dump. The assembly label `Ateles_geoffroyi_a` is explicitly normalised, and an unresolved historical annotation name can fall back to its manifest taxon ID; these resolutions are recorded in the output.

@@ -119,7 +119,8 @@ class FigureBuildTests(unittest.TestCase):
                 (ROOT / "paper.tex").read_text(),
             )
         )
-        self.assertEqual(set(plot.cli.commands), stems)
+        standalone = {'dataset_timetree'}
+        self.assertEqual(set(plot.cli.commands) | standalone, stems)
         makefile = (ROOT / "Makefile").read_text()
         for stem in stems:
             self.assertIn(f"figure-{stem}:\n", makefile)
@@ -132,7 +133,8 @@ class FigureBuildTests(unittest.TestCase):
             capture_output=True,
             text=True,
         ).stdout
-        self.assertEqual(plan.count("src/plot.py "), len(stems))
+        self.assertEqual(plan.count("src/plot.py "), len(stems - standalone))
+        self.assertEqual(plan.count("src/plot_dataset_timetree.py"), 1)
 
     def test_artwork_and_fit_report(self):
         source = ROOT / "figures/variant_scoring_workflow.svg"
