@@ -24,7 +24,65 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from plot_dataset_phylogeny import BLUE, ORANGE, animal_tree, mammal_tree, tips
+BLUE, ORANGE = '#2878a5', '#d77b32'
+
+# Display names only; topology and dates come from the TimeTree exports.
+ANIMAL_LABELS = {'Porifera': 'Sponges',
+ 'Ctenophora': 'Comb jellies',
+ 'Placozoa': 'Placozoans',
+ 'Cnidaria': 'Corals, anemones & jellyfish',
+ 'Xenacoelomorpha': 'Xenacoelomorph worms',
+ 'Mollusca': 'Molluscs',
+ 'Annelida': 'Segmented worms',
+ 'Nemertea': 'Ribbon worms',
+ 'Platyhelminthes': 'Flatworms',
+ 'Brachiopoda': 'Lamp shells',
+ 'Bryozoa': 'Bryozoans',
+ 'Priapulida': 'Priapulid worms',
+ 'Nematoda': 'Roundworms',
+ 'Tardigrada': 'Water bears',
+ 'Arthropoda': 'Arthropods (including insects)',
+ 'Echinodermata': 'Sea stars, urchins & relatives',
+ 'Hemichordata': 'Acorn worms & relatives',
+ 'Leptocardii': 'Lancelets',
+ 'Ascidiacea': 'Tunicates',
+ 'Myxini': 'Hagfish',
+ 'Hyperoartia': 'Lampreys',
+ 'Chondrichthyes': 'Sharks, rays & chimaeras',
+ 'ray_finned': 'Ray-finned fishes',
+ 'Coelacanthiformes': 'Coelacanths',
+ 'Amphibia': 'Amphibians',
+ 'Mammalia': 'Mammals → panel B',
+ 'Lepidosauria': 'Lizards, snakes & tuatara',
+ 'Testudines': 'Turtles',
+ 'Crocodylia': 'Crocodilians',
+ 'Aves': 'Birds'}
+
+MAMMAL_LABELS = {'Monotremata': 'Platypus & echidnas',
+ 'Didelphimorphia': 'Opossums',
+ 'Dasyuromorphia': 'Quolls, devils & relatives',
+ 'Diprotodontia': 'Kangaroos, koalas & relatives',
+ 'Microbiotheria': 'Monito del monte',
+ 'Peramelemorphia': 'Bandicoots & bilbies',
+ 'Afrosoricida': 'Tenrecs & golden moles',
+ 'Macroscelidea': 'Elephant shrews',
+ 'Tubulidentata': 'Aardvarks',
+ 'Hyracoidea': 'Hyraxes',
+ 'Proboscidea': 'Elephants',
+ 'Sirenia': 'Manatees & dugongs',
+ 'Cingulata': 'Armadillos',
+ 'Pilosa': 'Sloths & anteaters',
+ 'Rodentia': 'Rodents',
+ 'Lagomorpha': 'Rabbits, hares & pikas',
+ 'Scandentia': 'Tree shrews',
+ 'Dermoptera': 'Colugos',
+ 'Primates': 'Primates',
+ 'Eulipotyphla': 'Shrews, moles & hedgehogs',
+ 'Chiroptera': 'Bats',
+ 'Carnivora': 'Carnivorans',
+ 'Pholidota': 'Pangolins',
+ 'Perissodactyla': 'Horses, rhinos & tapirs',
+ 'Artiodactyla': 'Even-toed ungulates & whales'}
 
 ROOT = Path(__file__).resolve().parents[1]
 CACHE = ROOT / 'plot_data/remote/https/www.timetree.org/cohort_figure'
@@ -258,8 +316,8 @@ def main() -> None:
                          'tips':len(leaves(tree)), 'root_age_ma':tree.age,
                          'cache_date_utc':datetime.fromtimestamp(path.stat().st_mtime, timezone.utc).date().isoformat()})
     accessed = max(item['cache_date_utc'] for item in metadata)
-    alabels = {n.key:n.name for n in tips(animal_tree())}
-    mlabels = {n.key:n.name for n in tips(mammal_tree())}
+    alabels = ANIMAL_LABELS
+    mlabels = MAMMAL_LABELS
     available = {n.name for n in leaves(source_trees['class'])}
     selection = {k:set(v)&available for k,v in ANIMAL_GROUPS.items()}
     assert all(selection.values()), 'Source lacks an entire displayed group'
