@@ -763,6 +763,8 @@ sequence-level proportions also describe the allocation of input tokens.
 Uniform sampling across regions does not imply uniform sampling across
 species or equal exposure to every distinct genomic sequence.
 
+
+
 The early experiments compared upstream-only and CDS-only specialists
 with two upstream/CDS mixtures: equal weights (50/50) and weights
 proportional to the source dataset sizes (approximately 10.6/89.4,
@@ -780,14 +782,18 @@ Figure~\ref{fig:specialists}) used upstream and CDS checkpoints at
 approximately 23.1B and 35.7B tokens, respectively, and therefore
 does not represent an equal-exposure comparison.
 
-The later mixture experiments used the standard 1.12B-parameter
-architecture with 255-base sequences preceded by BOS and batches of
-8,192 sequences. The annotation-derived CDS, upstream, and downstream
-datasets yielded a dataset-proportional mixture of approximately
-73\%, 21\%, and 6\%, respectively, as used in the parameter-scaling
-experiments. The uniform three-region mixture instead assigned equal
-weight to each region, while five-region mixtures additionally included
-the projected ncRNA and enhancer datasets.
+We use three descriptive labels for the later mixture lineages:
+\emph{Staged} for uniform three-region training followed by uniform
+five-region training, \emph{Uniform} for uniform five-region training
+from initialization, and \emph{Upstream-weighted} for five-region training
+with extra weight on upstream sequences from initialization.
+These lineages, compared in Supplementary
+Figures~\ref{fig:mixture-llr}--\ref{fig:mixture-probe}, used the standard
+1.12B-parameter architecture with 255-base sequences preceded by BOS
+and batches of 8,192 sequences.
+The uniform three-region mixture assigned equal weight to CDS, upstream,
+and downstream sequences, while five-region mixtures additionally
+included the projected ncRNA and enhancer datasets.
 Mixture weights were implemented using approximate component counts
 within shuffled blocks of equal-length examples. Each component was
 shuffled and sampled from a capped dataset slice, restarting when
@@ -800,25 +806,22 @@ rather than unique genomic coverage or complete passes through each
 dataset. Further sampling details are given in Supplementary
 Section~\nameref{supp:training-details}.
 
-We compared three later training lineages, denoted m5.1, m1.3, and m3.3
-(Figure~\ref{fig:later-mixtures}). The staged m5.1 lineage accumulated
+The Staged lineage accumulated
 approximately 104B model-input tokens on a uniform three-region mixture,
 comprising 42B inherited tokens and 62B additional tokens, before
 continuing for a further 62B tokens on a uniform five-region mixture
-(20\% per region). The m1.3 and m3.3 lineages instead used five regions
-from initialization. The m1.3 mixture assigned 20\% to each region,
-whereas m3.3 assigned 25\% to upstream and 18.75\% to each of the
-other four regions. All reported training exposures include BOS;
-Figure~\ref{fig:later-mixtures} shows the approximate allocations
-derived from the configured mixture weights.
+(20\% per region). The Uniform and Upstream-weighted lineages instead used five regions
+from initialization. The Uniform mixture assigned 20\% to each region,
+whereas Upstream-weighted assigned 25\% to upstream and 18.75\% to each of the
+other four regions. All reported training exposures include BOS.
 
 The lineages also differed in their optimization histories.
-The first m5.1 continuation inherited model weights from the initial
+The first Staged continuation inherited model weights from the initial
 three-region run but initialized a new optimizer. The subsequent
 five-region stage restored optimizer state from the completed
 three-region checkpoint and restarted the learning-rate schedule,
 with 10\% warmup and 20\% final decay.
-In contrast, m1.3 and m3.3 repeatedly resumed checkpoints from
+In contrast, Uniform and Upstream-weighted repeatedly resumed checkpoints from
 before the learning-rate decay phase, preserving optimizer state
 without rewarmup and scheduling decay over the final 20\% of the
 extended training horizon. Continuation runs also differed in
@@ -840,17 +843,6 @@ histories in which mixture composition, cumulative regional exposure,
 data ordering, and optimization schedules differ together.
 They therefore do not isolate the causal effect of introducing
 particular functional regions at different stages of training.
-
-
-\begin{figure}
-\centering
-\includegraphics[width=\linewidth]{figures/training_mixture_histories.pdf}
-\caption{Training-data exposure histories. The staged m5.1 lineage uses
-approximately 104B model-input tokens of uniform three-region training followed by 62B
-tokens with ncRNA and enhancer data added. The m1.3 and m3.3 controls use
-five-region mixtures from the start; m3.3 assigns upstream 25\% and each other
-region 18.75\%.}\label{fig:later-mixtures}
-\end{figure}
 
 \subsection{Hyperparameter transfer}\label{methods:transfer}
 \begin{itemize}
@@ -903,6 +895,10 @@ scale.}\label{fig:transfer}
 \end{figure}
 
 \subsection{Scaling experiments and loss monitoring}\label{methods:scaling}
+The parameter-scaling experiments sampled the annotation-derived CDS,
+upstream, and downstream datasets in proportion to their sizes, giving
+approximately 73\%, 21\%, and 6\% of training sequences, respectively.
+
 \begin{itemize}
 \item List the eight model sizes, common approximately 84.77B-model-input-token budget,
 proportional three-region mixture, transferred hyperparameters, and checkpoint
@@ -1124,7 +1120,7 @@ Evo 2 40B & 8,192 & 1 & 630 & 66 days & 3,635 \\
 \end{tabular}
 \end{table*}
 
-Both Marin DNA configurations use checkpoint
+Both Marin DNA configurations use the Staged checkpoint
 \texttt{mix-v0.9-p1B-i24-exp135-m5.1-step-59158}.
 The optimized benchmark loads its public release,
 \texttt{marin-dna/marin-dna-exp135-m5.1}, at revision
@@ -1352,15 +1348,15 @@ Transfer validation & 256 & 4,096 &
 Parameter scaling & 256 & 1,536 &
 84.77B observed & Proportional, three regions \\
 \addlinespace
-m5.1 inherited ancestry & 256 & 8,192 &
-41.95B inherited & Uniform, three regions \\
-m5.1 three-region continuation & 256 & 8,192 &
-62.03B & Uniform, three regions \\
-m5.1 five-region continuation & 256 & 8,192 &
-62.03B & Uniform, five regions \\
-m1.3 & 256 & 8,192 &
-$\sim$166B comparison & Uniform, five regions \\
-m3.3 & 256 & 8,192 &
+Staged inherited ancestry & 256 & 8,192 &
+41.95B inherited & Equal weights, three regions \\
+Staged three-region continuation & 256 & 8,192 &
+62.03B & Equal weights, three regions \\
+Staged five-region continuation & 256 & 8,192 &
+62.03B & Equal weights, five regions \\
+Uniform & 256 & 8,192 &
+$\sim$166B comparison & Equal weights, five regions \\
+Upstream-weighted & 256 & 8,192 &
 $\sim$166B comparison & Upstream 25\%; others 18.75\% \\
 \bottomrule
 \end{tabularx}
@@ -1369,6 +1365,10 @@ $\sim$166B comparison & Upstream 25\%; others 18.75\% \\
 
 \subsection{Training configuration details}
 \label{supp:training-details}
+
+The descriptive labels Staged, Uniform, and Upstream-weighted correspond
+to repository identifiers \texttt{m5.1}, \texttt{m1.3}, and
+\texttt{m3.3}, respectively.
 
 Supplementary Table~\ref{tab:models} summarizes the training
 configurations used in the experiments.
@@ -1410,20 +1410,20 @@ learning rates were 0.00165607 and 0.00157196, respectively, with
 $\beta_2=0.9908626$ and
 $\epsilon=1.901774\times10^{-14}$.
 
-The m5.1 lineage comprised three training stages: 41.95B tokens
+The Staged lineage comprised three training stages: 41.95B tokens
 inherited from a uniform three-region model, a further 62.03B tokens
 of three-region training, and 62.03B tokens of five-region training.
 The first continuation initialized a new optimizer from inherited
 model weights, whereas the five-region continuation restored
 optimizer state and restarted the learning-rate schedule.
-The m1.3 and m3.3 lineages instead used repeated continuations
+The Uniform and Upstream-weighted lineages instead used repeated continuations
 from pre-cooldown checkpoints, preserving optimizer state without
 rewarmup.
 The comparison horizon for these lineages was approximately
 166B tokens, rather than their configured full horizon of
 approximately 173.7B tokens.
-The m1 lineage branched at absolute steps 23,664, 41,412, and 53,244,
-and the m3 lineage at steps 23,660, 41,405, and 53,235.
+The Uniform lineage branched at absolute steps 23,664, 41,412, and 53,244,
+and the Upstream-weighted lineage at steps 23,660, 41,405, and 53,235.
 Each extension added 29,580 and 29,579 updates, respectively.
 The corresponding data mixtures and their interpretation are
 described in Section~\nameref{methods:mixtures}.

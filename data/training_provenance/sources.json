@@ -130,5 +130,10 @@
     "src/plot.py: ARMS, shared_step_data, PANEL_SPECS, RUNS, _composed_curve, _lineage_draw_panel",
     "src/local_data.py: LINEAGE, inherited_components",
     "plot_data/data_mixture_results.csv"
-  ]
+  ],
+  "mixture_display_labels": {
+    "m5.1": "Staged",
+    "m1.3": "Uniform",
+    "m3.3": "Upstream-weighted"
+  }
 }

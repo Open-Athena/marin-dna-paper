@@ -13,14 +13,14 @@ GNU Make 4.3 or later, `pdflatex`, and BibTeX.
 
 ```sh
 make                                      # Bundled figures, then paper.pdf
-make figures                              # The 12 figures with bundled inputs
+make figures                              # The 11 figures with bundled inputs
 make figures/learning_rate_transfer.pdf    # Incremental build of one figure
 make figure-learning_rate_transfer        # Force regeneration of one figure
-uv run --locked python src/plot.py --help  # 21 figures; time tree uses a separate script
+uv run --locked python src/plot.py --help  # 20 figures; time tree uses a separate script
 uv run --locked python src/plot.py --output-dir /tmp/figures learning_rate_transfer
 ```
 
-The 21 figures in `src/plot.py` have Click commands matching their filenames without the extension.
+The 20 figures in `src/plot.py` have Click commands matching their filenames without the extension.
 The supplementary cohort time tree uses `src/plot_dataset_timetree.py` and has matching Make targets.
 Plots write PDF and SVG; `sequence_loss_scaling` also writes
 `sequence_loss_scaling_fit.txt`. Existing SVG diagrams in `figures/` are converted
@@ -45,7 +45,7 @@ Changing plotting code does not automatically regenerate these external figures.
 make fetch-figure-vep_by_model_size         # Fetch missing inputs, then render
 uv run --locked python src/plot.py --fetch vep_by_model_size
 make figure-vep_by_model_size              # Regenerate from downloaded inputs
-make figures-all                          # Force all 22; fails if inputs are missing
+make figures-all                          # Force all 21; fails if inputs are missing
 make fetch-sweeps                          # Refresh four W&B sweep/history CSVs
 ```
 

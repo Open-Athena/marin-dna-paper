@@ -12,7 +12,6 @@ PAPER_FIGURES := \
 	figures/upstream_coding_mixture_balance.pdf \
 	figures/missense_readout_scaling.pdf \
 	figures/training_dataset_provenance.pdf \
-	figures/training_mixture_histories.pdf \
 	figures/hyperparameter_transfer_workflow.pdf \
 	figures/learning_rate_transfer.pdf \
 	figures/sequence_loss_scaling.pdf \
@@ -35,7 +34,6 @@ LOCAL_FIGURES := \
 	figures/variant_scoring_workflow.pdf \
 	figures/vep_performance_vs_throughput.pdf \
 	figures/training_dataset_provenance.pdf \
-	figures/training_mixture_histories.pdf \
 	figures/hyperparameter_transfer_workflow.pdf \
 	figures/learning_rate_transfer.pdf \
 	figures/sequence_loss_scaling.pdf \
@@ -67,7 +65,6 @@ figures-all: \
 	figure-upstream_coding_mixture_balance \
 	figure-missense_readout_scaling \
 	figure-training_dataset_provenance \
-	figure-training_mixture_histories \
 	figure-hyperparameter_transfer_workflow \
 	figure-learning_rate_transfer \
 	figure-sequence_loss_scaling \
@@ -150,15 +147,6 @@ figure-training_dataset_provenance:
 	$(PLOT) training_dataset_provenance
 fetch-figure-training_dataset_provenance:
 	$(PLOT) --fetch training_dataset_provenance
-
-figures/training_mixture_histories.pdf: $(FIGURE_CODE) figures/training_mixture_histories.svg
-	$(PLOT) training_mixture_histories
-
-.PHONY: figure-training_mixture_histories fetch-figure-training_mixture_histories
-figure-training_mixture_histories:
-	$(PLOT) training_mixture_histories
-fetch-figure-training_mixture_histories:
-	$(PLOT) --fetch training_mixture_histories
 
 figures/hyperparameter_transfer_workflow.pdf: $(FIGURE_CODE) figures/hyperparameter_transfer_workflow.svg
 	$(PLOT) hyperparameter_transfer_workflow

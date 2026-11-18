@@ -2042,9 +2042,9 @@ SHORT_NAMES = {
 }
 
 LINEAGES: tuple[tuple[str, str, str, str], ...] = (
-    ("exp135-zoonomia-m5.1", "m5.1", EARTH_QUAL[0], "o"),
-    ("exp135-zoonomia-m1.3", "m1.3", EARTH_QUAL[3], "o"),
-    ("exp135-zoonomia-m3.3", "m3.3", EARTH_QUAL[4], "o"),
+    ("exp135-zoonomia-m5.1", "Staged", EARTH_QUAL[0], "o"),
+    ("exp135-zoonomia-m1.3", "Uniform", EARTH_QUAL[3], "o"),
+    ("exp135-zoonomia-m3.3", "Upstream-weighted", EARTH_QUAL[4], "o"),
 )
 
 PANELS: tuple[tuple[str, str], ...] = (
@@ -2329,7 +2329,7 @@ def plot_lineage(kind: str, results_df: pd.DataFrame | None = None) -> Figure:
         )
         if is_macro:
             ax.annotate(
-                "m5.1 shift\n3→5 regions",
+                "Staged shift\n3→5 regions",
                 xy=(shift_x, 0.02),
                 xycoords=ax.get_xaxis_transform(),
                 xytext=(4, 0),
@@ -2503,7 +2503,7 @@ PROBE_DISPLAYS: frozenset[str] = frozenset(
 )
 
 DISPLAY_OVERRIDES: dict[str, str] = {
-    "exp135-1B-m5.1": "MarinDNA (1B/m5.1)",
+    "exp135-1B-m5.1": "MarinDNA 1B (Staged)",
 }
 
 
@@ -3626,13 +3626,6 @@ def variant_scoring_workflow(output_dir: Path) -> None:
 def hyperparameter_transfer_workflow(output_dir: Path) -> None:
     """Convert the authored hyperparameter-transfer workflow."""
     render_artwork(output_dir, "hyperparameter_transfer_workflow")
-
-
-@cli.command("training_mixture_histories")
-@click.pass_obj
-def training_mixture_histories(output_dir: Path) -> None:
-    """Convert the authored training-mixture histories."""
-    render_artwork(output_dir, "training_mixture_histories")
 
 
 if __name__ == "__main__":
