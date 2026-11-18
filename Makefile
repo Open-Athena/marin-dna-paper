@@ -12,7 +12,6 @@ PAPER_FIGURES := \
 	figures/upstream_coding_mixture_balance.pdf \
 	figures/missense_readout_scaling.pdf \
 	figures/training_dataset_provenance.pdf \
-	figures/annotation_derived_training_pool.pdf \
 	figures/training_mixture_histories.pdf \
 	figures/hyperparameter_transfer_workflow.pdf \
 	figures/learning_rate_transfer.pdf \
