@@ -660,74 +660,83 @@ These totals include overlapping windows and both sequence
 orientations, and therefore do not represent unique genomic coverage.
 
 \subsection{Architecture and training}\label{methods:architecture}
-\begin{itemize}
-\item Document the preliminary objective comparison on promoter sequences:
-causal language modeling, masked language modeling, and masked diffusion
-(\href{https://github.com/Open-Athena/marin-dna/issues/3}{experiment \#3}).
-Causal language modeling looked most promising in the initial training steps;
-this was direction-setting evidence, not a definitive matched-compute
-comparison.
-Our initial goal was to model individual functional elements, such as an exon or
-an enhancer, well. The short 255-base context made training and evaluation
-faster and examples easier to construct, filter, audit, and interpret. State
-its limitations for longer-range processes.
-\item Describe the standard Qwen3 causal, decoder-only architecture, geometry
-rule, and experiment families summarized in Table~\ref{tab:models}.
-TODO: pin model code and provide complete architecture configurations in
-supplementary material or versioned experiment records. Refer to the causal gLM
-precedents discussed in Background.
-\item Specify nucleotide tokenization, sequence orientation, special tokens,
-and context construction. Distinguish early 512-base examples without a BOS
-token from the later 255-base recipe with a 256-token deployed context.
-\item Define the training objective and repetitive-base loss weighting,
-optimizer implementation, and learning-rate schedule. Document the later
-schedule's 10\% warmup and 20\% decay, and identify any experiment-specific
-exceptions. TODO: supply complete configuration references, precision,
-batching, seeds, software versions, and training hardware.
-\end{itemize}
-% Overview transcribed from blog/marin-dna.md; scaling sizes also appear in
-% blog/figure4_loss_scaling.svg. Unreported settings are not inferred.
-\begin{table*}
-\caption{Overview of training configurations. Parameter counts and training
-budgets are approximate; training tokens are reported per model or stage.}
-\label{tab:models}
-\centering
-\small
-\setlength{\tabcolsep}{4pt}
-\renewcommand{\arraystretch}{1.2}
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{0.17\linewidth}%
->{\raggedright\arraybackslash}p{0.19\linewidth}c
-r r L@{}}
-\toprule
-Experiment & Parameters & Context (bp) & Tokens (B) & Batch (tokens) & Training
-mixture \\
-\midrule
-Upstream specialist & 1.7B & 512 & ? & ? & Upstream only \\
-CDS specialist & ? & 512 & ? & ? & CDS only \\
-Early mixture comparison & ? & ? & ? & ? & Upstream/CDS: 10/90 or 50/50;
-single-region controls \\
-Reference calibration & 25M & 255 & 2.5 & 16k & ? \\
-Transfer validation & 255M, 476M, 1B & 255 & 10 & 4k & ? \\
-Parameter scaling & 46M, 76M, 128M, 255M, 476M, 1B, 2B, 4B & 255 & 84 & ? &
-Three regions, dataset-proportional \\
-m5.1, initial stage & 1B & 255 & 104 & ? & Three regions, uniform \\
-m5.1, continuation & 1B & 255 & 62 & ? & Five regions, uniform \\
-m1.3 control & 1B & 255 & 166$^{a}$ & ? & Five regions, uniform \\
-m3.3 control & 1B & 255 & 166$^{a}$ & ? & Upstream 25\%; each other region
-18.75\% \\
-\bottomrule
-\end{tabularx}
-\par\smallskip
-\parbox{\linewidth}{\footnotesize
-?: not established by the blog; TODO: verify against experiment configurations.
-The early specialists use no BOS token. The later 255-base recipe has a
-256-token deployed context. Transfer-validation tokens and batch size follow
-the reported fourfold token increase and fourfold batch reduction from the
-reference run. Three-region mixtures contain CDS, upstream, and downstream;
-five-region mixtures add ncRNA and enhancer-region sequences.
-The two m5.1 stages total 166B tokens.
-$^{a}$Displayed comparison horizon, not necessarily full training duration.}
-\end{table*}
+We trained causal, decoder-only Transformers~\cite{vaswani2017attention}
+based on the Qwen3 architecture~\citep{qwen2025qwen3} using the Marin framework~\citep{marin}.
+Each block uses causal self-attention with rotary positional embeddings~\citep{su2024roformer},
+RMS normalization~\citep{zhang2019rmsnorm} (including query/key normalization), and a gated
+feed-forward network with SiLU activation~\citep{shazeer2020glu}.
+The initial upstream and CDS specialists and their two-region mixtures
+used the 1.7B architecture preset, with grouped-query attention and tied
+input/output embeddings. Later experiments used equal numbers of query
+and key/value heads and separate input/output embeddings.
+For hidden width $D$, these later models used
+$\mathrm{round}[D/(55+4\log_2 D)]$ layers, feed-forward width $4D$,
+and $D/128$ attention heads of dimension 128.
+This geometry rule was inherited from the Marin text-model recipe rather
+than fitted to DNA. Supplementary Table~\ref{tab:architectures} gives the
+model dimensions; the model described as 1B has 1,120,772,224 parameters.
+
+Sequences were tokenized one nucleotide at a time, with the same token
+for upper- and lowercase versions of each base; character case was retained
+separately for loss weighting.
+The later tokenizer has seven tokens: A, C, G, T, padding, unknown, and
+beginning-of-sequence (BOS). Ambiguous characters map to the unknown token.
+A BOS token precedes each 255-base sequence, yielding a 256-token input;
+no end-of-sequence token is appended. Fixed-length examples require no
+padding, and each example contains one genomic window.
+The early specialists and two-region mixtures used 512-base inputs without
+BOS. Reverse-complement examples were supplied by the dataset augmentation
+described above; the architecture itself does not enforce reverse-complement
+equivariance.
+The short context targets local sequence features and reduces training and
+evaluation cost, but cannot directly model interactions beyond the input
+window. A preliminary promoter experiment comparing causal, masked, and
+masked-diffusion objectives motivated the causal choice; it did not provide
+a definitive matched-compute comparison of objectives.
+
+Training minimized next-nucleotide cross-entropy. Uppercase targets had
+weight 1 and lowercase targets, marking soft-masked repetitive sequence,
+had weight 0.01. The DNA tokenizer aligns weights to the predicted target;
+the final input position has no prediction target and receives zero weight.
+The BOS position predicts the first nucleotide. The weighted loss is
+normalized by the sum of contributing weights, rather than the number of
+input positions. Later experiments also penalized the squared log-normalizer
+of the output logits (z-loss).
+The human-sequence monitoring statistic called validation loss used human
+training sequences, with lowercase marking non-conserved bases rather than
+repeats. It therefore measures neither performance on held-out genomes nor
+conventional held-out sequence generalization (Section~\nameref{methods:scaling}).
+
+The later recipe used AdamH for linear weight matrices, rescaling each
+update to preserve the matrix's Frobenius norm, and Adam~\citep{kingma2015adam}
+for the remaining parameters, including embeddings and normalization scales.
+The two groups have separate learning rates and gradient-norm clipping;
+there is no additional weight-decay term in this optimizer implementation.
+Reference optimization settings and their transfer across batch sizes and
+training horizons are described in Section~\nameref{methods:transfer}.
+Fresh later runs used 10\% linear warmup, a constant learning rate through
+80\% of training, and linear decay to zero over the final 20\%.
+The implementation uses no dropout.
+They used float32 parameters and bfloat16 computation on TPUs, with gradient
+accumulation where needed to maintain the effective batch size.
+Supplementary Table~\ref{tab:models} gives effective batches and training
+budgets. These training budgets count model-input tokens, including BOS;
+they differ from the nucleotide-only dataset sizes reported above.
+
+Continuation did not always mean resuming the same optimizer trajectory.
+The m5.1 lineage first inherited weights from the uniform three-region
+model at step 20,000 through a Hugging Face checkpoint, initializing a new
+optimizer for further three-region training. It then loaded the completed
+three-region Levanter checkpoint at step 29,579, preserving optimizer state,
+and trained on five regions with a fresh 10\% warmup and 20\% final decay
+for the new stage. Thus, both the mixture and schedule history must be
+considered when interpreting this lineage. The m1.3 and m3.3 controls instead
+repeatedly resumed pre-cooldown checkpoints with optimizer state preserved,
+without rewarmup; each continuation placed cooldown over the final 20\%
+of its combined parent-plus-child step horizon.
+Commit-pinned configuration sources and outstanding historical provenance
+gaps are recorded in
+\href{https://github.com/Open-Athena/marin-dna-paper/blob/main/data/training_provenance/sources.json}{the training-provenance record}.
 
 \subsection{Mixture experiments}\label{methods:mixtures}
 Dataset-proportional sampling of the three annotation-derived datasets
@@ -736,13 +745,16 @@ sequences.
 \begin{itemize}
 \item Define specialist, dataset-proportional, and balanced sampling. Document
 the early upstream/CDS comparisons, their datasets, contexts, token budgets,
-and checkpoints. TODO: identify the sampling unit and repeat/epoch behavior.
+and checkpoints. Later mixtures operate on equal-length sequence examples;
+smaller component datasets restart when exhausted. Component caps and
+mixture weights determine drawn-token budgets, which need not correspond
+to one pass over every available sequence.
 \item Use Figure~\ref{fig:later-mixtures} to document exposure histories.
-Define the later lineages: m5.1 uses approximately 104B tokens of uniform
+Define the later lineages: m5.1 uses approximately 104B model-input tokens of uniform
 three-region training followed by 62B tokens of uniform five-region training;
 m1.3 and m3.3 use five regions from the start, with m3.3 assigning upstream
-25\% and each other region 18.75\%. TODO: verify full configurations and
-checkpoint histories against versioned artifacts.
+25\% and each other region 18.75\%. Their continuation schedules are described in
+Section~\nameref{methods:architecture} and Supplementary Table~\ref{tab:models}.
 \item Record exposure counts, continuation state, schedules, evaluation
 checkpoints, and comparison horizons. Identify differences between histories
 that limit causal interpretation of exposure order.
@@ -752,7 +764,7 @@ that limit causal interpretation of exposure order.
 \centering
 \includegraphics[width=\linewidth]{figures/training_mixture_histories.pdf}
 \caption{Training-data exposure histories. The staged m5.1 lineage uses
-approximately 104B tokens of uniform three-region training followed by 62B
+approximately 104B model-input tokens of uniform three-region training followed by 62B
 tokens with ncRNA and enhancer data added. The m1.3 and m3.3 controls use
 five-region mixtures from the start; m3.3 assigns upstream 25\% and each other
 region 18.75\%.}\label{fig:later-mixtures}
@@ -763,18 +775,24 @@ region 18.75\%.}\label{fig:later-mixtures}
 \item Use Figure~\ref{fig:transfer-workflow} to explain calibration and
 transfer.
 Situate the calibration in hyperparameter-transfer literature
-\citep{yang2021transfer}; TODO: add the Complete(d) citation from the blog.
+\citep{yang2021transfer,mlodozeniec2025completed}.
 Explain how poor tuning can confound model-size comparisons.
 Specify the approximately 25M-parameter reference sweep, 2.5B-token
-horizon, 16k-token batch, Vizier search, tuned parameters, and selection
+horizon, 16,384-sequence batch (4,194,304 input tokens), Vizier search, tuned parameters, and selection
 objective. Refer to Section~\nameref{methods:scaling} for the monitoring
 statistic.
 TODO: provide search spaces, trial counts, and selection rules.
-\item Give the exact transfer equations for learning rates, optimizer moments,
-and epsilon, and identify settings reused unchanged. Distinguish inherited
-geometry and token-horizon heuristics from quantities fitted on DNA, including
-the departure from the Complete(d) exponent. TODO: transcribe equations and
-bounds from the commit-pinned implementation linked in the blog.
+\item The Complete(d)-inspired transfer uses the reference batch $B_0=16{,}384$
+sequences and horizon $T_0=2.5\times10^9$ model-input tokens. Writing
+$r=(BT_0)/(B_0T)$, it sets
+$\eta_H=\eta_{H,0}\sqrt{B/B_0}(T_0/T)^{0.3}$,
+$\eta_A=\eta_{A,0}\sqrt{r}$,
+$\epsilon=\epsilon_0/\sqrt{r}$, and
+$\beta_2=\mathrm{clip}(\beta_{2,0}^{B/B_0},0.5,0.9999)$.
+Both learning rates are capped at 0.03. Initialization scale, $\beta_1$,
+gradient clipping and z-loss are unchanged. The exponent 0.3 is inherited
+from Marin's text recipe, rather than fitted to DNA, and differs from the
+0.5 token-horizon exponent in Complete(d).
 \item Document target validation at 255M, 476M, and 1B, changed batch sizes and
 token horizons, sweep grids, and unchanged-reference controls. Specify the
 regional checks and criterion for comparing predicted and observed optima.
@@ -804,7 +822,7 @@ scale.}\label{fig:transfer}
 
 \subsection{Scaling experiments and loss monitoring}\label{methods:scaling}
 \begin{itemize}
-\item List the eight model sizes, common approximately 84B-token budget,
+\item List the eight model sizes, common approximately 84.77B-model-input-token budget,
 proportional three-region mixture, transferred hyperparameters, and checkpoint
 selection. TODO: supply exact run configurations and completed token counts.
 \item Define the fixed human monitoring sequences, their overlap with
@@ -824,7 +842,7 @@ downstream analyses. TODO: recover exact fitting settings from the plot code.
 \centering
 \includegraphics[width=\linewidth]{figures/sequence_loss_scaling.pdf}
 \caption{Sequence loss across model sizes. Eight models from 46M to 4B
-parameters are each trained on approximately 84B tokens. The inset shows a
+parameters are each trained on approximately 84.77B model-input tokens. The inset shows a
 Kaplan-style power-law fit to final validation loss.}\label{fig:scaling}
 \end{figure}
 
@@ -1145,12 +1163,100 @@ the Registry of candidate cis-regulatory elements.
 \todo
 \bibliography{paper}
 \clearpage
+\onecolumn
 \section*{Supplementary material}
 % Source audit: data/dataset_provenance/sources.json records the source
 % commits of the exported manifests and the remaining provenance gaps.
 % In particular, do not treat inspected HF card revisions as training-job
 % revisions or infer RefSeq annotation release dates from assembly versions.
 
+\setcounter{table}{0}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\theHtable}{supp.\arabic{table}}
+\begin{table}[htbp]
+\centering\small
+\caption{Model architectures. Widths denote hidden and feed-forward dimensions;
+Q/KV denotes query and key/value head counts.}\label{tab:architectures}
+\begin{tabular}{lrrrrl}
+\toprule
+Model & Layers & Hidden width & FFN width & Q/KV heads & Embeddings \\
+\midrule
+Early 1.7B preset & 28 & 2048 & 6144 & 16/8 & Tied \\
+Reference ($\sim$25M) & 5 & 512 & 2048 & 4/4 & Separate \\
+45.9M & 7 & 640 & 2560 & 5/5 & Separate \\
+75.5M & 8 & 768 & 3072 & 6/6 & Separate \\
+128.5M & 10 & 896 & 3584 & 7/7 & Separate \\
+254.8M & 12 & 1152 & 4608 & 9/9 & Separate \\
+475.9M & 15 & 1408 & 5632 & 11/11 & Separate \\
+1.12B & 19 & 1920 & 7680 & 15/15 & Separate \\
+2.27B & 24 & 2432 & 9728 & 19/19 & Separate \\
+4.02B & 29 & 2944 & 11776 & 23/23 & Separate \\
+\bottomrule
+\end{tabular}
+\par\smallskip
+\parbox{\linewidth}{\footnotesize
+All heads have dimension 128. The reference and scaling configurations use
+RMS-normalization epsilon $10^{-5}$, bias-free projections, and initialization
+scale 0.02 for the selected recipe. Rotary embeddings use the inherited
+Llama-3 configuration ($\theta=500{,}000$, scaling factor 8, low/high-frequency
+factors 1/4, original context parameter 8192); these parameters do not imply
+training at an 8192-token context. Early inputs have 512 bases; later inputs
+have 255 bases plus BOS. The 255M, 476M, and 1.12B geometries also serve the
+transfer experiments; all later mixture models use the 1.12B geometry.
+Early 1.7B is the preset's nominal label, not a recount with the DNA vocabulary.}
+\end{table}
+
+\begin{table}[htbp]
+\centering\small
+\caption{Training configurations. Batch sizes are effective sequences per
+optimizer update; budgets count model-input tokens.}\label{tab:models}
+\begin{tabularx}{\linewidth}{@{}lrrL@{}}
+\toprule
+Experiment & Batch & Input tokens/update & Budget and recipe \\
+\midrule
+Early specialists/mixtures & 2,048 & 1,048,576 &
+512-base inputs; Adam-family optimizer with configured learning rate $8\times10^{-4}$, inverse schedule
+with 2,000-step cycles. Full observed horizons not established. \\
+Reference calibration & 16,384 & 4,194,304 &
+2.5B target; proportional three-region mixture; hyperparameters tuned. \\
+Transfer validation & 4,096 & 1,048,576 &
+10B target; proportional three-region mixture; transferred settings and controls. \\
+Parameter scaling & 1,536 & 393,216 &
+84.77B target; proportional three-region mixture; transferred settings. \\
+m5.1 three-region ancestry & 8,192 & 2,097,152 &
+41.95B inherited plus 62.03B further uniform three-region training. \\
+m5.1 five-region stage & 8,192 & 2,097,152 &
+62.03B further uniform five-region training; optimizer restored with rewarmup. \\
+m1.3 / m3.3 & 8,192 & 2,097,152 &
+Five regions from initialization; uniform / upstream 25\%, others 18.75\%.
+Pre-cooldown continuations without rewarmup. \\
+\bottomrule
+\end{tabularx}
+\par\smallskip
+\parbox{\linewidth}{\footnotesize
+Budgets for calibration and transfer are configured targets rounded down to
+whole updates. The scaling snapshot records 215,574 updates, or
+84,767,145,984 input tokens, against an 84,767,420,928-token target.
+The selected reference has AdamH/Adam learning rates 0.0155661/0.0298951,
+$\beta_1=0.6675603$, $\beta_2=0.9067270$, $\epsilon=10^{-15}$,
+clipping threshold 0.9951880, and z-loss coefficient $4.312883\times10^{-6}$.
+Initialization scale, $\beta_1$, clipping and z-loss are reused in the later
+recipe; learning rates, $\beta_2$ and $\epsilon$ are transferred as described
+in Section~\nameref{methods:transfer}.
+For the scaling ladder, the resulting learning rates are 0.00165607/0.00157196,
+$\beta_2=0.9908626$ and $\epsilon=1.901774\times10^{-14}$.
+The m1.3/m3.3 comparison horizon is approximately 166B tokens, rather than
+the configured full horizon (approximately 173.7B). The m1 lineage forks
+at absolute steps 23,664, 41,412, and 53,244; the m3 lineage at 23,660,
+41,405, and 53,235. Each extension adds 29,580 and 29,579 updates, respectively,
+retaining optimizer state and omitting rewarmup.
+The early standard-loss promoter control is an exception to repeat weighting.
+Exact source references and distinctions between configured and observed
+values accompany the machine-readable training-provenance files.}
+\end{table}
+
+\clearpage
+\twocolumn
 % Supplementary numbering uses distinct PDF anchors.
 \setcounter{figure}{0}
 \renewcommand{\thefigure}{S\arabic{figure}}
