@@ -493,6 +493,24 @@ Survey and discuss future work.
 % from versioned experiment artifacts; do not infer reproducibility settings.
 \subsection{Dataset construction}\label{methods:data}
 
+\begin{figure}
+\centering
+\small
+\begin{tabular}{@{}p{\linewidth}@{}}
+\textbf{A \quad Training-dataset provenance and scale}\par
+\includegraphics[width=\linewidth]{figures/training_dataset_provenance.pdf}
+\\[6pt]
+\textbf{B \quad Annotation-derived training pool}\par
+\includegraphics[width=\linewidth]{figures/annotation_derived_training_pool.pdf}
+\end{tabular}
+\caption{Training datasets and their composition.
+\textbf{A}, Annotation-derived CDS, upstream, and downstream sequences are
+supplemented with alignment-projected ncRNA and enhancer-region sequences.
+\textbf{B}, The initial annotation-derived pool contains approximately 85B
+tokens across CDS, upstream, and downstream regions; proportional sampling
+follows these dataset sizes.}\label{fig:datasets}
+\end{figure}
+
 We constructed pretraining datasets using two complementary approaches
 (Figure~\ref{fig:datasets}A).
 First, we extracted coding sequence (CDS), upstream, and downstream regions
@@ -511,20 +529,18 @@ Section~\nameref{methods:mixtures}.
 The taxonomic coverage of the two cohorts, spanning 18 animal phyla,
 is summarised in Supplementary Figure~\ref{fig:dataset-timetree}.
 
-For the annotation-derived datasets, we selected 499 NCBI RefSeq animal
+For the annotation-derived datasets, we selected 499
+RefSeq~\cite{goldfarb2025ncbi} animal
 assemblies, with one assembly per taxonomic family.
 We considered Metazoa assemblies with total sequence lengths below 4~Gb
-and assembly quality ranging from complete genome to contig level,
-excluding assemblies without family assignments or on a predefined
-exclusion list.
+and assembly quality ranging from complete genome to contig level.
 Within each family, we prioritized designated reference assemblies,
-followed by assembly completeness, increasing sequence length, and
-organism name.
-Genome sequences and GTF annotations were obtained by assembly accession,
+followed by assembly completeness and increasing total sequence length,
+breaking any remaining ties alphabetically by organism name.
+Genome sequences and corresponding GTF annotations were downloaded from
+NCBI RefSeq by assembly accession using the NCBI Datasets command-line tool,
 including both curated and predicted transcripts.
-The human reference was GRCh38.p14 (\texttt{GCF\_000001405.40}).
-The selected assemblies and taxonomy assignments are recorded in the
-manifests accompanying Supplementary Table~\ref{tab:dataset-provenance}.
+The human reference was GRCh38.p14 (GCF\_000001405.40).
 
 We extracted three classes of genomic intervals from protein-coding
 transcript annotations.
@@ -537,10 +553,8 @@ upstream and downstream of the TSS.
 The downstream dataset comprised the 256~bp immediately following the
 terminal CDS boundary in transcript orientation, independently of
 annotated 3$'$ UTRs.
-All intervals were represented in 0-based, half-open coordinates, with
-overlapping intervals merged before sequence extraction.
-Sequences were extracted directly from genomic assemblies rather than
-assembled into spliced transcripts.
+CDS intervals were retained separately rather than concatenated into
+spliced coding sequences.
 
 Annotation-derived intervals were intersected with defined genomic
 sequence to exclude stretches of undefined bases.
@@ -549,27 +563,32 @@ For human, extraction was restricted to reference sequences with the
 unplaced scaffolds.
 The resulting intervals were tiled into 255-bp windows with a 128-bp
 stride, discarding incomplete terminal windows.
-Sequences were extracted using \texttt{twoBitToFa}, preserving the
-source assembly's soft masking.
-Lowercase bases therefore retain repeat-mask information, which is
+Sequences were extracted using \texttt{twoBitToFa}~\cite{kuhn2013ucsc},
+preserving the
+source assembly's soft masking. Lowercase bases therefore retain
+repeat-mask information, which is
 handled during training as described in
 Section~\nameref{methods:architecture}.
 
-For the alignment-derived datasets, we used the Ensembl release~115
+For the alignment-derived datasets, we used the Ensembl
+release~115~\cite{yates2026ensembl}
 GRCh38 soft-masked primary assembly and corresponding annotations,
 restricting human source regions to chromosomes 1--22, X, and Y.
 We generated 255-bp windows at a 128-bp stride across the genome and
 retained those containing at least 20\% conserved bases, defined by
-447-mammal phyloP scores of at least 2.2162~\citep{phylop447resource}.
-The threshold was calibrated on human chromosome~1 to match the fraction
-of non-missing positions exceeding the 241-way phyloP threshold of 2.27.
+447-mammal phyloP~\citep{pollard2010phylop} scores of at least
+2.2162~\citep{phylop447resource,kuderna2024identification}.
+We calibrated this threshold on human chromosome~1 to match the fraction
+of scored bases classified as constrained by the Zoonomia 241-mammal
+phyloP track \citep{sullivan2023leveraging}, using its published cutoff of $\geq 2.27$
+(5\% false discovery rate).
 Conserved-base fractions were calculated over the full window length,
 with missing scores treated as non-conserved.
 This filtering yielded 1,136,854 human source windows (anchors) before
 functional classification.
 
-We classified these anchors using the released \texttt{v3} functional
-partition.
+We classified these anchors into functional categories using genomic
+annotations.
 Windows were assigned a functional category if at least 20\% of their
 bases overlapped the union of annotated functional regions.
 Qualifying windows were assigned to the first overlapping category
@@ -582,7 +601,10 @@ biotype or quality filtering.
 It therefore included other non-protein-coding annotations, such as
 pseudogene and retained-intron exons.
 TSS regions extended 256~bp on either side of annotated transcript starts.
-The enhancer interval set comprised ENCODE Registry V4 non-promoter
+Human cCRE annotations were obtained from the
+ENCODE\cite{encode2012integrated,luo2020encode,hitz2023encode,kagda2025encode}
+Registry V4 for GRCh38, distributed through SCREEN~\citep{moore2026registry}.
+The enhancer interval set comprised non-promoter
 cCREs, extended by 500~bp on each side, including dELS, pELS, CA,
 CA-CTCF, CA-TF, CA-H3K4me3, and TF classes, but excluding PLS.
 Thus, the enhancer dataset represents a broader collection of
@@ -632,25 +654,6 @@ The alignment-derived ncRNA and enhancer datasets contributed an
 additional 3.90B and 24.64B tokens, respectively.
 These totals include overlapping windows and both sequence
 orientations, and therefore do not represent unique genomic coverage.
-
-
-\begin{figure}
-\centering
-\small
-\begin{tabular}{@{}p{\linewidth}@{}}
-\textbf{A \quad Training-dataset provenance and scale}\par
-\includegraphics[width=\linewidth]{figures/training_dataset_provenance.pdf}
-\\[6pt]
-\textbf{B \quad Annotation-derived training pool}\par
-\includegraphics[width=\linewidth]{figures/annotation_derived_training_pool.pdf}
-\end{tabular}
-\caption{Training datasets and their composition.
-\textbf{A}, Annotation-derived CDS, upstream, and downstream sequences are
-supplemented with alignment-projected ncRNA and enhancer-region sequences.
-\textbf{B}, The initial annotation-derived pool contains approximately 85B
-tokens across CDS, upstream, and downstream regions; proportional sampling
-follows these dataset sizes.}\label{fig:datasets}
-\end{figure}
 
 \subsection{Architecture and training}\label{methods:architecture}
 \begin{itemize}
@@ -1117,6 +1120,10 @@ reported ratio.
 \section{Competing interests}
 \todo
 \section{Acknowledgements}
+We thank the ENCODE Consortium and its data-production laboratories for
+generating the underlying functional genomic data, and the Zhiping Weng
+laboratory at UMass Chan Medical School for producing and distributing
+the Registry of candidate cis-regulatory elements.
 \todo
 \bibliography{paper}
 \clearpage
