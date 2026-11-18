@@ -672,6 +672,9 @@ We trained Marin DNA models using causal, decoder-only
 Transformers~\citep{vaswani2017attention} derived from the Qwen3
 architecture~\citep{qwen2025qwen3}, implemented in the Marin
 framework~\citep{marin}.
+This section describes the standard recipe used in the later experiments;
+the early specialist and two-region mixture configurations are described
+in Section~\nameref{methods:mixtures}.
 The models use causal self-attention with rotary positional
 embeddings~\citep{su2024roformer}, RMS
 normalization~\citep{zhang2019rmsnorm}, including query/key
@@ -716,7 +719,7 @@ input position had no prediction target and received zero weight.
 We additionally applied z-loss, which penalizes the squared
 log-normalizer of the output logits.
 The loss coefficients are reported in
-Supplementary Table~\ref{tab:models}.
+Supplementary Section~\nameref{supp:training-details}.
 
 Optimization used Adam-Hyperball (AdamH)~\citep{wen2026hyperball}
 for linear weight matrices, constraining their Frobenius norms to
@@ -1236,14 +1239,14 @@ the Registry of candidate cis-regulatory elements.
 \caption{Model architectures. Widths denote hidden and feed-forward
 dimensions; Q/KV denotes query and key/value attention head counts.
 Additional architectural details are given in
-Supplementary Section~\ref{supp:architecture-details}.}
+Supplementary Section~\nameref{supp:architecture-details}.}
 \label{tab:architectures}
 \begin{tabular}{lrrrrl}
 \toprule
 Model & Layers & Hidden width & FFN width & Q/KV heads & Embeddings \\
 \midrule
 \multicolumn{6}{l}{\emph{Standard architecture}} \\
-Reference ($\sim$25M) & 5 & 512 & 2048 & 4/4 & Separate \\
+Reference ($\sim$25M) & 6 & 512 & 2048 & 4/4 & Separate \\
 45.9M & 7 & 640 & 2560 & 5/5 & Separate \\
 75.5M & 8 & 768 & 3072 & 6/6 & Separate \\
 128.5M & 10 & 896 & 3584 & 7/7 & Separate \\
@@ -1294,7 +1297,7 @@ Supplementary Table~\ref{tab:models}.
 \caption{Training configurations. Batch sizes are effective sequences
 per optimizer update. Training exposure is measured in model-input
 tokens, including BOS where applicable. Configuration details are
-given in Supplementary Section~\ref{supp:training-details}.}
+given in Supplementary Section~\nameref{supp:training-details}.}
 \label{tab:models}
 \begin{tabularx}{\linewidth}{@{}LrrLL@{}}
 \toprule

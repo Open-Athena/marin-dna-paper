@@ -1,0 +1,6 @@
+family,batch_sequences,input_tokens_per_sequence,target_input_tokens,evidence
+early specialists and mixtures,2048,512,,configured batch; observed full horizon unverified
+reference,16384,256,2500000000,configured horizon; actual steps floored
+transfer,4096,256,10000000000,configured horizon; actual steps floored
+scaling,1536,256,84767420928,recorded target; 215574 steps give 84767145984 input tokens
+later mixtures,8192,256,,stage-dependent budgets; see source checkpoint ancestry

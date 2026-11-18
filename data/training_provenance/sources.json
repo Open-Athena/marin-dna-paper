@@ -1,0 +1,103 @@
+{
+  "marin_commit": "a638849fa837f924aaac66ff3d0c1f581dfdd49e",
+  "mixture_commit": "a41a83fdddfdef85a75e39b56c32949518e3f578",
+  "release_manifest": "https://github.com/Open-Athena/marin-dna/blob/220e7120ca22a05025fee8a9129927357f78a4d2/scripts/issue389/manifest.json",
+  "sources": {
+    "experiments/dna/exp109_bolinas_scaling_sweep.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/experiments/dna/exp109_bolinas_scaling_sweep.py",
+    "experiments/dna/exp13_promoter_cds_mixture.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/experiments/dna/exp13_promoter_cds_mixture.py",
+    "experiments/dna/exp21_promoters_yolo.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/experiments/dna/exp21_promoters_yolo.py",
+    "experiments/dna/exp27_cds_yolo.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/experiments/dna/exp27_cds_yolo.py",
+    "experiments/dna/defaults.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/experiments/dna/defaults.py",
+    "experiments/qwen3.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/experiments/qwen3.py",
+    "experiments/scaling_law_sweeps/completed_adamh.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/experiments/scaling_law_sweeps/completed_adamh.py",
+    "lib/levanter/src/levanter/models/qwen.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/lib/levanter/src/levanter/models/qwen.py",
+    "lib/levanter/src/levanter/models/llama.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/lib/levanter/src/levanter/models/llama.py",
+    "lib/levanter/src/levanter/layers/rotary.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/lib/levanter/src/levanter/layers/rotary.py",
+    "lib/levanter/src/levanter/optim/adamh.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/lib/levanter/src/levanter/optim/adamh.py",
+    "lib/levanter/src/levanter/data/text/_batch_tokenizer.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/lib/levanter/src/levanter/data/text/_batch_tokenizer.py",
+    "lib/haliax/src/haliax/nn/loss.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/lib/haliax/src/haliax/nn/loss.py"
+  },
+  "mixture_source": "https://github.com/marin-community/marin/blob/a41a83fdddfdef85a75e39b56c32949518e3f578/experiments/dna/exp135_bolinas_mix_sweep.py",
+  "evidence_notes": [
+    "Code snapshots establish configured behavior, not proof of every historical execution setting.",
+    "Scaling dimensions and optimizer settings cross-checked with bundled plot_data/parameter_scaling_results.csv.",
+    "Published m5.1 architecture cross-checked with the release manifest; stored float32 does not imply float32 training computation.",
+    "Training accounting uses batch sequences times 256 model-input tokens, including BOS; dataset counts use 255 nucleotide tokens.",
+    "The release manifest labels 166018940928 as nucleotide tokens, but its accounting and the training code use 256 tokens per example. Preserve it only as approximate model-input-token exposure.",
+    "Early registered checkpoint steps do not establish the full run duration or every checkpoint used in manuscript plots.",
+    "Cache suffix -5149 refers to the BOS-token cache rebuild issue https://github.com/marin-community/marin/issues/5149; corrected source alone does not verify all historical caches.",
+    "Scaling CSV parameter counts are the configured estimator values, not tensor recounts: its 1B entry is 1120767360 versus 1120772224 in the released checkpoint. The difference is 4864 = 2 * 128 * 19, consistent with query/key normalization weights."
+  ],
+  "m5_1_release_configuration": {
+    "vocab_size": 7,
+    "max_position_embeddings": 256,
+    "hidden_size": 1920,
+    "intermediate_size": 7680,
+    "num_hidden_layers": 19,
+    "num_attention_heads": 15,
+    "num_key_value_heads": 15,
+    "head_dim": 128,
+    "bos_token_id": 2,
+    "pad_token_id": 0,
+    "eos_token_id": null,
+    "tie_word_embeddings": false
+  },
+  "m5_1_parameters": 1120772224,
+  "m5_1_tokenizer": {
+    "class": "PreTrainedTokenizerFast",
+    "vocab_size": 7,
+    "vocab": {
+      "[PAD]": 0,
+      "[UNK]": 1,
+      "[BOS]": 2,
+      "a": 3,
+      "c": 4,
+      "g": 5,
+      "t": 6
+    },
+    "lowercase": true,
+    "prepends_bos": true,
+    "appends_eos": false,
+    "bos_token": "[BOS]",
+    "bos_token_id": 2,
+    "pad_token": "[PAD]",
+    "pad_token_id": 0,
+    "unk_token": "[UNK]",
+    "unk_token_id": 1,
+    "eos_token": null,
+    "eos_token_id": null,
+    "maximum_dna_bases": 255
+  },
+  "reference_optimizer": {
+    "adamh_lr": 0.015566099981405093,
+    "adam_lr": 0.02989514059663958,
+    "beta1": 0.6675603345321236,
+    "beta2": 0.9067269880630742,
+    "epsilon": 1e-15,
+    "clip": 0.9951880136348765,
+    "z_loss": 4.312883184368223e-06,
+    "initializer_range": 0.02
+  },
+  "unresolved": [
+    "Historical pre-fix tokenizer cache behavior, including BOS handling",
+    "Early-run optimizer defaults at original launch revisions and final training horizons"
+  ],
+  "later_mixture_commit": "eb6b279bd827b2b239a7a853c2c3764cb98b8cd1",
+  "later_mixture_source": "https://github.com/marin-community/marin/blob/eb6b279bd827b2b239a7a853c2c3764cb98b8cd1/experiments/dna/exp135_bolinas_mix_sweep.py",
+  "mixture_parent_steps": {
+    "m1.1": 23664,
+    "m1.2": 41412,
+    "m1.3": 53244,
+    "m3.1": 23660,
+    "m3.2": 41405,
+    "m3.3": 53235
+  },
+  "early_registered_checkpoints": {
+    "upstream": 22000,
+    "cds": 34000,
+    "equal_mixture": 26000,
+    "proportional_mixture": 26000
+  },
+  "early_checkpoint_source": "plot_data/models.yaml",
+  "transfer_reference_units": "B counts sequences; T counts input tokens including BOS"
+}
