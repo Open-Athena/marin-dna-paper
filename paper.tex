@@ -614,8 +614,8 @@ The resulting ncRNA and enhancer partitions contained 93,064 and
 
 We projected these anchors into a family-deduplicated cohort of
 108 mammals using the Zoonomia
-\texttt{447-mammalian-2022v1.hal} Cactus alignment~\citep{cgl2023}
-and \texttt{halLiftover --noDupes}.
+\texttt{447-mammalian-2022v1.hal} alignment~\citep{cgl2023}
+and \texttt{halLiftover --noDupes}~\citep{hickey2013hal}.
 For each anchor and target species, alignment fragments mapping to
 the same chromosome and strand were collapsed to their spanning
 interval; mappings spanning multiple chromosomes or strands were
@@ -624,15 +624,16 @@ Target intervals were retained if their lengths were 128--512~bp
 and the target chromosome could accommodate a 255-bp window.
 Retained intervals were resized to 255~bp around their midpoints,
 shifting windows at chromosome boundaries as necessary.
-Strand-aware sequences were extracted from the corresponding
-HAL-derived assemblies, reverse-complementing negative-strand
-mappings.
+Target-species genome sequences were exported from the HAL file using
+\texttt{hal2fasta}. Sequences for the resized intervals were extracted
+using \texttt{bedtools getfasta -s}~\citep{quinlan2010bedtools},
+reverse-complementing negative-strand mappings.
 This yielded at most one sequence per human anchor and target
 species before augmentation, with functional labels inherited from
 the human source regions.
 
 Both annotation-derived and alignment-derived datasets were augmented
-with reverse-complement sequences, shuffled using seed~42, and stored
+with reverse-complement sequences, stored
 as 64 compressed JSONL shards per dataset.
 For annotation-derived sequences, the orientation label distinguishes
 the original genomic sequence from its reverse complement, rather
