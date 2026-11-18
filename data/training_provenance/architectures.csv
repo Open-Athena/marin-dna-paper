@@ -1,0 +1,9 @@
+model,parameters,hidden,layers,mlp,heads,kv_heads,head_dim,bases,input_tokens,tied_embeddings
+dna-bolinas-scaling-v0.5-h640-p46M,45893760,640,7,2560,5,5,128,255,256,False
+dna-bolinas-scaling-v0.5-h768-p76M,75521280,768,8,3072,6,6,128,255,256,False
+dna-bolinas-scaling-v0.5-h896-p128M,128481920,896,10,3584,7,7,128,255,256,False
+dna-bolinas-scaling-v0.5-h1152-p255M,254848896,1152,12,4608,9,9,128,255,256,False
+dna-bolinas-scaling-v0.5-h1408-p476M,475854720,1408,15,5632,11,11,128,255,256,False
+dna-bolinas-scaling-v0.5-h1920-p1B,1120767360,1920,19,7680,15,15,128,255,256,False
+dna-bolinas-scaling-v0.5-h2432-p2B,2271368832,2432,24,9728,19,19,128,255,256,False
+dna-bolinas-scaling-v0.5-h2944-p4B,4021766016,2944,29,11776,23,23,128,255,256,False
