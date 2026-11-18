@@ -529,16 +529,31 @@ Section~\nameref{methods:mixtures}.
 The taxonomic coverage of the two cohorts, spanning 18 animal phyla,
 is summarised in Supplementary Figure~\ref{fig:dataset-timetree}.
 
+Dataset generation was organised as Snakemake
+workflows~\citep{molder2021snakemake}, with cloud jobs launched using
+SkyPilot~\citep{yang2023skypilot}.
+Workflow environments used packages distributed through
+Bioconda~\citep{gruning2018bioconda}.
+Numerical and tabular processing used NumPy~\citep{harris2020numpy}
+and pandas~\citep{mckinney2010pandas}.
+Bioframe~\citep{open2c2024bioframe} provided interval unions, subtraction,
+and overlap coverage for functional classification.
+The annotation-derived workflow used Biopython~\citep{cock2009biopython}
+for FASTA parsing and reverse-complement augmentation.
+
 For the annotation-derived datasets, we selected 499
 RefSeq~\cite{goldfarb2025ncbi} animal
 assemblies, with one assembly per taxonomic family.
+Taxonomic assignments were obtained from NCBI
+Taxonomy~\citep{schoch2020taxonomy,cox2025taxonomy}.
 We considered Metazoa assemblies with total sequence lengths below 4~Gb
 and assembly quality ranging from complete genome to contig level.
 Within each family, we prioritized designated reference assemblies,
 followed by assembly completeness and increasing total sequence length,
 breaking any remaining ties alphabetically by organism name.
 Genome sequences and corresponding GTF annotations were downloaded from
-NCBI RefSeq by assembly accession using the NCBI Datasets command-line tool,
+NCBI RefSeq by assembly accession using the NCBI Datasets command-line
+tool~\citep{oleary2024datasets},
 including both curated and predicted transcripts.
 The human reference was GRCh38.p14 (GCF\_000001405.40).
 
@@ -614,7 +629,8 @@ The resulting ncRNA and enhancer partitions contained 93,064 and
 
 We projected these anchors into a family-deduplicated cohort of
 108 mammals using the Zoonomia
-\texttt{447-mammalian-2022v1.hal} alignment~\citep{cgl2023}
+\texttt{447-mammalian-2022v1.hal} alignment~\citep{cgl2023},
+constructed using Progressive Cactus~\citep{armstrong2020cactus},
 and \texttt{halLiftover --noDupes}~\citep{hickey2013hal}.
 For each anchor and target species, alignment fragments mapping to
 the same chromosome and strand were collapsed to their spanning
