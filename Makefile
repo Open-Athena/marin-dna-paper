@@ -35,7 +35,6 @@ LOCAL_FIGURES := \
 	figures/variant_scoring_workflow.pdf \
 	figures/vep_performance_vs_throughput.pdf \
 	figures/training_dataset_provenance.pdf \
-	figures/annotation_derived_training_pool.pdf \
 	figures/training_mixture_histories.pdf \
 	figures/hyperparameter_transfer_workflow.pdf \
 	figures/learning_rate_transfer.pdf \
@@ -68,7 +67,6 @@ figures-all: \
 	figure-upstream_coding_mixture_balance \
 	figure-missense_readout_scaling \
 	figure-training_dataset_provenance \
-	figure-annotation_derived_training_pool \
 	figure-training_mixture_histories \
 	figure-hyperparameter_transfer_workflow \
 	figure-learning_rate_transfer \
@@ -152,15 +150,6 @@ figure-training_dataset_provenance:
 	$(PLOT) training_dataset_provenance
 fetch-figure-training_dataset_provenance:
 	$(PLOT) --fetch training_dataset_provenance
-
-figures/annotation_derived_training_pool.pdf: $(FIGURE_CODE) figures/annotation_derived_training_pool.svg
-	$(PLOT) annotation_derived_training_pool
-
-.PHONY: figure-annotation_derived_training_pool fetch-figure-annotation_derived_training_pool
-figure-annotation_derived_training_pool:
-	$(PLOT) annotation_derived_training_pool
-fetch-figure-annotation_derived_training_pool:
-	$(PLOT) --fetch annotation_derived_training_pool
 
 figures/training_mixture_histories.pdf: $(FIGURE_CODE) figures/training_mixture_histories.svg
 	$(PLOT) training_mixture_histories

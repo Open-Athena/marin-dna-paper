@@ -3621,13 +3621,6 @@ def variant_scoring_workflow(output_dir: Path) -> None:
     render_artwork(output_dir, "variant_scoring_workflow")
 
 
-@cli.command("annotation_derived_training_pool")
-@click.pass_obj
-def annotation_derived_training_pool(output_dir: Path) -> None:
-    """Convert the authored annotation-derived training-pool diagram."""
-    render_artwork(output_dir, "annotation_derived_training_pool")
-
-
 @cli.command("hyperparameter_transfer_workflow")
 @click.pass_obj
 def hyperparameter_transfer_workflow(output_dir: Path) -> None:
