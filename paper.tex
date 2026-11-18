@@ -24,9 +24,8 @@ TODO
 \end{keywords}
 \end{frontmatter}
 
-\textcolor{red}{JK: the Background is drafted in prose; subsequent sections
-remain
-a narrative plan, where each item plans a given paragraph.
+\textcolor{red}{JK: the Background and Dataset construction sections are drafted in prose;
+other sections remain a narrative plan, where each item plans a given paragraph.
 Figures are transferred directly from the blog for this draft.
 Main text figures with missing panels are filled with explanatory text.}
 
@@ -225,16 +224,12 @@ identified in the blog.
 \begin{tabular}{|p{\dimexpr\linewidth-2\tabcolsep-2\arrayrulewidth\relax}|}
 \hline
 \textbf{A \quad Multispecies training sequences}\par
-\textit{Planned schematic.} Show DNA from multiple species and functional
-regions being assembled into a training mixture. Distinguish sequence
-selection from model inputs: the model receives individual DNA sequences.
-Keep detailed dataset provenance in Figure~\ref{fig:datasets}. \\[3pt]
+\includegraphics[width=\linewidth]{figures/multispecies_training_sequences.pdf}
+\\[3pt]
 \hline
 \textbf{B \quad Learning to predict DNA}\par
-\textit{Planned schematic.} Show a standard causal Transformer reading a DNA
-sequence and predicting the next base. Indicate that training uses DNA
-sequence rather than variant-effect labels, and produces sequence
-probabilities and learned representations. \\[3pt]
+\includegraphics[width=\linewidth]{figures/next_base_prediction.pdf}
+\\[3pt]
 \hline
 \textbf{C \quad From sequences to variant scores}\par
 \includegraphics[width=\linewidth]{figures/variant_scoring_workflow.pdf}\par
@@ -243,11 +238,22 @@ without labeled variant examples. A linear probe uses labeled examples to
 learn from the frozen model's reference/alternate representations. \\[3pt]
 \hline
 \end{tabular}
-\caption{From DNA to variant ranking: draft panel layout.
-\textbf{A}, Planned overview of multispecies training sequences.
-\textbf{B}, Planned next-base prediction schematic.
-\textbf{C}, Existing variant-scoring diagram, showing likelihood-based scoring
-and a linear probe trained on frozen reference/alternate representations.}
+\caption{From DNA to variant ranking.
+\textbf{A}, DNA from multiple species is selected by functional region and
+sampled as individual sequences; the model does not receive a multispecies
+alignment. CDS, upstream, and downstream regions are annotation-derived;
+ncRNA and enhancer-region annotations are projected from human through
+whole-genome alignments. Downstream denotes sequence after the CDS end,
+not annotated 3-prime UTRs; enhancer regions denote the non-promoter cCRE
+collection. See Figure~\ref{fig:datasets} for detailed provenance.
+\textbf{B}, A Qwen3 causal Transformer learns to predict each base from its
+preceding sequence, producing sequence probabilities and learned
+representations. The abbreviated example shows shifted next-base targets.
+Panels A and B illustrate the later recipe with 255 DNA bases plus a BOS
+token, rather than the early 512-base experiments; mixture schedules are
+omitted. Training uses DNA without variant-effect labels.
+\textbf{C}, Variant scoring uses sequence likelihoods or a linear probe
+trained on frozen reference/alternate representations.}
 \label{fig:model-overview}
 \end{figure}
 
@@ -486,39 +492,148 @@ Survey and discuss future work.
 % Each item specifies a methods paragraph to develop. Fill missing details
 % from versioned experiment artifacts; do not infer reproducibility settings.
 \subsection{Dataset construction}\label{methods:data}
-\begin{itemize}
-\item Preserve the dataset-development rationale: we began with
-annotation-derived coding, upstream, and downstream sequences, which standard
-genome annotations make relatively easy to identify and extract consistently
-across species. Later, we added ncRNA and enhancer regions by projecting human
-annotations through whole-genome alignments. An annotation-derived ncRNA
-specialist showed little improvement in
-\href{https://github.com/Open-Athena/marin-dna/issues/43}{experiment \#43},
-motivating the projected ncRNA data. The distance-based downstream definition
-improved 3-prime UTR VEP over the annotation-derived baseline in
-\href{https://github.com/Open-Athena/marin-dna/issues/53}{experiment \#53}.
-Related uses of alignments include STEAM, which augments mouse accessibility
-training data with syntenic orthologs from 240 other mammalian genomes, and
-EnhancAR, which trains an autoregressive generator on families of human
-enhancers and their homologs~\citep{qiu2026steam,duncan2026enhancar}.
-\item Document genome and annotation sources, versions, species selection,
-and provenance. Use Figure~\ref{fig:datasets}A to distinguish annotation-derived
-and alignment-projected data. TODO: supply versioned source manifests,
-species lists, and dataset sizes. Identify the initial annotation-derived
-pool in Figure~\ref{fig:datasets}B.
-\item Define coding, upstream, and downstream extraction, strand handling,
-and window construction. Clarify that downstream denotes the 256 bases after
-an annotated CDS end rather than annotated 3-prime UTRs. TODO: specify all
-remaining extraction boundaries and filtering rules from the implementation.
-\item Describe projection of human ncRNA and enhancer-region annotations
-through whole-genome alignments. Define enhancer as the ENCODE V4 non-promoter
-cCRE set, including dELS and pELS as well as CA, CA-CTCF, CA-TF,
-CA-H3K4me3, and TF classes. TODO: document
-annotation/alignment versions, projection rules, and quality filters.
-\item Specify filtering, repetitive-sequence marking, deduplication if used,
-and sequence preparation. Distinguish early dataset versions from the later
-training pool, with per-region counts and experiment provenance.
-\end{itemize}
+
+We constructed pretraining datasets using two complementary approaches
+(Figure~\ref{fig:datasets}A).
+First, we extracted coding sequence (CDS), upstream, and downstream regions
+from species-specific gene annotations across diverse animals.
+Second, we constructed noncoding RNA (ncRNA) and enhancer-region datasets
+by identifying conserved, functionally annotated sequences in the human
+genome and projecting them into other mammalian genomes using whole-genome
+alignments.
+The projected functional labels describe the human source annotations,
+rather than experimentally established functions in the target species.
+The resulting datasets comprise individual DNA sequences; alignments were
+used during dataset construction but were not supplied to the model during
+training.
+Dataset composition and sampling during training are described in
+Section~\nameref{methods:mixtures}.
+The taxonomic coverage of the two cohorts, spanning 18 animal phyla,
+is summarised in Supplementary Figure~\ref{fig:dataset-timetree}.
+
+For the annotation-derived datasets, we selected 499 NCBI RefSeq animal
+assemblies, with one assembly per taxonomic family.
+We considered Metazoa assemblies with total sequence lengths below 4~Gb
+and assembly quality ranging from complete genome to contig level,
+excluding assemblies without family assignments or on a predefined
+exclusion list.
+Within each family, we prioritized designated reference assemblies,
+followed by assembly completeness, increasing sequence length, and
+organism name.
+Genome sequences and GTF annotations were obtained by assembly accession,
+including both curated and predicted transcripts.
+The human reference was GRCh38.p14 (\texttt{GCF\_000001405.40}).
+The selected assemblies and taxonomy assignments are recorded in the
+manifests accompanying Supplementary Table~\ref{tab:dataset-provenance}.
+
+We extracted three classes of genomic intervals from protein-coding
+transcript annotations.
+CDS intervals of 20--10,000~bp were extended by 20~bp on each side to
+include splice-region context, and intervals shorter than 256~bp after
+extension were expanded symmetrically to that minimum length.
+The upstream dataset comprised regions extending 256~bp on either side
+of transcription start sites (TSSs), and thus includes sequence both
+upstream and downstream of the TSS.
+The downstream dataset comprised the 256~bp immediately following the
+terminal CDS boundary in transcript orientation, independently of
+annotated 3$'$ UTRs.
+All intervals were represented in 0-based, half-open coordinates, with
+overlapping intervals merged before sequence extraction.
+Sequences were extracted directly from genomic assemblies rather than
+assembled into spliced transcripts.
+
+Annotation-derived intervals were intersected with defined genomic
+sequence to exclude stretches of undefined bases.
+For human, extraction was restricted to reference sequences with the
+\texttt{NC} accession prefix, excluding alternative haplotypes and
+unplaced scaffolds.
+The resulting intervals were tiled into 255-bp windows with a 128-bp
+stride, discarding incomplete terminal windows.
+Sequences were extracted using \texttt{twoBitToFa}, preserving the
+source assembly's soft masking.
+Lowercase bases therefore retain repeat-mask information, which is
+handled during training as described in
+Section~\nameref{methods:architecture}.
+
+For the alignment-derived datasets, we used the Ensembl release~115
+GRCh38 soft-masked primary assembly and corresponding annotations,
+restricting human source regions to chromosomes 1--22, X, and Y.
+We generated 255-bp windows at a 128-bp stride across the genome and
+retained those containing at least 20\% conserved bases, defined by
+447-mammal phyloP scores of at least 2.2162~\citep{phylop447resource}.
+The threshold was calibrated on human chromosome~1 to match the fraction
+of non-missing positions exceeding the 241-way phyloP threshold of 2.27.
+Conserved-base fractions were calculated over the full window length,
+with missing scores treated as non-conserved.
+This filtering yielded 1,136,854 human source windows (anchors) before
+functional classification.
+
+We classified these anchors using the released \texttt{v3} functional
+partition.
+Windows were assigned a functional category if at least 20\% of their
+bases overlapped the union of annotated functional regions.
+Qualifying windows were assigned to the first overlapping category
+in the priority order CDS, 3$'$ UTR, ncRNA exon, TSS region/5$'$ UTR,
+and non-promoter candidate cis-regulatory element (cCRE);
+remaining windows were classified as background.
+The ncRNA interval set comprised the union of Ensembl-annotated exons
+after subtracting protein-coding transcript exons, without additional
+biotype or quality filtering.
+It therefore included other non-protein-coding annotations, such as
+pseudogene and retained-intron exons.
+TSS regions extended 256~bp on either side of annotated transcript starts.
+The enhancer interval set comprised ENCODE Registry V4 non-promoter
+cCREs, extended by 500~bp on each side, including dELS, pELS, CA,
+CA-CTCF, CA-TF, CA-H3K4me3, and TF classes, but excluding PLS.
+Thus, the enhancer dataset represents a broader collection of
+non-promoter regulatory annotations rather than enhancers alone.
+The resulting ncRNA and enhancer partitions contained 93,064 and
+468,131 human anchors, respectively.
+
+We projected these anchors into a family-deduplicated cohort of
+108 mammals using the Zoonomia
+\texttt{447-mammalian-2022v1.hal} Cactus alignment~\citep{cgl2023}
+and \texttt{halLiftover --noDupes}.
+For each anchor and target species, alignment fragments mapping to
+the same chromosome and strand were collapsed to their spanning
+interval; mappings spanning multiple chromosomes or strands were
+discarded.
+Target intervals were retained if their lengths were 128--512~bp
+and the target chromosome could accommodate a 255-bp window.
+Retained intervals were resized to 255~bp around their midpoints,
+shifting windows at chromosome boundaries as necessary.
+Strand-aware sequences were extracted from the corresponding
+HAL-derived assemblies, reverse-complementing negative-strand
+mappings.
+This yielded at most one sequence per human anchor and target
+species before augmentation, with functional labels inherited from
+the human source regions.
+
+Both annotation-derived and alignment-derived datasets were augmented
+with reverse-complement sequences, shuffled using seed~42, and stored
+as 64 compressed JSONL shards per dataset.
+For annotation-derived sequences, the orientation label distinguishes
+the original genomic sequence from its reverse complement, rather
+than the transcript strand.
+Records contain sequence identifiers and sequences; alignment-derived
+records additionally retain the human anchor identifier, target
+species, coordinates, mapping strand, and augmentation orientation.
+No sequence-identity deduplication was performed across species or
+functional-region datasets.
+
+Supplementary Table~\ref{tab:dataset-provenance} reports released
+sequence counts, including reverse complements, and nucleotide-token
+totals (255 tokens per sequence, excluding the beginning-of-sequence
+token).
+The annotation-derived CDS, upstream, and downstream datasets
+contained 84.44~billion nucleotide tokens in total
+(approximately 85B; Figure~\ref{fig:datasets}B).
+The alignment-derived ncRNA and enhancer datasets contributed an
+additional 3.90B and 24.64B tokens, respectively.
+These totals include overlapping windows and both sequence
+orientations, and therefore do not represent unique genomic coverage.
+
+
 \begin{figure}
 \centering
 \small
@@ -1004,11 +1119,68 @@ reported ratio.
 \section{Acknowledgements}
 \todo
 \bibliography{paper}
+\clearpage
 \section*{Supplementary material}
+\setcounter{table}{0}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\theHtable}{supp.\arabic{table}}
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{lrrr}
+\hline
+Dataset & Genomes & Sequences & Nucleotide tokens (B) \\
+\hline
+\href{https://huggingface.co/datasets/marin-dna/genomes-v5-genome_set-animals-intervals-v5_255_128/tree/be993cd299dae650d6426d07d743404fdafba156}{CDS} & 499 & 242,334,716 & 61.795 \\
+\href{https://huggingface.co/datasets/marin-dna/genomes-v5-genome_set-animals-intervals-v1_255_128/tree/5acb6fef8a444609896724c9c28f0ec1eea503ef}{Upstream} & 499 & 68,286,166 & 17.413 \\
+\href{https://huggingface.co/datasets/marin-dna/genomes-v5-genome_set-animals-intervals-v15_255_128/tree/683c9560d9c044544cd0a8943c5004f2a4da2996}{Downstream} & 499 & 20,501,856 & 5.228 \\
+\href{https://huggingface.co/datasets/marin-dna/zoonomia-v1-v3_ncrna_exon/tree/d86210a245bde6d3ebeddf9cf7880b4bfc37eb0f}{ncRNA} & 108 & 15,277,064 & 3.896 \\
+\href{https://huggingface.co/datasets/marin-dna/zoonomia-v1-v3_ccre_non_promoter/tree/022eac4da79ddfdf56a84f5728c8ebdcb63881f4}{Enhancer} & 108 & 96,639,800 & 24.643 \\
+\hline
+\end{tabular}
+\caption{Training-dataset provenance and size. Dataset names link to the
+release snapshots inspected for this paper. Sequence counts are the exact
+counts reported by their dataset cards, including reverse complements;
+we did not independently recount the compressed shards. Nucleotide-token
+counts are sequence counts multiplied by 255, excluding BOS. The projected
+cohort contains 108 species, but individual anchors need not map to all
+species. All datasets use 255-bp windows, a 128-bp source stride,
+reverse-complement augmentation, shuffle seed 42, and 64 shards.
+The machine-readable file \texttt{data/dataset\_provenance/training\_datasets.csv}
+records dataset identifiers, inspected revisions, and exact token totals;
+\texttt{annotation\_genomes.tsv} and \texttt{projection\_species.tsv} in the
+same directory provide the assembly and taxonomy manifests.
+The inspected dataset revisions do not establish the revisions consumed by
+historical training jobs.}\label{tab:dataset-provenance}
+\end{table}
+
+% Source audit: data/dataset_provenance/sources.json records the source
+% commits of the exported manifests and the remaining provenance gaps.
+% In particular, do not treat inspected HF card revisions as training-job
+% revisions or infer RefSeq annotation release dates from assembly versions.
+
 % Supplementary numbering uses distinct PDF anchors.
 \setcounter{figure}{0}
 \renewcommand{\thefigure}{S\arabic{figure}}
 \renewcommand{\theHfigure}{supp.\arabic{figure}}
+\begin{figure*}[tp]
+\centering
+\includegraphics[width=\linewidth]{figures/dataset_timetree.pdf}
+\caption{Taxonomic coverage of the Marin DNA training datasets on an
+evolutionary timescale. \textbf{A}, The 499 annotation-derived animal genomes
+(blue) and 108 alignment-projected mammalian genomes (orange), grouped by
+higher taxa. \textbf{B}, Mammalian orders, with a fourfold expansion of the
+time axis (200--0 million years ago, compared with 800--0 in panel A).
+Counts are shown separately for each cohort; the 30 species shared between
+cohorts are counted in both, giving 577 unique species overall.
+Branch lengths and topology use TimeTree higher-taxon exports accessed
+17 November 2026~\citep{kumar2022timetree}, rather than a phylogeny inferred
+from the training sequences. Tips represent taxonomic groups at the present;
+terminal branches include diversification collapsed within each group.
+Dates are point estimates, with uncertainty omitted.}
+\label{fig:dataset-timetree}
+\end{figure*}
+
 \begin{figure}
 \centering
 \includegraphics[width=\linewidth]{figures/mendelian_zero_shot_comparison.pdf}
@@ -1031,6 +1203,12 @@ compatible probe results are unavailable.}\label{fig:benchmark-probes}
 \centering
 \includegraphics[width=\linewidth]{figures/region_specialist_performance.pdf}
 \caption{Region-matched zero-shot Mendelian VEP for specialists and generalists.
+The specialists are two early 1.7B-parameter MarinDNA models trained exclusively
+on upstream/promoter sequences or coding sequences (CDS), respectively, using
+512-base contexts without a BOS token. The upstream specialist is shown in the
+promoter and 5$'$ UTR panels; the CDS specialist is shown in the missense,
+splicing, and synonymous panels. Both are compared with Evo 2 (40B) and
+GPN-Star (M).
 Performance is measured as AUPRC; error bars denote standard
 errors.}\label{fig:specialists}
 \end{figure}

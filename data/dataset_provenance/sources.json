@@ -1,0 +1,20 @@
+{
+  "inspection_date": "2026-11-17",
+  "annotation_manifest_source": "cd45a510f83209ec11aa9b17f42738dc9ee63853:snakemake/training_dataset/dataset_creation/config/genomes.parquet",
+  "projection_manifest_source": "3d15a8573fd17b890bb31638f3847ddbed606c4b:snakemake/zoonomia_projection_dataset/config/species_zoonomia_447_family_dedup.tsv",
+  "annotation_count_source": "Exact sequence counts reported by pinned dataset cards, including reverse complements; shards were not recounted.",
+  "revision_scope": "Hugging Face revisions pin the cards inspected for this paper, not the revisions consumed by historical training jobs.",
+  "unresolved": [
+    "Historical training-job dataset revision hashes have not been recovered.",
+    "Per-assembly RefSeq annotation release dates/checksums are absent from the genome manifest."
+  ],
+  "token_convention": "255 nucleotide tokens per released row; includes reverse complements and overlapping windows; excludes BOS.",
+  "repository": "https://github.com/Open-Athena/marin-dna",
+  "historical_projection_source": "3d15a8573fd17b890bb31638f3847ddbed606c4b:snakemake/zoonomia_projection_dataset",
+  "dataset_lineage_evidence": "35e8aad650cdf6908bbffd792df7405b8b7b667e:plots/blog/diagrams/data_provenance_final.svg",
+  "reported_card_pipeline_commits": {
+    "annotation": "8db58254831f4da240bd0a87a606fb8870f790ff",
+    "projection": "2ab868a2f1d4db35535b83b2bdf5ff01f0c2e60a"
+  },
+  "source_limitations": "The pipeline commits reported by dataset cards are not present in the inspected local git object database; methods were cross-checked against the cards and the available historical/current code revisions recorded here."
+}
