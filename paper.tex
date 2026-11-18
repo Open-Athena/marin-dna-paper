@@ -486,6 +486,14 @@ these broader applications.
 foundation model can be useful and evaluated~\cite{feng2025benchmarking}.
 Survey and discuss future work.
 
+\item The short sequence context used here reduced training and inference costs
+and allowed us to focus on local genomic sequence features.
+However, interactions extending beyond the 255-bp input window cannot
+be modelled directly.
+Extending context lengths through continued pretraining or downstream
+fine-tuning is therefore an important direction for future work,
+particularly for tasks involving long-range regulatory interactions.
+
 \end{itemize}
 
 \section{Methods}
@@ -660,83 +668,86 @@ These totals include overlapping windows and both sequence
 orientations, and therefore do not represent unique genomic coverage.
 
 \subsection{Architecture and training}\label{methods:architecture}
-We trained causal, decoder-only Transformers~\cite{vaswani2017attention}
-based on the Qwen3 architecture~\citep{qwen2025qwen3} using the Marin framework~\citep{marin}.
-Each block uses causal self-attention with rotary positional embeddings~\citep{su2024roformer},
-RMS normalization~\citep{zhang2019rmsnorm} (including query/key normalization), and a gated
-feed-forward network with SiLU activation~\citep{shazeer2020glu}.
-The initial upstream and CDS specialists and their two-region mixtures
-used the 1.7B architecture preset, with grouped-query attention and tied
-input/output embeddings. Later experiments used equal numbers of query
-and key/value heads and separate input/output embeddings.
-For hidden width $D$, these later models used
+We trained Marin DNA models using causal, decoder-only
+Transformers~\citep{vaswani2017attention} derived from the Qwen3
+architecture~\citep{qwen2025qwen3}, implemented in the Marin
+framework~\citep{marin}.
+The models use causal self-attention with rotary positional
+embeddings~\citep{su2024roformer}, RMS
+normalization~\citep{zhang2019rmsnorm}, including query/key
+normalization, and gated feed-forward networks with SiLU
+activation~\citep{shazeer2020glu}.
+The architecture uses equal numbers of query and key/value
+attention heads and separate input and output embeddings.
+For hidden width $D$, models have
 $\mathrm{round}[D/(55+4\log_2 D)]$ layers, feed-forward width $4D$,
 and $D/128$ attention heads of dimension 128.
-This geometry rule was inherited from the Marin text-model recipe rather
-than fitted to DNA. Supplementary Table~\ref{tab:architectures} gives the
-model dimensions; the model described as 1B has 1,120,772,224 parameters.
+This scaling rule was inherited from the Marin text-model recipe
+rather than optimized for DNA.
+The principal 1B model has 19 layers, hidden width 1920, and
+1,120,772,224 parameters.
+Supplementary Table~\ref{tab:architectures} gives the configurations
+of all model sizes used in the experiments.
 
-Sequences were tokenized one nucleotide at a time, with the same token
-for upper- and lowercase versions of each base; character case was retained
-separately for loss weighting.
-The later tokenizer has seven tokens: A, C, G, T, padding, unknown, and
-beginning-of-sequence (BOS). Ambiguous characters map to the unknown token.
-A BOS token precedes each 255-base sequence, yielding a 256-token input;
-no end-of-sequence token is appended. Fixed-length examples require no
-padding, and each example contains one genomic window.
-The early specialists and two-region mixtures used 512-base inputs without
-BOS. Reverse-complement examples were supplied by the dataset augmentation
-described above; the architecture itself does not enforce reverse-complement
-equivariance.
-The short context targets local sequence features and reduces training and
-evaluation cost, but cannot directly model interactions beyond the input
-window. A preliminary promoter experiment comparing causal, masked, and
-masked-diffusion objectives motivated the causal choice; it did not provide
-a definitive matched-compute comparison of objectives.
+DNA sequences were tokenized at single-nucleotide resolution,
+using the same token identities for uppercase and lowercase bases
+while retaining case information separately for loss weighting.
+The vocabulary comprises seven tokens: A, C, G, T, padding,
+unknown, and beginning-of-sequence (BOS), with ambiguous bases
+mapped to the unknown token.
+Each training example consists of a 255-bp genomic window
+preceded by BOS, giving a 256-token input without an
+end-of-sequence token.
+Examples are fixed-length and require no padding.
+Reverse-complement sequences were included as separate training
+examples through the augmentation described in
+Section~\nameref{methods:data}; the architecture does not
+enforce reverse-complement equivariance.
 
-Training minimized next-nucleotide cross-entropy. Uppercase targets had
-weight 1 and lowercase targets, marking soft-masked repetitive sequence,
-had weight 0.01. The DNA tokenizer aligns weights to the predicted target;
-the final input position has no prediction target and receives zero weight.
-The BOS position predicts the first nucleotide. The weighted loss is
-normalized by the sum of contributing weights, rather than the number of
-input positions. Later experiments also penalized the squared log-normalizer
-of the output logits (z-loss).
-The human-sequence monitoring statistic called validation loss used human
-training sequences, with lowercase marking non-conserved bases rather than
-repeats. It therefore measures neither performance on held-out genomes nor
-conventional held-out sequence generalization (Section~\nameref{methods:scaling}).
+Training minimized weighted next-nucleotide cross-entropy loss.
+To reduce the contribution of repetitive sequence, uppercase
+targets received weight 1 and lowercase targets, corresponding
+to soft-masked bases, received weight 0.01.
+Weights were assigned according to the predicted target nucleotide,
+and the loss was normalized by the sum of contributing weights
+rather than the number of input positions.
+The BOS position predicted the first nucleotide, while the final
+input position had no prediction target and received zero weight.
+We additionally applied z-loss, which penalizes the squared
+log-normalizer of the output logits.
+The loss coefficients are reported in
+Supplementary Table~\ref{tab:models}.
 
-The later recipe used AdamH for linear weight matrices, rescaling each
-update to preserve the matrix's Frobenius norm, and Adam~\citep{kingma2015adam}
-for the remaining parameters, including embeddings and normalization scales.
-The two groups have separate learning rates and gradient-norm clipping;
-there is no additional weight-decay term in this optimizer implementation.
-Reference optimization settings and their transfer across batch sizes and
-training horizons are described in Section~\nameref{methods:transfer}.
-Fresh later runs used 10\% linear warmup, a constant learning rate through
-80\% of training, and linear decay to zero over the final 20\%.
-The implementation uses no dropout.
-They used float32 parameters and bfloat16 computation on TPUs, with gradient
-accumulation where needed to maintain the effective batch size.
-Supplementary Table~\ref{tab:models} gives effective batches and training
-budgets. These training budgets count model-input tokens, including BOS;
-they differ from the nucleotide-only dataset sizes reported above.
+Optimization used Adam-Hyperball (AdamH)~\citep{wen2026hyperball}
+for linear weight matrices, constraining their Frobenius norms to
+their initial values and normalizing optimizer updates, and
+Adam~\citep{kingma2015adam} for the remaining parameters,
+including embeddings and normalization scales.
+The two parameter groups used separate learning rates and
+gradient-norm clipping, without an additional weight-decay term.
+Optimizer hyperparameters were calibrated on a smaller reference
+model and transferred across model sizes, batch sizes, and training
+horizons, as described in Section~\nameref{methods:transfer}.
+The standard learning-rate schedule comprised linear warmup over
+the first 10\% of training, a constant rate until 80\% of the
+training horizon, and linear decay to zero over the final 20\%.
+Experiment-specific continuation schedules are described in
+Section~\nameref{methods:mixtures}.
 
-Continuation did not always mean resuming the same optimizer trajectory.
-The m5.1 lineage first inherited weights from the uniform three-region
-model at step 20,000 through a Hugging Face checkpoint, initializing a new
-optimizer for further three-region training. It then loaded the completed
-three-region Levanter checkpoint at step 29,579, preserving optimizer state,
-and trained on five regions with a fresh 10\% warmup and 20\% final decay
-for the new stage. Thus, both the mixture and schedule history must be
-considered when interpreting this lineage. The m1.3 and m3.3 controls instead
-repeatedly resumed pre-cooldown checkpoints with optimizer state preserved,
-without rewarmup; each continuation placed cooldown over the final 20\%
-of its combined parent-plus-child step horizon.
-Commit-pinned configuration sources and outstanding historical provenance
-gaps are recorded in
-\href{https://github.com/Open-Athena/marin-dna-paper/blob/main/data/training_provenance/sources.json}{the training-provenance record}.
+Training used float32 parameters with bfloat16 computation on TPUs,
+with gradient accumulation where necessary to achieve the effective
+batch size.
+No dropout was applied.
+Supplementary Table~\ref{tab:models} reports the effective batch
+sizes and training budgets for each experiment.
+These budgets count model-input tokens, including BOS, and
+therefore differ from the nucleotide-only dataset sizes reported
+in Section~\nameref{methods:data}.
+Versioned configuration sources and remaining provenance
+limitations are documented in the
+\href{https://github.com/Open-Athena/marin-dna-paper/blob/main/data/training_provenance/sources.json}{training-provenance record}.
+
+
 
 \subsection{Mixture experiments}\label{methods:mixtures}
 Dataset-proportional sampling of the three annotation-derived datasets
@@ -759,6 +770,37 @@ Section~\nameref{methods:architecture} and Supplementary Table~\ref{tab:models}.
 checkpoints, and comparison horizons. Identify differences between histories
 that limit causal interpretation of exposure order.
 \end{itemize}
+
+
+The initial upstream/CDS mixture experiments and single-region
+specialists used a different model configuration from the later
+experiments described in Section~\nameref{methods:architecture}.
+These models used the Qwen3 1.7B architecture preset, with 28 layers,
+hidden width 2048, grouped-query attention (16 query and 8
+key/value heads), and tied input/output embeddings.
+Training used 512-base sequences without a beginning-of-sequence
+token, rather than the 255-base sequences with a preceding BOS
+token used in later experiments.
+The early models also used a different optimizer configuration and
+learning-rate schedule (Supplementary
+Tables~\ref{tab:architectures} and~\ref{tab:models}).
+
+
+The lineages also differed in their checkpoint and optimizer histories.
+The m5.1 lineage initially inherited weights from a uniform three-region
+model at step 20,000 through a Hugging Face checkpoint, initializing a
+new optimizer for further three-region training.
+It subsequently resumed from the completed three-region Levanter
+checkpoint at step 29,579, preserving optimizer state but restarting
+the learning-rate schedule with 10\% warmup and 20\% final decay
+for the five-region stage.
+In contrast, m1.3 and m3.3 repeatedly resumed pre-cooldown checkpoints
+with optimizer state preserved and without rewarmup.
+Each continuation scheduled decay over the final 20\% of the combined
+parent and continuation training horizon.
+These differences in optimization history limit the interpretation
+of comparisons between mixture lineages.
+
 
 \begin{figure}
 \centering
@@ -837,6 +879,19 @@ fitting procedure,
 and goodness-of-fit calculation. Define region-matched log-likelihood used in
 downstream analyses. TODO: recover exact fitting settings from the plot code.
 \end{itemize}
+
+
+The human-sequence monitoring statistic, referred to as validation loss,
+used conservation-based case encoding rather than the repeat masking
+applied to training sequences.
+Lowercase bases represented non-conserved positions, including those
+without conservation scores, and received the same reduced loss weight
+of 0.01.
+The monitored genomic loci were not withheld from pretraining.
+Consequently, this statistic was used to track optimization and compare
+models, rather than to estimate generalization to held-out genomes
+or independent genomic regions.
+
 
 \begin{figure}
 \centering
