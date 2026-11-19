@@ -57,7 +57,7 @@ cached under `plot_data/remote/<scheme>/<host>/<path>` and are gitignored.
 `make figure-clean` removes only outputs reproducible from bundled inputs, retaining
 the source SVGs and external figures' checked-in PDFs.
 
-Run the offline build and scientific-calculation checks with:
+Run the scientific-calculation and cohort tree-data checks with:
 
 ```sh
 uv run --locked python -m unittest discover -s tests
