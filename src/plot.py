@@ -11,7 +11,6 @@ import sys
 import tempfile
 import warnings
 from dataclasses import dataclass
-from functools import lru_cache
 from pathlib import Path
 from typing import Any, NamedTuple
 from xml.etree import ElementTree
@@ -50,7 +49,6 @@ from matplotlib.transforms import Bbox
 from scipy.optimize import curve_fit
 
 import local_data
-import metrics as _metrics
 
 # Typography
 
@@ -1209,10 +1207,6 @@ SCALING_SUBPLOT_HEIGHT_PX = 112.0
 
 REDUNDANT_LABEL_HEIGHT_FONT_SIZES = 1.4
 
-PROBE_RESULTS = (
-    "s3://oa-bolinas/snakemake/analysis/evals_v2/results/probe/"
-    "{model}/{dataset}.parquet"
-)
 
 MENDELIAN_SUBSETS: tuple[tuple[str, str], ...] = (
     ("missense_variant", "Missense"),
@@ -1237,87 +1231,6 @@ READOUTS: tuple[tuple[str, str, str], ...] = (
     ("minus_llr_avg", "Zero-shot LLR", "llr"),
     ("probe_score", "Linear probe", "probe"),
 )
-
-
-def _model_rows() -> pd.DataFrame:
-    """Return the eight endpoint model IDs and their parameter counts."""
-    metadata = pd.read_csv(local_data.SCALING_RESULTS_PATH)[
-        ["run_name", "params"]
-    ].copy()
-    assert len(metadata) == 8, f"expected 8 scaling models, got {len(metadata)}"
-    assert metadata["run_name"].is_unique
-    assert metadata["params"].is_unique
-    metadata["model"] = (
-        metadata["run_name"].str.removeprefix("dna-bolinas-") + f"-step-{FINAL_STEP}"
-    )
-    return metadata.sort_values("params").reset_index(drop=True)
-
-
-def _read_paired_metrics(model: str, dataset: str) -> pd.DataFrame:
-    """Compute both readouts' AUPRC on identical finite probe-score rows."""
-    path = PROBE_RESULTS.format(model=model, dataset=dataset)
-    print(f"Reading {path}")
-    data = local_data.read_pandas(path)
-    required = {
-        "label",
-        "subset",
-        "chrom",
-        "probe_score",
-        "llr_fwd",
-        "llr_rc",
-    }
-    assert required.issubset(data.columns), (
-        f"{path} missing columns {sorted(required - set(data.columns))}"
-    )
-
-    # A probe can be absent for a subset that failed its training-data gate.
-    # Restrict both readouts to the exact rows on which the probe is defined.
-    finite_probe = np.isfinite(data["probe_score"].to_numpy(dtype=float))
-    data = data.loc[finite_probe].copy()
-    assert len(data) > 0, f"{path} has no finite probe predictions"
-    data["minus_llr_avg"] = (
-        -(data["llr_fwd"].to_numpy(dtype=float) + data["llr_rc"].to_numpy(dtype=float))
-        / 2
-    )
-    assert np.isfinite(data["minus_llr_avg"]).all()
-
-    metrics = _metrics.per_chrom_ap_table(
-        data,
-        ["minus_llr_avg", "probe_score"],
-        n_bootstrap=1000,
-        rng=0,
-    )
-    wanted = {subset for subset, _ in SCALING_SUBSETS[dataset]}
-    metrics = metrics[metrics["subset"].isin(wanted)].copy()
-    expected = {(score, subset) for score, *_ in READOUTS for subset in wanted}
-    observed = set(zip(metrics["score_type"], metrics["subset"], strict=True))
-    assert observed == expected, (
-        f"{model}/{dataset}: expected metric cells {sorted(expected)}, "
-        f"got {sorted(observed)}"
-    )
-    assert metrics["value"].between(0, 1).all()
-    assert metrics["se"].notna().all()
-    return metrics
-
-
-def load_parameter_scaling_metrics() -> pd.DataFrame:
-    """Load all eight endpoints for both datasets and both paired readouts."""
-    frames: list[pd.DataFrame] = []
-    for row in _model_rows().itertuples(index=False):
-        for dataset in SCALING_SUBSETS:
-            metrics = _read_paired_metrics(row.model, dataset)
-            metrics["dataset"] = dataset
-            metrics["params"] = int(row.params)
-            metrics["model"] = row.model
-            frames.append(metrics)
-    result = pd.concat(frames, ignore_index=True)
-    expected_rows = (
-        8 * sum(len(subsets) for subsets in SCALING_SUBSETS.values()) * len(READOUTS)
-    )
-    assert len(result) == expected_rows, (
-        f"expected {expected_rows} endpoint metric rows, got {len(result)}"
-    )
-    return result
 
 
 def _scaling_plot_panel(
@@ -1365,7 +1278,7 @@ def _scaling_plot_panel(
 def plot_scaling(data: pd.DataFrame | None = None) -> Figure:
     """Build the combined Mendelian + SGE parameter-scaling figure."""
     if data is None:
-        data = load_parameter_scaling_metrics()
+        data = local_data.load_plot_csv("vep_by_model_size")
 
     mosaic = [
         [
@@ -1493,36 +1406,6 @@ ANNOTATION_HEADROOM_SUBSETS = frozenset({"synonymous_variant", "3_prime_UTR_vari
 ANNOTATION_HEADROOM_FRACTION = 0.3
 
 
-def load_loss_vs_auprc(
-    results: pd.DataFrame | None = None,
-    metrics: pd.DataFrame | None = None,
-) -> pd.DataFrame:
-    """Join paired AUPRCs to each consequence's matched validation LL."""
-    if results is None:
-        results = pd.read_csv(local_data.SCALING_RESULTS_PATH)
-    if metrics is None:
-        metrics = load_parameter_scaling_metrics()
-
-    required_results = {"params", *LOSS_COLUMNS}
-    assert required_results.issubset(results.columns), (
-        f"scaling results missing {sorted(required_results - set(results.columns))}"
-    )
-    metadata = results[["params", *LOSS_COLUMNS]].copy()
-    assert len(metadata) == 8
-    assert metadata["params"].is_unique
-    assert np.isfinite(metadata[list(LOSS_COLUMNS)].to_numpy(dtype=float)).all()
-
-    data = metrics.merge(metadata, on="params", how="left", validate="many_to_one")
-    assert len(data) == len(metrics)
-    data["ll"] = np.nan
-    for subset, loss_column in MATCHED_LOSS_COLUMN.items():
-        mask = data["subset"] == subset
-        data.loc[mask, "ll"] = -data.loc[mask, loss_column]
-    assert data["ll"].notna().all()
-    assert np.isfinite(data["ll"].to_numpy(dtype=float)).all()
-    return data
-
-
 def _likelihood_plot_panel(
     ax: plt.Axes,
     data: pd.DataFrame,
@@ -1595,12 +1478,10 @@ def _likelihood_plot_panel(
     ax.set_box_aspect(1)
 
 
-def plot_likelihood(
-    results: pd.DataFrame | None = None,
-    metrics: pd.DataFrame | None = None,
-) -> Figure:
+def plot_likelihood(data: pd.DataFrame | None = None) -> Figure:
     """Build the combined Mendelian + SGE LL-versus-AUPRC figure."""
-    data = load_loss_vs_auprc(results, metrics)
+    if data is None:
+        data = local_data.load_plot_csv("vep_by_sequence_likelihood")
 
     mosaic = [
         [
@@ -1748,65 +1629,10 @@ def _format_parameter_count(value: float, _position: int) -> str:
     return f"{value:g}"
 
 
-def _evo2_path(model: str) -> str:
-    short = local_data.EVO2_DATASET_SHORT[MISSENSE_DATASET]
-    return f"{local_data.EVO2_PROBE_METRICS_GIST_BASE}/{short}_{model}_train_probe_metrics.parquet"
-
-
-def load_missense_comparison(
-    marin_metrics: pd.DataFrame | None = None,
-) -> pd.DataFrame:
-    """Load paired missense AUPRCs for both model families."""
-    if marin_metrics is None:
-        marin_metrics = load_parameter_scaling_metrics()
-    required = {"dataset", "subset", "score_type", "value", "se", "n", "params"}
-    assert required.issubset(marin_metrics.columns), (
-        f"MarinDNA metrics missing {sorted(required - set(marin_metrics.columns))}"
-    )
-    marin = marin_metrics[
-        (marin_metrics["dataset"] == MISSENSE_DATASET)
-        & (marin_metrics["subset"] == SUBSET)
-    ][["score_type", "value", "se", "n", "params"]].copy()
-    assert len(marin) == 8 * len(READOUTS)
-    marin["family"] = MARIN
-
-    evo_frames: list[pd.DataFrame] = []
-    for model, params in EVO2_MODELS:
-        path = _evo2_path(model)
-        print(f"Reading {path}")
-        frame = local_data.read_polars(path).filter(
-            (pl.col("subset") == SUBSET)
-            & pl.col("score_type").is_in([score for score, *_ in READOUTS])
-            & (pl.col("split") == "train")
-        )
-        assert frame.height == len(READOUTS), (
-            f"{model}: expected {len(READOUTS)} missense score rows, got {frame.height}"
-        )
-        evo = frame.select("score_type", "value", "se", "n").to_pandas()
-        evo["params"] = params
-        evo["family"] = EVO2
-        evo_frames.append(evo)
-
-    result = pd.concat([marin, *evo_frames], ignore_index=True)
-    assert len(result) == (8 + len(EVO2_MODELS)) * len(READOUTS)
-    assert result["value"].between(0, 1).all()
-    assert result["se"].notna().all()
-    assert (result["se"] >= 0).all()
-    assert result["n"].nunique() == 1, (
-        f"MarinDNA and Evo 2 missense rows differ: {sorted(result['n'].unique())}"
-    )
-    expected_cells = {
-        (family, score) for family in FAMILIES for score, *_rest in READOUTS
-    }
-    assert (
-        set(zip(result["family"], result["score_type"], strict=True)) == expected_cells
-    )
-    return result
-
-
-def plot_missense(marin_metrics: pd.DataFrame | None = None) -> Figure:
+def plot_missense(data: pd.DataFrame | None = None) -> Figure:
     """Build the combined MarinDNA + Evo 2 missense scaling figure."""
-    data = load_missense_comparison(marin_metrics)
+    if data is None:
+        data = local_data.load_plot_csv("missense_readout_scaling")
     fig, ax = plt.subplots(figsize=figsize(8.4, 7.2))
 
     for family in FAMILIES:
@@ -2009,8 +1835,6 @@ def plot_throughput(leaderboard: pd.DataFrame, inference_costs: pd.DataFrame) ->
 
 TOKENS_PER_STEP = 8192 * 256
 
-RESULTS_ROOT = "s3://oa-bolinas/snakemake/analysis/evals_v2/results"
-
 
 @dataclass(frozen=True)
 class OfflineRun:
@@ -2079,136 +1903,16 @@ MACRO_ACCENT = "#59636e"
 MACRO_FILL = "#f1eee8"
 
 
-def _model_id(mix: str, step: int) -> str:
-    run = BY_MIX[mix]
-    short = SHORT_NAMES.get(mix, mix)
-    return f"mix-v0.9-p1B-i{run.index}-{short}-step-{step}"
-
-
-@lru_cache(maxsize=None)
-def _read_checkpoint(kind: str, mix: str, step: int) -> dict[str, tuple[float, float]]:
-    """Return stored ``(AUPRC, SE)`` values for the eight subsets and their macro."""
-    result_kind, score_type, _metric_label, _method_label = WORLD_CONFIG[kind]
-    model_id = _model_id(mix, step)
-    path = f"{RESULTS_ROOT}/{result_kind}/{model_id}/mendelian_traits.parquet"
-    data = (
-        local_data.read_polars(path)
-        .filter(
-            (pl.col("score_type") == score_type)
-            & (pl.col("split") == "train")
-            & pl.col("subset").is_in(ALL_METRIC_SUBSETS)
-        )
-        .select("subset", "value", "se")
-    )
-    assert data.height == len(ALL_METRIC_SUBSETS), (
-        f"{model_id}/{kind}: expected {len(ALL_METRIC_SUBSETS)} metric rows, "
-        f"got {data.height}"
-    )
-    assert data["subset"].n_unique() == len(ALL_METRIC_SUBSETS)
-    assert data["value"].is_not_null().all()
-    assert data["se"].is_not_null().all()
-    assert data["value"].is_between(0, 1, closed="both").all()
-    assert data["se"].is_between(0, 1, closed="both").all()
-    return {subset: (float(value), float(se)) for subset, value, se in data.iter_rows()}
-
-
-def _chain(leaf: str) -> list[str]:
-    """Return the root-to-leaf stage sequence for one lineage."""
-    chain: list[str] = []
-    mix: str | None = leaf
-    while mix is not None:
-        chain.append(mix)
-        mix = local_data.BY_MIX[mix].parent
-    return chain[::-1]
-
-
-def _phase_start_step(mix: str, results: pd.DataFrame) -> float:
-    row = results.loc[mix]
-    own_steps = round(float(row["tokens"]) / TOKENS_PER_STEP)
-    return float(row["num_train_steps"]) - own_steps
-
-
-def _composed_checkpoints(
-    leaf: str, results: pd.DataFrame, own_tokens: dict[str, float]
-) -> list[tuple[float, str, int]]:
-    """Select inherited checkpoints and their cumulative-token coordinates."""
-    chain = _chain(leaf)
-    offsets = [
-        sum(local_data.inherited_components(mix, own_tokens).values()) for mix in chain
-    ]
-    checkpoints = []
-    for phase_index, mix in enumerate(chain):
-        start = _phase_start_step(mix, results)
-        cutoff = (
-            offsets[phase_index + 1] + TOKENS_PER_STEP
-            if phase_index + 1 < len(chain)
-            else np.inf
-        )
-        for step in BY_MIX[mix].steps:
-            # Preserve S5's omission of the point 0.9B tokens before the first
-            # post-transition checkpoint, as requested for Figure 3.
-            if (leaf == "exp135-zoonomia-m5.1"
-                    and mix == "uniform_to_uniform_1" and step == 29579):
-                continue
-            tokens = offsets[phase_index] + (step - start) * TOKENS_PER_STEP
-            if tokens <= cutoff:
-                checkpoints.append((tokens, mix, step))
-    checkpoints.sort()
-    expected = 8 if leaf == "exp135-zoonomia-m5.1" else 9
-    assert len(checkpoints) == expected
-    assert np.all(np.diff([row[0] for row in checkpoints]) > 0)
-    return checkpoints
-
-
-def _composed_curve(
-    kind: str,
-    leaf: str,
-    subset: str,
-    results: pd.DataFrame,
-    own_tokens: dict[str, float],
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Compose existing offline checkpoints on the cumulative-token axis."""
-    checkpoints = _composed_checkpoints(leaf, results, own_tokens)
-    measurements = [_read_checkpoint(kind, mix, step)[subset]
-                    for _tokens, mix, step in checkpoints]
-    return (np.asarray([row[0] for row in checkpoints]),
-            np.asarray([row[0] for row in measurements]),
-            np.asarray([row[1] for row in measurements]))
-
-
-def _lineage_keep(tokens: np.ndarray, leaf: str, token_cutoff: float) -> np.ndarray:
-    """Retain the original S5 horizon, including the first control point beyond it."""
-    keep = np.ones(len(tokens), dtype=bool)
-    if leaf != "exp135-zoonomia-m5.1":
-        keep = tokens <= token_cutoff
-        if keep.any() and not keep.all():
-            keep[np.argmax(~keep)] = True
-    return keep
-
-
-def _lineage_draw_panel(
-    ax: plt.Axes,
-    *,
-    kind: str,
-    subset: str,
-    results: pd.DataFrame,
-    own_tokens: dict[str, float],
-    token_cutoff: float,
-) -> None:
-    """Draw raw offline checkpoints with capless ±1 SE bars."""
+def _lineage_draw_panel(ax: plt.Axes, *, data: pl.DataFrame, subset: str) -> None:
+    """Draw exported checkpoint values and their stored standard errors."""
     for leaf, _label, color, marker in LINEAGES:
-        tokens, values, ses = _composed_curve(kind, leaf, subset, results, own_tokens)
-        keep = _lineage_keep(tokens, leaf, token_cutoff)
-        tokens, values, ses = tokens[keep], values[keep], ses[keep]
+        curve = data.filter((pl.col("lineage") == leaf) & (pl.col("subset") == subset)).sort("tokens")
+        assert curve.height > 0
         ax.errorbar(
-            tokens / 1e9,
-            values * 100.0,
-            yerr=ses * 100.0,
-            color=color,
-            marker=marker,
-            ecolor=color,
-            capsize=0,
-            zorder=3,
+            curve["tokens"].to_numpy() / 1e9,
+            curve["value"].to_numpy() * 100.0,
+            yerr=curve["se"].to_numpy() * 100.0,
+            color=color, marker=marker, ecolor=color, capsize=0, zorder=3,
         )
 
 
@@ -2248,31 +1952,15 @@ def _attach_legend(fig: plt.Figure) -> None:
     )
 
 
-def plot_lineage(kind: str, results_df: pd.DataFrame | None = None) -> Figure:
+def plot_lineage(kind: str, data: pl.DataFrame | None = None) -> Figure:
     """Build one nine-panel offline prototype without smoothing."""
     assert kind in WORLD_CONFIG
-    if results_df is None:
-        results_df = local_data.load_mixture()
-    results = results_df.set_index("mix")
-    own_tokens = {mix: float(results.loc[mix, "tokens"]) for mix in results.index}
-
-    m5_tokens, _m5_values, _m5_ses = _composed_curve(
-        kind,
-        "exp135-zoonomia-m5.1",
-        MACRO_SUBSET,
-        results,
-        own_tokens,
-    )
-    token_cutoff = float(m5_tokens.max())
-    shift_x = (
-        sum(
-            local_data.inherited_components(
-                "exp135-zoonomia-m5.1",
-                own_tokens,
-            ).values()
-        )
-        / 1e9
-    )
+    if data is None:
+        name = "mixture_zero_shot_trajectories" if kind == "llr" else "mixture_probe_trajectories"
+        data = local_data.load_plot_polars(name)
+    shifts = data["transition_tokens"].unique()
+    assert len(shifts) == 1
+    shift_x = shifts.item() / 1e9
 
     grid_panels: list[tuple[str, str, bool]] = [(MACRO_SUBSET, "Macro Avg", True)]
     grid_panels.extend((subset, label, False) for subset, label in PANELS)
@@ -2293,14 +1981,7 @@ def plot_lineage(kind: str, results_df: pd.DataFrame | None = None) -> Figure:
     )
 
     for ax, (subset, title, is_macro) in zip(axes.flat, grid_panels, strict=True):
-        _lineage_draw_panel(
-            ax,
-            kind=kind,
-            subset=subset,
-            results=results,
-            own_tokens=own_tokens,
-            token_cutoff=token_cutoff,
-        )
+        _lineage_draw_panel(ax, data=data, subset=subset)
         ax.grid(False)
         ax.yaxis.set_major_locator(MaxNLocator(nbins="auto", integer=True))
         ax.yaxis.set_major_formatter(StrMethodFormatter("{x:.0f}"))
@@ -2372,7 +2053,7 @@ def _luminance(rgba: tuple[float, ...] | np.ndarray) -> float:
 
 def table_from_normalized(rows: pl.DataFrame) -> pd.DataFrame:
     """Convert normalized leaderboard rows to an AUPRC-percent heatmap table."""
-    keep = [_metrics.MACRO_AVG_SUBSET, *SUBSET_ORDER]
+    keep = [MACRO_SUBSET, *SUBSET_ORDER]
     selected = (
         rows.filter(pl.col("subset").is_in(keep))
         .with_columns(value=pl.col("value") * 100.0)
@@ -2394,11 +2075,11 @@ def render_heatmap(
     table: pd.DataFrame,
 ) -> Figure:
     """Render one independently sorted and color-normalized leaderboard."""
-    table = table.sort_values(_metrics.MACRO_AVG_SUBSET, ascending=False)
+    table = table.sort_values(MACRO_SUBSET, ascending=False)
     display_names = [index[0] for index in table.index]
     families = [index[1] for index in table.index]
     column_labels = ["Macro Avg", *HEATMAP_SUBSET_DISPLAY.values()]
-    matrix = table[[_metrics.MACRO_AVG_SUBSET, *SUBSET_ORDER]].to_numpy(dtype=float)
+    matrix = table[[MACRO_SUBSET, *SUBSET_ORDER]].to_numpy(dtype=float)
     n_rows, n_columns = matrix.shape
 
     finite = matrix[np.isfinite(matrix)]
@@ -2531,15 +2212,7 @@ def _table_for_displays(
 
 def plot_mendelian_zero_shot_comparison() -> Figure:
     """Render the six canonical-protocol zero-shot headline rows."""
-    rows = (
-        local_data.normalized_rows("mendelian_traits", ZERO_SHOT_DISPLAYS)
-        .with_columns(
-            pl.col("family")
-            .replace_strict(local_data.DEFAULT_PROTOCOL, default=None)
-            .alias("_default")
-        )
-        .filter(pl.col("protocol") == pl.col("_default"))
-    )
+    rows = local_data.load_plot_polars("mendelian_zero_shot_comparison")
     return render_heatmap(
         _table_for_displays(rows, ZERO_SHOT_DISPLAYS),
     )
@@ -2549,7 +2222,7 @@ def plot_mendelian_probe_comparison() -> Figure:
     """Render only the four probe rows that overlap the zero-shot panel."""
     return render_heatmap(
         _table_for_displays(
-            local_data.probe_normalized_rows("mendelian_traits", PROBE_DISPLAYS),
+            local_data.load_plot_polars("mendelian_probe_comparison"),
             PROBE_DISPLAYS,
         ),
     )
@@ -2617,65 +2290,6 @@ BASELINE_IDS = {
     "Evo 2 (40B)": "evo2_40b",
     "GPN-Star (M)": "GPN-Star-M",
 }
-
-
-def load_plot_data() -> pd.DataFrame:
-    """Load the five region-matched comparisons from current evals_v2 metrics."""
-    required_ids = {
-        *(spec["specialist_id"] for spec in PANEL_SPECS.values()),
-        *BASELINE_IDS.values(),
-    }
-    models = {
-        model.id: model
-        for model in local_data.models_for_dataset(SPECIALIST_DATASET)
-        if model.id in required_ids
-    }
-    assert set(models) == required_ids, (
-        f"missing registered models: {sorted(required_ids - set(models))}"
-    )
-
-    records: list[dict[str, Any]] = []
-    for subset in PANEL_ORDER:
-        spec = PANEL_SPECS[subset]
-        role_to_model_id = {
-            "Specialist": spec["specialist_id"],
-            **BASELINE_IDS,
-        }
-        for role, model_id in role_to_model_id.items():
-            model = models[model_id]
-            metrics = local_data.fetch_method_metrics(model, SPECIALIST_DATASET)
-            row = metrics.filter(metrics["subset"] == subset)
-            assert row.height == 1, (
-                f"expected one {subset!r} row for {model_id!r}, got {row.height}"
-            )
-            values = row.row(0, named=True)
-            value = float(values["value"])
-            se = float(values["se"])
-            n = int(values["n"])
-            n_positives = int(values["n_positives"])
-            assert 0.0 <= value <= 1.0
-            assert 0.0 <= se <= 1.0
-            assert 0 < n_positives <= n
-            records.append(
-                {
-                    "subset": subset,
-                    "consequence": SPECIALIST_SUBSET_DISPLAY[subset],
-                    "region": spec["region"],
-                    "role": role,
-                    "model_id": model_id,
-                    "protocol": local_data.DEFAULT_PROTOCOL[model.family],
-                    "auprc_pct": 100.0 * value,
-                    "se_pct": 100.0 * se,
-                    "n": n,
-                    "n_positives": n_positives,
-                }
-            )
-
-    frame = pd.DataFrame.from_records(records)
-    expected_rows = len(PANEL_ORDER) * len(ROLE_ORDER)
-    assert len(frame) == expected_rows
-    assert not frame.isna().any().any()
-    return frame
 
 
 def _specialist_draw_panel(ax: Axes, data: pd.DataFrame, subset: str) -> None:
@@ -2864,7 +2478,6 @@ ARMS: dict[str, Arm] = {
     ),
 }
 
-S3_BASE = "s3://oa-bolinas/snakemake/analysis/evals_v2/results/metrics"
 
 SCORE_TYPE = "minus_llr_avg"
 
@@ -3003,72 +2616,6 @@ def apply_style() -> None:
             "savefig.transparent": True,
         }
     )
-
-
-def load_trajectories() -> pl.DataFrame:
-    """Load all available checkpoints for the four experiment arms."""
-    parts: list[pl.DataFrame] = []
-    missing: list[str] = []
-    total = sum(len(arm.steps) for arm in ARMS.values())
-    for arm_key, arm in ARMS.items():
-        for step in arm.steps:
-            uri = f"{S3_BASE}/{arm.prefix}-step-{step}/mendelian_traits.parquet"
-            try:
-                checkpoint = local_data.read_polars(uri)
-            except local_data.MissingData:
-                raise
-            except Exception as exc:
-                missing.append(f"  {arm_key} step-{step}: {exc}")
-                continue
-            parts.append(
-                checkpoint.with_columns(
-                    pl.lit(arm_key).alias("arm"),
-                    pl.lit(step).alias("step"),
-                )
-            )
-    if missing:
-        print(
-            f"WARNING: {len(missing)} of {total} parquets unreadable:\n"
-            + "\n".join(missing),
-            file=sys.stderr,
-        )
-    assert parts, "no metrics parquets loaded"
-    return pl.concat(parts)
-
-
-def shared_step_data(trajectories: pl.DataFrame) -> pl.DataFrame:
-    """Select the two focal subsets at steps represented in every arm."""
-    common_steps = set.intersection(*(set(arm.steps) for arm in ARMS.values()))
-    assert common_steps == {2000, 6000, 10000, 14000, 18000, 22000}
-
-    filtered = trajectories.filter(
-        (pl.col("score_type") == SCORE_TYPE)
-        & (pl.col("subset").is_in(list(BALANCE_SUBSETS.values())))
-        & (pl.col("step").is_in(sorted(common_steps)))
-    )
-    expected_rows = len(ARMS) * len(BALANCE_SUBSETS) * len(common_steps)
-    assert filtered.height == expected_rows, (
-        f"expected {expected_rows} arm/subset/step rows, got {filtered.height}"
-    )
-    assert filtered.select("arm", "subset", "step").unique().height == expected_rows
-    assert filtered["value"].is_not_null().all()
-    assert filtered["value"].is_between(0.0, 1.0).all()
-    return filtered
-
-
-def balance_endpoint_data(data: pl.DataFrame) -> pl.DataFrame:
-    """Select measured common-checkpoint values and the two-class mean."""
-    endpoint = data.filter(pl.col("step") == 22000)
-    assert endpoint.height == 8
-    assert endpoint.select("arm", "subset").unique().height == 8
-    assert set(endpoint["arm"]) == set(ARMS)
-    assert set(endpoint["subset"]) == set(BALANCE_SUBSETS.values())
-    assert endpoint["value"].is_not_null().all()
-    assert endpoint["value"].is_between(0, 1).all()
-    means = endpoint.group_by("arm").agg(pl.col("value").mean()).with_columns(
-        pl.lit("two_class_mean").alias("subset")
-    )
-    return pl.concat([endpoint.select("arm", "subset", "value"), means.select("arm", "subset", "value")])
 
 
 def plot_mixture_figure(endpoint: pl.DataFrame, trajectories: pl.DataFrame) -> Figure:
@@ -3481,17 +3028,17 @@ def render_artwork(output_dir: Path, name: str) -> None:
     click.echo(f"Built {name}")
 
 
-def _transfer_figure(draw) -> Figure:
-    frame = local_data.load_transfer()
+def _transfer_figure(draw, name) -> Figure:
+    frame = local_data.load_plot_csv(name)
     params = sorted({int(p) for p in frame["params"].dropna().unique()})
     return draw(frame, palette(params), params)
 
 
 def _loss_scaling_figure(staging: Path) -> Figure:
-    results = local_data.load_scaling_results()
+    results = local_data.load_plot_csv("sequence_loss_scaling_results")
     params = sorted({int(p) for p in results["params"].dropna().unique()})
     return plot_loss_scaling(
-        local_data.load_scaling_history(),
+        local_data.load_plot_csv("sequence_loss_scaling_history"),
         results,
         palette(params),
         staging / "sequence_loss_scaling_fit.txt",
@@ -3505,22 +3052,14 @@ def _loss_scaling_figure(staging: Path) -> Figure:
     default=Path(__file__).resolve().parents[1] / "figures",
     show_default=True,
 )
-@click.option(
-    "--fetch",
-    is_flag=True,
-    help="Retrieve missing snapshots using configured credentials.",
-)
 @click.pass_context
-def cli(ctx: click.Context, output_dir: Path, fetch: bool) -> None:
+def cli(ctx: click.Context, output_dir: Path) -> None:
     """Generate a paper figure by its manuscript filename (without extension).
 
     Plots write PDF and SVG; existing SVG diagrams are converted to PDF.
-    Builds are offline unless --fetch or
-    FIGURE_FETCH=1 is explicitly supplied. Use Make for batches of figures.
+    All data-driven plots use checked-in CSVs. Run process_data.py to refresh
+    these from source measurements before rendering.
     """
-    previous = local_data.FETCH
-    local_data.FETCH = fetch
-    ctx.call_on_close(lambda: setattr(local_data, "FETCH", previous))
     ctx.obj = output_dir
 
 
@@ -3531,7 +3070,7 @@ def learning_rate_transfer(output_dir: Path) -> None:
     render(
         output_dir,
         "learning_rate_transfer",
-        lambda _: _transfer_figure(plot_learning_rate),
+        lambda _: _transfer_figure(plot_learning_rate, "learning_rate_transfer"),
     )
 
 
@@ -3542,7 +3081,7 @@ def optimizer_parameter_transfer(output_dir: Path) -> None:
     render(
         output_dir,
         "optimizer_parameter_transfer",
-        lambda _: _transfer_figure(plot_optimizer),
+        lambda _: _transfer_figure(plot_optimizer, "optimizer_parameter_transfer"),
     )
 
 
@@ -3553,7 +3092,7 @@ def regional_hyperparameter_transfer(output_dir: Path) -> None:
     render(
         output_dir,
         "regional_hyperparameter_transfer",
-        lambda _: _transfer_figure(plot_regional),
+        lambda _: _transfer_figure(plot_regional, "regional_hyperparameter_transfer"),
     )
 
 
@@ -3577,7 +3116,8 @@ def vep_performance_vs_throughput(output_dir: Path) -> None:
         output_dir,
         "vep_performance_vs_throughput",
         lambda _: plot_throughput(
-            local_data.load_leaderboard(), local_data.load_inference_costs()
+            local_data.load_plot_csv("vep_performance_vs_throughput_leaderboard"),
+            local_data.load_plot_csv("vep_performance_vs_throughput_inference_costs")
         ),
     )
 
@@ -3585,42 +3125,42 @@ def vep_performance_vs_throughput(output_dir: Path) -> None:
 @cli.command("vep_by_model_size")
 @click.pass_obj
 def vep_by_model_size(output_dir: Path) -> None:
-    """Paired endpoint AUPRC versus model size; requires external predictions."""
+    """Paired endpoint AUPRC versus model size; reads bundled CSVs."""
     render(output_dir, "vep_by_model_size", lambda _: plot_scaling())
 
 
 @cli.command("vep_by_sequence_likelihood")
 @click.pass_obj
 def vep_by_sequence_likelihood(output_dir: Path) -> None:
-    """Paired endpoint AUPRC versus sequence loss; requires external predictions."""
+    """Paired endpoint AUPRC versus sequence loss; reads bundled CSVs."""
     render(output_dir, "vep_by_sequence_likelihood", lambda _: plot_likelihood())
 
 
 @cli.command("missense_readout_scaling")
 @click.pass_obj
 def missense_readout_scaling(output_dir: Path) -> None:
-    """MarinDNA/Evo 2 missense readouts; requires external predictions/metrics."""
+    """MarinDNA/Evo 2 missense readouts; reads bundled CSVs."""
     render(output_dir, "missense_readout_scaling", lambda _: plot_missense())
 
 
 @cli.command("mixture_zero_shot_trajectories")
 @click.pass_obj
 def mixture_zero_shot_trajectories(output_dir: Path) -> None:
-    """Mixture-lineage zero-shot trajectories; requires external metrics."""
+    """Mixture-lineage zero-shot trajectories; reads bundled CSVs."""
     render(output_dir, "mixture_zero_shot_trajectories", lambda _: plot_lineage("llr"))
 
 
 @cli.command("mixture_probe_trajectories")
 @click.pass_obj
 def mixture_probe_trajectories(output_dir: Path) -> None:
-    """Mixture-lineage probe trajectories; requires external metrics."""
+    """Mixture-lineage probe trajectories; reads bundled CSVs."""
     render(output_dir, "mixture_probe_trajectories", lambda _: plot_lineage("probe"))
 
 
 @cli.command("mendelian_zero_shot_comparison")
 @click.pass_obj
 def mendelian_zero_shot_comparison(output_dir: Path) -> None:
-    """Mendelian zero-shot leaderboard; requires external metrics."""
+    """Mendelian zero-shot leaderboard; reads bundled CSVs."""
     render(
         output_dir,
         "mendelian_zero_shot_comparison",
@@ -3631,7 +3171,7 @@ def mendelian_zero_shot_comparison(output_dir: Path) -> None:
 @cli.command("mendelian_probe_comparison")
 @click.pass_obj
 def mendelian_probe_comparison(output_dir: Path) -> None:
-    """Mendelian probe leaderboard; requires external metrics."""
+    """Mendelian probe leaderboard; reads bundled CSVs."""
     render(
         output_dir,
         "mendelian_probe_comparison",
@@ -3642,11 +3182,11 @@ def mendelian_probe_comparison(output_dir: Path) -> None:
 @cli.command("region_specialist_performance")
 @click.pass_obj
 def region_specialist_performance(output_dir: Path) -> None:
-    """Region-specialist comparisons; requires external metrics."""
+    """Region-specialist comparisons; reads bundled CSVs."""
     render(
         output_dir,
         "region_specialist_performance",
-        lambda _: plot_specialists(load_plot_data()),
+        lambda _: plot_specialists(local_data.load_plot_csv("region_specialist_performance")),
     )
 
 
@@ -3657,7 +3197,7 @@ def upstream_coding_mixture_balance(output_dir: Path) -> None:
     render(
         output_dir,
         "upstream_coding_mixture_balance",
-        lambda _: plot_mixture_figure(*local_data.load_figure3()),
+        lambda _: plot_mixture_figure(*local_data.load_upstream_coding_mixture_balance()),
         fixed_size=True,
     )
 

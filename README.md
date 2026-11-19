@@ -11,94 +11,95 @@ Sources: [Marin DNA blog](https://openathena.ai/blog/marin-dna/),
 Install the plotting environment with `uv sync --locked`. The paper also needs
 GNU Make 4.3 or later, `pdflatex`, and BibTeX.
 
-```sh
-make                                      # Bundled figures, then paper.pdf
-make figures                              # The figures with bundled inputs
-make figures/learning_rate_transfer.pdf    # Incremental build of one figure
-make figure-learning_rate_transfer        # Force regeneration of one figure
-uv run --locked python src/plot.py --help  # 20 figures; time tree uses a separate script
-uv run --locked python src/plot.py --output-dir /tmp/figures learning_rate_transfer
-```
-
-The 20 figures in `src/plot.py` have Click commands matching their filenames without the extension.
-The supplementary cohort time tree uses `src/plot_dataset_timetree.py` and has matching Make targets.
-Plots write PDF and SVG; `sequence_loss_scaling` also writes
-`sequence_loss_scaling_fit.txt`. Existing SVG diagrams in `figures/` are converted
-to vector PDF. `plot_data/` holds the CSVs, model registry, and downloaded inputs.
-The overview diagrams use Lato when available. SVG text stays editable.
-
-The Makefile explicitly lists the paper's figures and their bundled inputs.
-The main figure recipes are in `src/plot.py`; `src/local_data.py` contains shared
-input loaders, source URLs, model metadata, and lineage definitions.
-`src/metrics.py` contains the chromosome-weighted AUPRC and bootstrap calculations.
-The plotting code’s original license is retained in `src/LICENSE`.
-
-## External snapshots
-
-Some figures require original predictions or metric Parquets that are not bundled.
-Ordinary paper builds use their checked-in PDFs. Explicit regeneration fails with
-the expected local path and original URL when an input is missing; it leaves
-existing publication files intact. An absent PDF also triggers this check.
-Changing plotting code does not automatically regenerate these external figures.
+Every data-driven figure renders from CSVs checked into `plot_data/`. No AWS
+credentials, raw Parquets, network access, or untracked caches are needed to
+render. Schematics use local Python code or source SVG artwork rather than
+measurement tables.
 
 ```sh
-make fetch-figure-vep_by_model_size         # Fetch missing inputs, then render
-uv run --locked python src/plot.py --fetch vep_by_model_size
-make figure-vep_by_model_size              # Regenerate from downloaded inputs
-make figures-all                          # Force all 21; fails if inputs are missing
-make fetch-sweeps                          # Refresh four W&B sweep/history CSVs
+make                                      # Figures and paper.pdf
+make figures                              # All figures from local inputs
+make figures-all                          # Force regeneration of every figure
+make figure-vep_by_model_size              # One figure
+uv run --locked python src/plot.py --help
+uv run --locked python src/plot.py --output-dir /tmp/figures vep_by_model_size
 ```
 
-Fetching is explicit and may require AWS or W&B credentials. Remote inputs are
-cached under `plot_data/remote/<scheme>/<host>/<path>` and are gitignored.
-`FIGURE_FETCH=1` is also supported for explicit retrieval. Normal builds are offline.
+Plot commands, CSV basenames, and figure filenames share descriptive labels,
+not manuscript figure numbers. A figure with multiple tables adds a descriptive
+suffix, such as `upstream_coding_mixture_balance_endpoints.csv` and
+`upstream_coding_mixture_balance_trajectories.csv`. The standalone zero-shot
+mixture trajectory figure remains available even though its content is now in
+the combined upstream/CDS figure.
 
-`make clean` removes LaTeX intermediates; `make mrproper` also removes `paper.pdf`.
-`make figure-clean` removes only outputs reproducible from bundled inputs, retaining
-the source SVGs and external figures' checked-in PDFs.
+The Makefile tracks CSV dependencies, so editing an export rebuilds its figure.
+Plots write PDF and SVG; `sequence_loss_scaling` also writes its fitted-parameter
+report. `dataset_timetree` additionally writes PNG. Source SVG diagrams remain
+editable and are converted to PDF. The plotting code's original license is
+retained in `src/LICENSE`.
+
+## Prepare plotting data
+
+`src/process_data.py` contains the S3 metric/prediction processing and exposes
+Click commands named after each data-driven figure, plus `all`. Processing is
+separate from rendering and only runs when explicitly requested:
+
+```sh
+uv run --locked python src/process_data.py --help
+make process-data                         # Re-export all using cached sources
+make data-vep_by_model_size                # One export using cached sources
+AWS_PROFILE=marin-dna make fetch-data      # Fetch missing sources and export all
+AWS_PROFILE=marin-dna make fetch-data-vep_by_model_size
+AWS_PROFILE=marin-dna make fetch-figure-vep_by_model_size  # Export, then render
+uv run --locked python src/process_data.py --output-dir /tmp/plot-data vep_by_model_size
+```
+
+The script preserves the original evaluation methods: scaling readouts use the
+same finite-probe variants and chromosome-weighted AUPRC with 1,000 bootstrap
+replicates and seed 0; leaderboard and lineage exports retain stored metrics
+and standard errors. Mixture trajectories preserve the former supplementary
+checkpoint selection and horizon, including its deliberate pre-transition
+omission. The upstream/CDS endpoints use step 22,000, with an unweighted mean of
+the two classes; the later macro-average is the stored eight-class result.
+Undefined benchmark cells remain missing rather than being imputed.
+
+The CSVs retain the values consumed by the plots, with source URIs and model or
+checkpoint identifiers on externally derived metric tables. AUPRC values and
+SEs are fractions except for `region_specialist_performance.csv`, whose
+explicit `_pct` columns use percentages. Token coordinates are unrounded.
+Readers preserve floating-point precision through the CSV round trip.
+
+Original S3 and pinned public benchmark inputs are cached under the gitignored
+`plot_data/remote/` directory. `--fetch` (or `FIGURE_FETCH=1`) retrieves missing
+inputs; it does not refresh already cached snapshots. A preparation failure
+leaves that figure's existing exports intact. Source metric values are not
+estimated from figure images.
+
+The transfer, loss-scaling, and throughput commands prepare figure-specific
+CSVs from the existing frozen source CSVs in `plot_data/`. Those snapshots are
+retained as provenance and inputs to processing. `make fetch-sweeps` remains
+the separate, explicit W&B source-refresh command; after refreshing sources,
+run `process_data.py` to update plotting exports.
+
+## Cohort time tree
+
+`process_data.py dataset_timetree` exports dated tree nodes, parent relationships,
+labels, source hashes, and cohort counts to `plot_data/dataset_timetree.csv`.
+Preparation uses cached TimeTree higher-taxon Newick exports and the manifests
+in `data/dataset_provenance/`; `--fetch` retrieves missing public exports.
+`plot_dataset_timetree.py` renders only the bundled node CSV. Collapsed nodes
+retain their original ages, and the two panels retain distinct time axes.
+Terminal branches include diversification hidden inside each taxonomic group;
+this is not a species tree inferred from the training data.
+
+## Cleanup and scientific checks
+
+`make figure-clean` removes generated artwork while keeping all source CSVs and
+SVG diagrams, so `make figures` can rebuild offline. `make clean` removes LaTeX
+intermediates; `make mrproper` also removes `paper.pdf`.
 
 Run the scientific-calculation and cohort tree-data checks with:
 
 ```sh
 uv run --locked python -m unittest discover -s tests
 ```
-
-## Cohort time tree
-
-`uv run --locked python src/plot_dataset_timetree.py` renders the dated cohort overview as PDF, SVG, and PNG in `figures/dataset_timetree.*`.
-Add `--fetch` to retrieve or refresh TimeTree's higher-taxon exports; the raw exports are cached under `plot_data/remote/` and are not bundled.
-The offline renderer preserves source node ages while collapsing taxonomic groups and obtains counts from `data/dataset_provenance/`.
-`plot_data/dataset_timetree_sources.json` records source URLs, hashes, and the mapping between source taxa and figure groups.
-The two panels have explicitly different time axes; terminal branches include diversification hidden inside each group, and age uncertainty is not drawn.
-
-### Figure 3 data
-
-`src/prepare_figure3_data.py` extracts the measured AWS checkpoint data into two
-bundled CSVs. Normal figure builds read only these CSVs and need no AWS access:
-
-- `plot_data/figure3_endpoints.csv`: 12 rows covering four conditions at step
-  22,000, their promoter and missense AUPRC, and their unweighted two-class mean.
-- `plot_data/figure3_trajectories.csv`: 216 checkpoint rows covering three
-  lineages and nine plots, including the stored eight-class macro-average and
-  standard errors, cumulative tokens, and the transition position.
-
-AUPRC values and standard errors are stored as fractions; tokens are absolute
-counts. Rows include original S3 URIs, metric names, and checkpoint identifiers
-for provenance. The export preserves the former S5 checkpoint selection and
-horizon, including its deliberate pre-transition omission; no measurements or
-uncertainty estimates are recomputed. Only Panel A's two-class means are derived.
-
-```sh
-# Fetch missing Parquets and export both CSVs using the configured AWS profile.
-AWS_PROFILE=marin-dna make fetch-figure3-data
-# Or export using already cached Parquets, without AWS access.
-make figure3-data
-# Render entirely from the bundled CSVs.
-make figure-upstream_coding_mixture_balance
-# Fetch, export, and render together.
-AWS_PROFILE=marin-dna make fetch-figure-upstream_coding_mixture_balance
-```
-
-The script also accepts `--output-dir` to write exports to a different directory.
-Raw Parquets remain in the gitignored `plot_data/remote/` cache. CSVs are updated
-only by the explicit preparation targets, not by ordinary figure builds.
