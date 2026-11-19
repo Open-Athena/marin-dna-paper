@@ -2191,12 +2191,10 @@ def _lineage_draw_panel(
     results: pd.DataFrame,
     own_tokens: dict[str, float],
     token_cutoff: float,
-    curve_fn=None,
 ) -> None:
     """Draw raw offline checkpoints with capless ±1 SE bars."""
-    curve_fn = _composed_curve if curve_fn is None else curve_fn
     for leaf, _label, color, marker in LINEAGES:
-        tokens, values, ses = curve_fn(kind, leaf, subset, results, own_tokens)
+        tokens, values, ses = _composed_curve(kind, leaf, subset, results, own_tokens)
         if leaf != "exp135-zoonomia-m5.1":
             keep = tokens <= token_cutoff
             if keep.any() and not keep.all():
@@ -3075,27 +3073,7 @@ def balance_endpoint_data(data: pl.DataFrame) -> pl.DataFrame:
     return pl.concat([endpoint.select("arm", "subset", "value"), means.select("arm", "subset", "value")])
 
 
-def _synthetic_mixture_curve(kind, leaf, subset, results, own_tokens):
-    """Draft layout values only; never read or write the measurement cache."""
-    region = (len(ALL_SUBSETS) - 1) / 2 if subset == MACRO_SUBSET else ALL_SUBSETS.index(subset)
-    lineage = [entry[0] for entry in LINEAGES].index(leaf)
-    tokens = np.linspace(20, 166, 9) * 1e9
-    values = .30 + .012 * region + .025 * np.sin(np.arange(9) * .8 + lineage)
-    ses = np.full(9, .012)
-    return tokens, values, ses
-
-
-def synthetic_balance_endpoints() -> pl.DataFrame:
-    """Deterministic invented endpoints, explicitly for the FIXME draft."""
-    return pl.DataFrame([
-        {"arm": arm, "subset": subset, "step": 22000,
-         "value": .28 + .018 * index + .025 * region}
-        for index, arm in enumerate(ARMS)
-        for region, subset in enumerate(BALANCE_SUBSETS.values())
-    ])
-
-
-def plot_mixture_figure(data: pl.DataFrame, results_df=None, *, synthetic=False) -> Figure:
+def plot_mixture_figure(data: pl.DataFrame, results_df=None) -> Figure:
     """Figure 3: early endpoints above the complete existing S5 trajectories."""
     apply_style()
     mpl.rcParams.update({
@@ -3144,12 +3122,11 @@ def plot_mixture_figure(data: pl.DataFrame, results_df=None, *, synthetic=False)
         results_df = local_data.load_mixture()
     results = results_df.set_index("mix")
     own_tokens = {mix: float(results.loc[mix, "tokens"]) for mix in results.index}
-    curve_fn = _synthetic_mixture_curve if synthetic else _composed_curve
-    tokens, _, _ = curve_fn("llr", "exp135-zoonomia-m5.1", MACRO_SUBSET, results, own_tokens)
+    tokens, _, _ = _composed_curve("llr", "exp135-zoonomia-m5.1", MACRO_SUBSET, results, own_tokens)
     shift = sum(local_data.inherited_components("exp135-zoonomia-m5.1", own_tokens).values()) / 1e9
     for ax, (subset, title) in zip(axes_b, [(MACRO_SUBSET, "Macro-average"), *PANELS], strict=True):
         _lineage_draw_panel(ax, kind="llr", subset=subset, results=results,
-                            own_tokens=own_tokens, token_cutoff=float(tokens.max()), curve_fn=curve_fn)
+                            own_tokens=own_tokens, token_cutoff=float(tokens.max()))
         ax.axvline(shift, color="#6b7280", linestyle=(0, (4, 2)), linewidth=.7, zorder=1)
         ax.set_title(title.replace("'", "′"), pad=4)
         ax.set_xticks([0, 80, 160])
@@ -3160,10 +3137,6 @@ def plot_mixture_figure(data: pl.DataFrame, results_df=None, *, synthetic=False)
     for ax in axes_b[::3]:
         ax.set_ylabel("AUPRC (%)")
     axes_b[7].set_xlabel("Training tokens (B)")
-    if synthetic:
-        fig.text(.5, .732, "FIXME: SYNTHETIC DATA", ha="center", va="center",
-                 fontsize=9, weight="bold", color="#b00020",
-                 bbox=dict(facecolor="#fff2f2", edgecolor="#b00020", pad=3))
     return fig
 
 
@@ -3675,17 +3648,13 @@ def region_specialist_performance(output_dir: Path) -> None:
 
 
 @cli.command("upstream_coding_mixture_balance")
-@click.option("--synthetic", is_flag=True, help="FIXME draft only: invented data with a visible warning.")
 @click.pass_obj
-def upstream_coding_mixture_balance(output_dir: Path, synthetic: bool = False) -> None:
+def upstream_coding_mixture_balance(output_dir: Path) -> None:
     """Combined early endpoints and five-region histories; requires external metrics."""
     render(
         output_dir,
         "upstream_coding_mixture_balance",
-        lambda _: plot_mixture_figure(
-            synthetic_balance_endpoints() if synthetic else shared_step_data(load_trajectories()),
-            synthetic=synthetic,
-        ),
+        lambda _: plot_mixture_figure(shared_step_data(load_trajectories())),
         fixed_size=True,
     )
 

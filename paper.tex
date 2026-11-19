@@ -305,10 +305,7 @@ regions improved prediction of noncoding variants.
 \begin{figure}
 \centering
 \includegraphics[width=\linewidth]{figures/upstream_coding_mixture_balance.pdf}
-\caption{\textbf{\textcolor{red}{FIXME: Figure 3 currently uses synthetic
-values and uncertainty bars for layout only. Replace with measured results
-before interpreting or publishing this figure.}} Training-sequence composition
-and observed training histories (intended final content).
+\caption{Training-sequence composition and observed training histories.
 \textbf{A}, Balanced upstream/CDS sampling in the early Qwen3 1.7B preset
 with 512-base inputs without BOS. Four training conditions are compared at
 step 22,000 (approximately 23.1B input tokens): upstream-only (100/0),
@@ -319,8 +316,7 @@ unweighted two-class mean.
 architecture with 255 bases plus BOS. Zero-shot pooled Mendelian AUPRC is
 shown for all eight variant classes and their eight-class macro-average
 for staged m5.1, uniform five-region m1.3, and upstream-weighted five-region
-m3.3. In the final figure, points will be measured checkpoints and error bars
-will denote standard errors.
+m3.3. Points are measured checkpoints; error bars denote standard errors.
 Dashed lines mark the approximately 104B-token transition at which m5.1
 introduces ncRNA and enhancer-region sequences. These lineages differ in
 data composition and optimization histories and are not controlled

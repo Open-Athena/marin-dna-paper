@@ -1,8 +1,6 @@
 .DEFAULT_GOAL := all
 FIGURE_PYTHON ?= uv run --locked python
 PLOT := $(FIGURE_PYTHON) src/plot.py
-# FIXME: use measured Figure 3 inputs once S3 access is available.
-FIGURE3_FLAGS ?= --synthetic
 FIGURE_CODE := src/plot.py src/local_data.py src/metrics.py pyproject.toml uv.lock
 
 # Every PDF referenced by paper.tex, in manuscript order.
@@ -121,11 +119,11 @@ fetch-figure-vep_performance_vs_throughput:
 
 # Regenerate after code changes so an old Panel A cannot masquerade as Figure 3.
 figures/upstream_coding_mixture_balance.pdf figures/upstream_coding_mixture_balance.svg &: $(FIGURE_CODE)
-	$(PLOT) upstream_coding_mixture_balance $(FIGURE3_FLAGS)
+	$(PLOT) upstream_coding_mixture_balance
 
 .PHONY: figure-upstream_coding_mixture_balance fetch-figure-upstream_coding_mixture_balance
 figure-upstream_coding_mixture_balance:
-	$(PLOT) upstream_coding_mixture_balance $(FIGURE3_FLAGS)
+	$(PLOT) upstream_coding_mixture_balance
 fetch-figure-upstream_coding_mixture_balance:
 	$(PLOT) --fetch upstream_coding_mixture_balance
 
