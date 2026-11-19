@@ -1,23 +1,14 @@
-"""Plot the cohort counts on dated higher-taxon trees exported by TimeTree.
+"""Render the cohort time tree entirely from plot_data/dataset_timetree.csv.
 
-uv run --locked python src/plot_dataset_timetree.py [--fetch]
-
-Raw exports are cached under plot_data/remote (gitignored). The default is
-fully offline; --fetch refreshes the public web exports. This is a group-level
-view, not a species tree inferred from the training data. Terminal lineages
-include diversification hidden inside each collapsed taxonomic group.
+Refresh the table with process_data.py dataset_timetree. Tree parsing and
+collapse helpers below are shared with preparation and chronology checks.
 """
 from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-import hashlib
-import json
 from pathlib import Path
 import re
-import urllib.parse
-import urllib.request
 
 import matplotlib
 matplotlib.use('Agg')
@@ -287,48 +278,40 @@ def draw(ax, tree: DatedNode, data: dict, title: str, maximum: int, step: int) -
     ax.text(14.55,len(ts)+.4,'Proj.',ha='right',fontsize=9,color=ORANGE,weight='bold')
 
 
+def load_plot_data():
+    """Reconstruct the ordered dated trees from the checked-in node table."""
+    frame = pd.read_csv(ROOT / 'plot_data/dataset_timetree.csv',
+                        float_precision='round_trip', keep_default_na=False)
+    panels = []
+    for panel in ('animals', 'mammals'):
+        rows = frame[frame.panel == panel]
+        nodes = {int(row.node_id): DatedNode(name=row.name, age=row.age_ma, key=row.key)
+                 for row in rows.itertuples(index=False)}
+        roots = []
+        counts_by_key = {}
+        for row in rows.itertuples(index=False):
+            node = nodes[int(row.node_id)]
+            if int(row.parent_id) == -1:
+                roots.append(node)
+            else:
+                parent = nodes[int(row.parent_id)]
+                assert parent.age >= node.age
+                parent.children.append(node)
+            if row.key:
+                counts_by_key[row.key] = (int(row.annotation), int(row.projection))
+        assert len(roots) == 1
+        assert {node.key for node in leaves(roots[0])} == set(counts_by_key)
+        panels.append((roots[0], counts_by_key))
+    return panels
+
+
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--fetch', action='store_true', help='Refresh TimeTree exports explicitly')
+    parser = argparse.ArgumentParser(description='Render the cohort time tree from bundled CSV data.')
+    parser.add_argument('--output-dir', type=Path, default=ROOT / 'figures')
     args = parser.parse_args()
-    CACHE.mkdir(parents=True, exist_ok=True)
-    metadata = []
-    source_trees = {}
-    for rank in ['class','order']:
-        params = {'direct-download-format':'newick','direct-download-id':'211973',
-                  'direct-download-rank':rank}
-        url = 'https://www.timetree.org/ajax/direct_download?' + urllib.parse.urlencode(params)
-        path = CACHE / f'metazoa_{rank}.nwk'
-        if args.fetch:
-            with urllib.request.urlopen(url,timeout=60) as response:
-                content = response.read()
-            parse_newick(content.decode())  # reject an error page before replacing cache
-            path.write_bytes(content)
-        if not path.exists():
-            raise SystemExit(f'Missing {path}; run with --fetch to retrieve the source.')
-        content = path.read_bytes()
-        tree = parse_newick(content.decode())
-        for n in leaves(tree):
-            n.name = normalize(n.name)
-        assert tree.age > 0, 'Source does not contain positive divergence times'
-        source_trees[rank] = tree
-        metadata.append({'rank':rank,'url':url,'sha256':hashlib.sha256(content).hexdigest(),
-                         'tips':len(leaves(tree)), 'root_age_ma':tree.age,
-                         'cache_date_utc':datetime.fromtimestamp(path.stat().st_mtime, timezone.utc).date().isoformat()})
-    accessed = max(item['cache_date_utc'] for item in metadata)
-    alabels = ANIMAL_LABELS
-    mlabels = MAMMAL_LABELS
-    available = {n.name for n in leaves(source_trees['class'])}
-    selection = {k:set(v)&available for k,v in ANIMAL_GROUPS.items()}
-    assert all(selection.values()), 'Source lacks an entire displayed group'
-    broad = collapse(source_trees['class'], selection, alabels)
-    mselection = {k: {k} for k in mlabels}
-    mselection['Afrosoricida'] = {'Tenrecidae (no order)', 'Chrysochloridae (no order)'}
-    mammal = collapse(source_trees['order'], mselection, mlabels)
-    ac, mc = counts()
-    assert {n.key for n in leaves(broad)} == set(ac)
-    assert {n.key for n in leaves(mammal)} == set(mc)
-    plt.rcParams.update({'font.family':'DejaVu Sans','svg.fonttype':'none','pdf.fonttype':42})
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    (broad, ac), (mammal, mc) = load_plot_data()
+    plt.rcParams.update({'font.family':'DejaVu Sans','svg.fonttype':'none','pdf.fonttype':42,'svg.hashsalt':'dataset_timetree'})
     fig, axes = plt.subplots(1,2,figsize=(20,11.5))
     fig.subplots_adjust(left=.025,right=.985,top=.88,bottom=.04,wspace=.045)
     draw(axes[0],broad,ac,'A   Across animals',800,200)
@@ -337,20 +320,13 @@ def main() -> None:
     fig.text(.525,.965,'108 alignment-projected genomes · placental mammals',color=ORANGE,fontsize=14,weight='bold')
     fig.text(.025,.925,'CDS · upstream · downstream',fontsize=11,color='#52616b')
     fig.text(.525,.925,'ncRNA · enhancer regions',fontsize=11,color='#52616b')
-    out = ROOT/'figures/dataset_timetree'
+    out = args.output_dir / 'dataset_timetree'
     for ext in ['pdf','svg','png']:
-        fig.savefig(out.with_suffix('.'+ext),dpi=180,facecolor='white')
+        fig.savefig(out.with_suffix('.'+ext),dpi=180,facecolor='white',
+                    metadata={'CreationDate': None, 'ModDate': None} if ext == 'pdf' else ({'Date': None} if ext == 'svg' else {}))
+    svg = out.with_suffix('.svg')
+    svg.write_text('\n'.join(line.rstrip() for line in svg.read_text().splitlines()) + '\n')
     plt.close(fig)
-    report = {'source':'TimeTree live higher-taxon web export','retrieved':accessed,
-              'citation':'https://doi.org/10.1093/molbev/msac174', 'sources':metadata,
-              'interpretation':'TimeTree reference topology and dates; group-level tips at present. Terminal branches collapse within-group diversification. No species substitutions used.',
-              'source_cache':'plot_data/remote/https/www.timetree.org/cohort_figure (not redistributed)',
-              'panels':{'animals':{'root_age_ma':broad.age,'axis_max_ma':800,'annotation':499,'projection':108},
-                        'mammals':{'root_age_ma':mammal.age,'axis_max_ma':200,'annotation':81,'projection':108}},
-              'class_group_mapping':{k:sorted(v) for k,v in selection.items()},
-              'order_group_mapping':{k:sorted(v) for k,v in mselection.items()}}
-    (ROOT/'plot_data/dataset_timetree_sources.json').write_text(json.dumps(report,indent=2)+'\n')
-    print(json.dumps(report['panels'],indent=2))
 
 if __name__ == '__main__':
     main()

@@ -162,6 +162,46 @@ evaluation methodology in their development.
 \subsection{A compact Transformer achieves competitive variant prediction at
 much lower cost}
 
+\begin{figure}
+\centering
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{\dimexpr\linewidth-2\tabcolsep-2\arrayrulewidth\relax}|}
+\hline
+\textbf{A \quad Multispecies training sequences}\par
+\includegraphics[width=\linewidth]{figures/multispecies_training_sequences.pdf}
+\\[3pt]
+\hline
+\textbf{B \quad Learning to predict DNA}\par
+\includegraphics[width=\linewidth]{figures/next_base_prediction.pdf}
+\\[3pt]
+\hline
+\textbf{C \quad From sequences to variant scores}\par
+\includegraphics[width=\linewidth]{figures/variant_scoring_workflow.pdf}\par
+Zero-shot scoring compares reference and alternate sequence likelihoods
+without labeled variant examples. A linear probe uses labeled examples to
+learn from the frozen model's reference/alternate representations. \\[3pt]
+\hline
+\end{tabular}
+\caption{From DNA to variant ranking.
+\textbf{A}, DNA from multiple species is selected by functional region and
+sampled as individual sequences; the model does not receive a multispecies
+alignment. CDS, upstream, and downstream regions are annotation-derived;
+ncRNA and enhancer-region annotations are projected from human through
+whole-genome alignments. Downstream denotes sequence after the CDS end,
+not annotated 3-prime UTRs; enhancer regions denote the non-promoter cCRE
+collection. See Figure~\ref{fig:datasets} for detailed provenance.
+\textbf{B}, A Qwen3 causal Transformer learns to predict each base from its
+preceding sequence, producing sequence probabilities and learned
+representations. The abbreviated example shows shifted next-base targets.
+Panels A and B illustrate the later recipe with 255 DNA bases plus a BOS
+token, rather than the early 512-base experiments; mixture schedules are
+omitted. Training uses DNA without variant-effect labels.
+\textbf{C}, Variant scoring uses sequence likelihoods or a linear probe
+trained on frozen reference/alternate representations.}
+\label{fig:model-overview}
+\end{figure}
+
 To assess whether a compact, standard autoregressive model can learn
 biologically useful sequence constraints, we evaluate Marin DNA on human
 Mendelian variant effect prediction. The model is trained to predict the
@@ -174,6 +214,38 @@ resources such as ClinVar~\citep{landrum2020clinvar,clinvarresource} and
 OMIM~\citep{amberger2015omim}. We compare Marin DNA against Evo 2 40B,
 a demanding, broadly evaluated single-sequence baseline~\citep{brixi2026evo2},
 assessing both variant-prediction performance and computational cost.
+
+\begin{figure}
+\centering
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{\dimexpr\linewidth-2\tabcolsep-2\arrayrulewidth\relax}|}
+\hline
+\textbf{A \quad Aggregate variant-prediction performance}\par
+\textit{Planned zero-shot comparison.} Plot macro-average Mendelian AUPRC
+for Marin DNA, Evo 2, GPN-Star, and AlphaGenome; distinguish single-sequence,
+alignment-based, and supervised model families.\par
+\textit{Planned probe comparison.} Separately plot macro-averages of
+chromosome-weighted AUPRC for Marin DNA and Evo 2. Keep the two aggregation
+schemes distinct. Current evidence: Supplementary
+Figures~\ref{fig:benchmarks} and~\ref{fig:benchmark-probes}. \\[3pt]
+\hline
+\textbf{B \quad Training and inference costs}\par
+\includegraphics[width=\linewidth]{figures/vep_performance_vs_throughput.pdf}%
+\par
+\textit{Planned training-cost comparison.} Add final-model training FLOPs
+for Marin DNA 1B and Evo 2 40B (approximately $1{,}980\times$ fewer for
+Marin DNA), separate from total research costs. The existing throughput plot
+uses deployed contexts: 256 versus 8,192 tokens for this comparison. \\[3pt]
+\hline
+\end{tabular}
+\caption{Performance and cost: draft panel layout.
+\textbf{A}, Planned aggregate performance comparisons for two readouts.
+\textbf{B}, Existing zero-shot Mendelian macro-average AUPRC versus variants
+scored per hour on a GH200, with a planned training-cost comparison.
+Throughput is measured at deployed, rather than equal, context lengths.}
+\label{fig:throughput}
+\end{figure}
 
 \begin{itemize}
 \item The 1B model achieves competitive Mendelian variant prediction with
@@ -217,148 +289,78 @@ other organisms. TODO: add the GPN-Star and AlphaGenome primary citations
 identified in the blog.
 
 \end{itemize}
-\begin{figure}
-\centering
-\small
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{|p{\dimexpr\linewidth-2\tabcolsep-2\arrayrulewidth\relax}|}
-\hline
-\textbf{A \quad Multispecies training sequences}\par
-\includegraphics[width=\linewidth]{figures/multispecies_training_sequences.pdf}
-\\[3pt]
-\hline
-\textbf{B \quad Learning to predict DNA}\par
-\includegraphics[width=\linewidth]{figures/next_base_prediction.pdf}
-\\[3pt]
-\hline
-\textbf{C \quad From sequences to variant scores}\par
-\includegraphics[width=\linewidth]{figures/variant_scoring_workflow.pdf}\par
-Zero-shot scoring compares reference and alternate sequence likelihoods
-without labeled variant examples. A linear probe uses labeled examples to
-learn from the frozen model's reference/alternate representations. \\[3pt]
-\hline
-\end{tabular}
-\caption{From DNA to variant ranking.
-\textbf{A}, DNA from multiple species is selected by functional region and
-sampled as individual sequences; the model does not receive a multispecies
-alignment. CDS, upstream, and downstream regions are annotation-derived;
-ncRNA and enhancer-region annotations are projected from human through
-whole-genome alignments. Downstream denotes sequence after the CDS end,
-not annotated 3-prime UTRs; enhancer regions denote the non-promoter cCRE
-collection. See Figure~\ref{fig:datasets} for detailed provenance.
-\textbf{B}, A Qwen3 causal Transformer learns to predict each base from its
-preceding sequence, producing sequence probabilities and learned
-representations. The abbreviated example shows shifted next-base targets.
-Panels A and B illustrate the later recipe with 255 DNA bases plus a BOS
-token, rather than the early 512-base experiments; mixture schedules are
-omitted. Training uses DNA without variant-effect labels.
-\textbf{C}, Variant scoring uses sequence likelihoods or a linear probe
-trained on frozen reference/alternate representations.}
-\label{fig:model-overview}
-\end{figure}
+
+\subsection{Balancing and broadening training data improves variant prediction}
+
+We investigated how the composition of pretraining data affects variant
+prediction across genomic regions. Although enriching for functional
+sequences can improve genomic language models, the relative allocation
+of training data between different functional regions may also be
+important. We first compared models trained exclusively on upstream
+or coding sequences with models trained on mixtures of both regions.
+We then examined whether extending training to additional functional
+regions improved prediction of noncoding variants.
+
 
 \begin{figure}
 \centering
-\small
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{|p{\dimexpr\linewidth-2\tabcolsep-2\arrayrulewidth\relax}|}
-\hline
-\textbf{A \quad Aggregate variant-prediction performance}\par
-\textit{Planned zero-shot comparison.} Plot macro-average Mendelian AUPRC
-for Marin DNA, Evo 2, GPN-Star, and AlphaGenome; distinguish single-sequence,
-alignment-based, and supervised model families.\par
-\textit{Planned probe comparison.} Separately plot macro-averages of
-chromosome-weighted AUPRC for Marin DNA and Evo 2. Keep the two aggregation
-schemes distinct. Current evidence: Supplementary
-Figures~\ref{fig:benchmarks} and~\ref{fig:benchmark-probes}. \\[3pt]
-\hline
-\textbf{B \quad Training and inference costs}\par
-\includegraphics[width=\linewidth]{figures/vep_performance_vs_throughput.pdf}%
-\par
-\textit{Planned training-cost comparison.} Add final-model training FLOPs
-for Marin DNA 1B and Evo 2 40B (approximately $1{,}980\times$ fewer for
-Marin DNA), separate from total research costs. The existing throughput plot
-uses deployed contexts: 256 versus 8,192 tokens for this comparison. \\[3pt]
-\hline
-\end{tabular}
-\caption{Performance and cost: draft panel layout.
-\textbf{A}, Planned aggregate performance comparisons for two readouts.
-\textbf{B}, Existing zero-shot Mendelian macro-average AUPRC versus variants
-scored per hour on a GH200, with a planned training-cost comparison.
-Throughput is measured at deployed, rather than equal, context lengths.}
-\label{fig:throughput}
-\end{figure}
-
-\subsection{Training-sequence selection improves performance across genomic
-regions}
-
-The composition of training data can affect which functional constraints
-a genomic language model learns. Although enriching for functional
-regions avoids uniform sampling from the predominantly neutral genomic
-background, different functional regions may still be represented
-unequally. Previous work has demonstrated the benefits of multispecies
-training and functional-region
-enrichment~\citep{benegas2023dna,benegas2025review}.
-In TraitGym~\citep{benegas2025traitgym}, a 152M-parameter model trained
-only on animal promoters performed comparably to Evo 2 40B on human
-promoter variants, while Evo 2 struggled on distal variants. These
-observations motivate examining how the relative exposure of coding
-and upstream sequences, and the inclusion of noncoding RNA and
-enhancer-region sequences, affect prediction across variant classes.
-
-\begin{itemize}
-\item Balanced sampling preserves performance across coding and upstream
-regions better than pooling in proportion to dataset size.
-Figure~\ref{fig:mixtures}A provides the direct comparison: allocating equal
-exposure improves promoter performance while retaining useful missense
-prediction. Define promoters as regions near gene starts and missense variants
-as protein-altering changes. Use specialists only as supporting context
-(Supplementary Figure~\ref{fig:specialists}); do not claim equal weights are
-optimal. Refer to Methods Section~\nameref{methods:mixtures} for the designs.
-\item Adding ncRNA and enhancer-region sequences is accompanied by gains on
-ncRNA and distal variants. Explain these categories briefly as
-non-protein-coding
-RNAs and regulatory regions farther from genes. Use the planned focused
-views in Figure~\ref{fig:mixtures}B--C to frame these findings; cite the
-currently available trajectories in Supplementary Figures~\ref{fig:mixture-llr}
-and~\ref{fig:mixture-probe}, retaining subset exceptions and noisier probe
-results. Treat a possible benefit of staged exposure as secondary and
-uncertain, rather than a controlled causal finding. Briefly disclose
-alignment-assisted dataset construction and refer to Methods
-Sections~\nameref{methods:data} and~\nameref{methods:mixtures}.
-\end{itemize}
-\begin{figure}
-\centering
-\small
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{|p{\dimexpr\linewidth-2\tabcolsep-2\arrayrulewidth\relax}|}
-\hline
-\textbf{A \quad Balanced regional exposure}\par
 \includegraphics[width=\linewidth]{figures/upstream_coding_mixture_balance.pdf}
-\\[3pt]
-\hline
-\textbf{B \quad ncRNA performance}\par
-\textit{Planned focused plot.} Show ncRNA zero-shot AUPRC versus training
-tokens along the staged training history. Mark introduction of ncRNA and
-enhancer-region sequences at approximately 104B tokens. Use the observed
-trajectory from Supplementary Figure~\ref{fig:mixture-llr}, with its
-uncertainty;
-retain the probe view in Supplementary Figure~\ref{fig:mixture-probe}. \\[3pt]
-\hline
-\textbf{C \quad Distal-variant performance}\par
-\textit{Planned focused plot.} Show distal-variant zero-shot AUPRC versus
-training tokens, using the same lineage, transition marker, and uncertainty
-convention as panel B. Source: Supplementary Figure~\ref{fig:mixture-llr}.
-These are observed training histories, not a matched causal ablation. \\[3pt]
-\hline
-\end{tabular}
-\caption{Training-sequence selection: draft panel layout.
-\textbf{A}, Existing upstream/CDS mixture comparison: zero-shot promoter and
-missense AUPRC versus training steps. The rightmost plot is their unweighted
-mean. \textbf{B--C}, Planned ncRNA and distal-variant views around the addition
-of new training regions; complete trajectories remain in the supplement.}
+\caption{Training-sequence composition and observed training histories.
+\textbf{A}, Balanced upstream/CDS sampling in the early Qwen3 1.7B preset
+with 512-base inputs without BOS. Four training conditions are compared at
+step 22,000 (approximately 23.1B input tokens): upstream-only (100/0),
+CDS-only (0/100), proportional (approximately 10/90), and balanced (50/50).
+The three plots show zero-shot promoter and missense AUPRC and their
+unweighted two-class mean.
+\textbf{B}, Five-region training histories using the later Marin DNA 1B
+architecture with 255 bases plus BOS. Zero-shot pooled Mendelian AUPRC is
+shown for all eight variant classes and their eight-class macro-average
+for staged m5.1, uniform five-region m1.3, and upstream-weighted five-region
+m3.3. Points are measured checkpoints; error bars denote standard errors.
+Dashed lines mark the approximately 104B-token transition at which m5.1
+introduces ncRNA and enhancer-region sequences. These lineages differ in
+data composition and optimization histories and are not controlled
+ablations of introduction timing.}
 \label{fig:mixtures}
 \end{figure}
+
+In the initial experiments, we compared four training conditions:
+upstream-only and CDS-only specialists, a balanced upstream/CDS
+mixture (50/50), and a mixture proportional to the available dataset
+sizes (approximately 10/90). The specialists showed complementary
+strengths: upstream-only training favoured promoter prediction,
+whereas CDS-only training favoured missense prediction
+(Figure~\ref{fig:mixtures}A). Their performance on related variant
+classes was also competitive with larger genomic language models
+in several comparisons (Supplementary Figure~\ref{fig:specialists}).
+Importantly, balanced sampling substantially improved promoter
+prediction relative to proportional sampling, while maintaining
+similar missense performance. Although the balanced model did not
+match the upstream specialist on promoter variants, it achieved
+useful performance on both variant classes. Thus, allocating training
+sequences according to dataset size was less effective than balancing
+exposure to these two functional regions.
+
+We next examined the inclusion of noncoding RNA (ncRNA) and
+enhancer-region sequences using the 1B Marin DNA model.
+A model initially trained on a uniform mixture of coding,
+upstream, and downstream sequences showed poor zero-shot prediction
+of ncRNA and distal variants. Performance on both classes increased
+markedly after ncRNA and enhancer-region sequences were introduced
+at approximately 104B training tokens
+(Figure~\ref{fig:mixtures}B).
+Models trained on all five regions from initialization showed
+different trajectories, with stronger performance on these variant
+classes earlier in training (Figure~\ref{fig:mixtures}B).
+The corresponding linear-probe results showed less consistent changes
+(Supplementary Figure~\ref{fig:mixture-probe}).
+Because these training histories also differed in optimization
+schedules and data ordering, they do not establish that introducing
+the additional regions at a particular stage was responsible for
+the observed improvements. Together, these experiments show that
+both the balance and functional coverage of pretraining sequences
+are important considerations for variant prediction.
+
 
 \subsection{Scaling improves representations beyond what likelihood scores
 reveal}
@@ -775,8 +777,8 @@ All four models used the Qwen3 1.7B architecture preset, 512-base
 sequences without BOS, and batches of 2,048 sequences, with architecture
 and optimization settings differing from the standard recipe
 (Supplementary Tables~\ref{tab:architectures} and~\ref{tab:models}).
-The direct mixture comparison evaluated six shared checkpoints spanning
-approximately 2.1--23.1B input tokens (Figure~\ref{fig:mixtures}A).
+The direct mixture comparison uses the common step 22,000 checkpoint,
+approximately 23.1B input tokens (Figure~\ref{fig:mixtures}A).
 The separate specialist comparison (Supplementary
 Figure~\ref{fig:specialists}) used upstream and CDS checkpoints at
 approximately 23.1B and 35.7B tokens, respectively, and therefore
@@ -787,8 +789,8 @@ We use three descriptive labels for the later mixture lineages:
 five-region training, \emph{Uniform} for uniform five-region training
 from initialization, and \emph{Upstream-weighted} for five-region training
 with extra weight on upstream sequences from initialization.
-These lineages, compared in Supplementary
-Figures~\ref{fig:mixture-llr}--\ref{fig:mixture-probe}, used the standard
+These lineages, compared in Figure~\ref{fig:mixtures}B and Supplementary
+Figure~\ref{fig:mixture-probe}, used the standard
 1.12B-parameter architecture with 255-base sequences preceded by BOS
 and batches of 8,192 sequences.
 The uniform three-region mixture assigned equal weight to CDS, upstream,
@@ -831,8 +833,8 @@ Section~\nameref{supp:training-details}.
 
 We evaluated the later lineages at saved checkpoints using zero-shot
 likelihood-ratio scoring and frozen-embedding linear probes
-(Supplementary Figures~\ref{fig:mixture-llr}
-and~\ref{fig:mixture-probe}).
+(Figure~\ref{fig:mixtures}B and Supplementary
+Figure~\ref{fig:mixture-probe}).
 Cumulative training exposure includes only the portions of ancestral
 runs inherited by each continuation, excluding subsequent training
 on branches not inherited. The trajectories show observed checkpoint
@@ -1478,14 +1480,6 @@ splicing, and synonymous panels. Both are compared with Evo 2 (40B) and
 GPN-Star (M).
 Performance is measured as AUPRC; error bars denote standard
 errors.}\label{fig:specialists}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[width=\linewidth]{figures/mixture_zero_shot_trajectories.pdf}
-\caption{Zero-shot mixture trajectories. Pooled Mendelian AUPRC versus training
-tokens for three model-mixture lineages. Error bars denote standard
-errors.}\label{fig:mixture-llr}
 \end{figure}
 
 \begin{figure}

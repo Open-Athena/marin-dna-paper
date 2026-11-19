@@ -1,0 +1,23 @@
+score_type,value,se,n,params,family,source_uri
+minus_llr_avg,0.444364088456117,0.02166032643855552,5800,45893760.0,MarinDNA,s3://oa-bolinas/snakemake/analysis/evals_v2/results/probe/scaling-v0.5-h640-p46M-step-215573/mendelian_traits.parquet
+probe_score,0.42536717934292123,0.02132703044404266,5800,45893760.0,MarinDNA,s3://oa-bolinas/snakemake/analysis/evals_v2/results/probe/scaling-v0.5-h640-p46M-step-215573/mendelian_traits.parquet
+minus_llr_avg,0.4789366334994745,0.019916374924901416,5800,75521280.0,MarinDNA,s3://oa-bolinas/snakemake/analysis/evals_v2/results/probe/scaling-v0.5-h768-p76M-step-215573/mendelian_traits.parquet
+probe_score,0.4381755457789077,0.015152851034108565,5800,75521280.0,MarinDNA,s3://oa-bolinas/snakemake/analysis/evals_v2/results/probe/scaling-v0.5-h768-p76M-step-215573/mendelian_traits.parquet
+minus_llr_avg,0.4886213889527007,0.018895779573213037,5800,128481920.0,MarinDNA,s3://oa-bolinas/snakemake/analysis/evals_v2/results/probe/scaling-v0.5-h896-p128M-step-215573/mendelian_traits.parquet
+probe_score,0.48468948972581966,0.022909488323407886,5800,128481920.0,MarinDNA,s3://oa-bolinas/snakemake/analysis/evals_v2/results/probe/scaling-v0.5-h896-p128M-step-215573/mendelian_traits.parquet
+minus_llr_avg,0.4868817764038543,0.018295237208283084,5800,254848896.0,MarinDNA,s3://oa-bolinas/snakemake/analysis/evals_v2/results/probe/scaling-v0.5-h1152-p255M-step-215573/mendelian_traits.parquet
+probe_score,0.5220307309504018,0.016187212480858214,5800,254848896.0,MarinDNA,s3://oa-bolinas/snakemake/analysis/evals_v2/results/probe/scaling-v0.5-h1152-p255M-step-215573/mendelian_traits.parquet
+minus_llr_avg,0.45411324130396796,0.01879450228619625,5800,475854720.0,MarinDNA,s3://oa-bolinas/snakemake/analysis/evals_v2/results/probe/scaling-v0.5-h1408-p476M-step-215573/mendelian_traits.parquet
+probe_score,0.5342410896080241,0.020774680032167335,5800,475854720.0,MarinDNA,s3://oa-bolinas/snakemake/analysis/evals_v2/results/probe/scaling-v0.5-h1408-p476M-step-215573/mendelian_traits.parquet
+minus_llr_avg,0.4279241446154947,0.015545672124236682,5800,1120767360.0,MarinDNA,s3://oa-bolinas/snakemake/analysis/evals_v2/results/probe/scaling-v0.5-h1920-p1B-step-215573/mendelian_traits.parquet
+probe_score,0.5534105197214152,0.015329621899345815,5800,1120767360.0,MarinDNA,s3://oa-bolinas/snakemake/analysis/evals_v2/results/probe/scaling-v0.5-h1920-p1B-step-215573/mendelian_traits.parquet
+minus_llr_avg,0.38926674051827315,0.021061213594602335,5800,2271368832.0,MarinDNA,s3://oa-bolinas/snakemake/analysis/evals_v2/results/probe/scaling-v0.5-h2432-p2B-step-215573/mendelian_traits.parquet
+probe_score,0.5770136783251442,0.015473063385255077,5800,2271368832.0,MarinDNA,s3://oa-bolinas/snakemake/analysis/evals_v2/results/probe/scaling-v0.5-h2432-p2B-step-215573/mendelian_traits.parquet
+minus_llr_avg,0.39148812420148066,0.020900690207896182,5800,4021766016.0,MarinDNA,s3://oa-bolinas/snakemake/analysis/evals_v2/results/probe/scaling-v0.5-h2944-p4B-step-215573/mendelian_traits.parquet
+probe_score,0.586163187560677,0.018681969273802442,5800,4021766016.0,MarinDNA,s3://oa-bolinas/snakemake/analysis/evals_v2/results/probe/scaling-v0.5-h2944-p4B-step-215573/mendelian_traits.parquet
+probe_score,0.4822704653312807,0.01571875681932761,5800,1000000000.0,Evo 2,https://gist.githubusercontent.com/gonzalobenegas/3649e68fb63ca1f3443e4486078eb4d8/raw/3ac60cd5e37148fd135c4d55bed12386dc065dc6/mendelian_evo2_1b_base_train_probe_metrics.parquet
+minus_llr_avg,0.5033013618247911,0.015449445824835423,5800,1000000000.0,Evo 2,https://gist.githubusercontent.com/gonzalobenegas/3649e68fb63ca1f3443e4486078eb4d8/raw/3ac60cd5e37148fd135c4d55bed12386dc065dc6/mendelian_evo2_1b_base_train_probe_metrics.parquet
+probe_score,0.5748810090460598,0.009278412184384936,5800,7000000000.0,Evo 2,https://gist.githubusercontent.com/gonzalobenegas/3649e68fb63ca1f3443e4486078eb4d8/raw/3ac60cd5e37148fd135c4d55bed12386dc065dc6/mendelian_evo2_7b_train_probe_metrics.parquet
+minus_llr_avg,0.40731313029726657,0.01398933403633177,5800,7000000000.0,Evo 2,https://gist.githubusercontent.com/gonzalobenegas/3649e68fb63ca1f3443e4486078eb4d8/raw/3ac60cd5e37148fd135c4d55bed12386dc065dc6/mendelian_evo2_7b_train_probe_metrics.parquet
+probe_score,0.5970221205517564,0.015693514104911363,5800,40000000000.0,Evo 2,https://gist.githubusercontent.com/gonzalobenegas/3649e68fb63ca1f3443e4486078eb4d8/raw/3ac60cd5e37148fd135c4d55bed12386dc065dc6/mendelian_evo2_40b_train_probe_metrics.parquet
+minus_llr_avg,0.3729042980250989,0.014148867404147999,5800,40000000000.0,Evo 2,https://gist.githubusercontent.com/gonzalobenegas/3649e68fb63ca1f3443e4486078eb4d8/raw/3ac60cd5e37148fd135c4d55bed12386dc065dc6/mendelian_evo2_40b_train_probe_metrics.parquet
