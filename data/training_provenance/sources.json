@@ -26,7 +26,12 @@
     "The release manifest labels 166018940928 as nucleotide tokens, but its accounting and the training code use 256 tokens per example. Preserve it only as approximate model-input-token exposure.",
     "Early registered checkpoint steps do not establish the full run duration or every checkpoint used in manuscript plots.",
     "Cache suffix -5149 refers to the BOS-token cache rebuild issue https://github.com/marin-community/marin/issues/5149; corrected source alone does not verify all historical caches.",
-    "Scaling CSV parameter counts are the configured estimator values, not tensor recounts: its 1B entry is 1120767360 versus 1120772224 in the released checkpoint. The difference is 4864 = 2 * 128 * 19, consistent with query/key normalization weights."
+    "Scaling CSV parameter counts are the configured estimator values, not tensor recounts: its 1B entry is 1120767360 versus 1120772224 in the released checkpoint. The difference is 4864 = 2 * 128 * 19, consistent with query/key normalization weights.",
+    "The early proportional mixture used raw sequence counts, giving upstream fraction 0.1064416781; 10/90 is a rounded figure label.",
+    "The direct early mixture comparison uses shared steps through 22000; the specialist bar comparison uses upstream step22000 and CDS step34000.",
+    "Later mixture loader clamps requested slices to the available dataset and restarts exhausted components. The older scaling snapshot does not establish this later loader behavior.",
+    "Offline lineage plots compose inherited stage fractions and preserve the first control checkpoint beyond the m5.1 endpoint. They omit the step29579 three-region checkpoint in the m5.1 curve and do not smooth scores.",
+    "Displayed lineage-token totals use approximate inherited fractions of run token tags; they are not exact counters of unique bases or identical checkpoint horizons."
   ],
   "m5_1_release_configuration": {
     "vocab_size": 7,
@@ -99,5 +104,36 @@
     "proportional_mixture": 26000
   },
   "early_checkpoint_source": "plot_data/models.yaml",
-  "transfer_reference_units": "B counts sequences; T counts input tokens including BOS"
+  "transfer_reference_units": "B counts sequences; T counts input tokens including BOS",
+  "early_mixture_original_source": "https://github.com/marin-community/marin/blob/b77ab7c348ce08d4d4323a7fcf5eb47f2f31b5f3/experiments/dna/exp13_promoter_cds_mixture.py",
+  "early_mixture_dataset_counts": {
+    "upstream": 22588618,
+    "cds": 189627296
+  },
+  "early_mixture_shared_checkpoints": [
+    2000,
+    6000,
+    10000,
+    14000,
+    18000,
+    22000
+  ],
+  "mixture_data_loader_source": "https://github.com/marin-community/marin/blob/eb6b279bd827b2b239a7a853c2c3764cb98b8cd1/lib/levanter/src/levanter/data/text/datasets.py",
+  "mixture_history_sources": [
+    "https://github.com/Open-Athena/marin-dna/issues/13",
+    "https://github.com/Open-Athena/marin-dna/issues/135",
+    "https://github.com/Open-Athena/marin-dna/issues/370",
+    "https://github.com/Open-Athena/marin-dna/commit/c0c6a105a646eabe553cfbf9d52576cf66646bb8",
+    "https://github.com/Open-Athena/marin-dna/commit/5e5950237072b3cdcb3b5df8a403696d574f106f"
+  ],
+  "mixture_figure_sources": [
+    "src/plot.py: ARMS, shared_step_data, PANEL_SPECS, RUNS, _composed_curve, _lineage_draw_panel",
+    "src/local_data.py: LINEAGE, inherited_components",
+    "plot_data/data_mixture_results.csv"
+  ],
+  "mixture_display_labels": {
+    "m5.1": "Staged",
+    "m1.3": "Uniform",
+    "m3.3": "Upstream-weighted"
+  }
 }

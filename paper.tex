@@ -751,69 +751,98 @@ limitations are documented in the
 \href{https://github.com/Open-Athena/marin-dna-paper/blob/main/data/training_provenance/sources.json}{training-provenance record}.
 
 
-
 \subsection{Mixture experiments}\label{methods:mixtures}
-Dataset-proportional sampling of the three annotation-derived datasets
-corresponds to approximately 73\% CDS, 21\% upstream, and 6\% downstream
-sequences.
-\begin{itemize}
-\item Define specialist, dataset-proportional, and balanced sampling. Document
-the early upstream/CDS comparisons, their datasets, contexts, token budgets,
-and checkpoints. Later mixtures operate on equal-length sequence examples;
-smaller component datasets restart when exhausted. Component caps and
-mixture weights determine drawn-token budgets, which need not correspond
-to one pass over every available sequence.
-\item Use Figure~\ref{fig:later-mixtures} to document exposure histories.
-Define the later lineages: m5.1 uses approximately 104B model-input tokens of uniform
-three-region training followed by 62B tokens of uniform five-region training;
-m1.3 and m3.3 use five regions from the start, with m3.3 assigning upstream
-25\% and each other region 18.75\%. Their continuation schedules are described in
-Section~\nameref{methods:architecture} and Supplementary Table~\ref{tab:models}.
-\item Record exposure counts, continuation state, schedules, evaluation
-checkpoints, and comparison horizons. Identify differences between histories
-that limit causal interpretation of exposure order.
-\end{itemize}
+
+We compared training on individual functional-region datasets with
+training on mixtures of those datasets. A specialist received sequences
+from one region only. Dataset-proportional mixtures assigned weights in
+proportion to the numbers of available sequences, whereas uniform mixtures
+assigned equal weight to each region, irrespective of dataset size.
+Because sequences within each experiment had the same length, these
+sequence-level proportions also describe the allocation of input tokens.
+Uniform sampling across regions does not imply uniform sampling across
+species or equal exposure to every distinct genomic sequence.
 
 
-The initial upstream/CDS mixture experiments and single-region
-specialists used a different model configuration from the later
-experiments described in Section~\nameref{methods:architecture}.
-These models used the Qwen3 1.7B architecture preset, with 28 layers,
-hidden width 2048, grouped-query attention (16 query and 8
-key/value heads), and tied input/output embeddings.
-Training used 512-base sequences without a beginning-of-sequence
-token, rather than the 255-base sequences with a preceding BOS
-token used in later experiments.
-The early models also used a different optimizer configuration and
-learning-rate schedule (Supplementary
-Tables~\ref{tab:architectures} and~\ref{tab:models}).
 
+The early experiments compared upstream-only and CDS-only specialists
+with two upstream/CDS mixtures: equal weights (50/50) and weights
+proportional to the source dataset sizes (approximately 10.6/89.4,
+labelled 10/90 in Figure~\ref{fig:mixtures}A).
+These experiments used earlier versions of the annotation-derived
+datasets rather than those summarized in Figure~\ref{fig:datasets}.
+All four models used the Qwen3 1.7B architecture preset, 512-base
+sequences without BOS, and batches of 2,048 sequences, with architecture
+and optimization settings differing from the standard recipe
+(Supplementary Tables~\ref{tab:architectures} and~\ref{tab:models}).
+The direct mixture comparison evaluated six shared checkpoints spanning
+approximately 2.1--23.1B input tokens (Figure~\ref{fig:mixtures}A).
+The separate specialist comparison (Supplementary
+Figure~\ref{fig:specialists}) used upstream and CDS checkpoints at
+approximately 23.1B and 35.7B tokens, respectively, and therefore
+does not represent an equal-exposure comparison.
 
-The lineages also differed in their checkpoint and optimizer histories.
-The m5.1 lineage initially inherited weights from a uniform three-region
-model at step 20,000 through a Hugging Face checkpoint, initializing a
-new optimizer for further three-region training.
-It subsequently resumed from the completed three-region Levanter
-checkpoint at step 29,579, preserving optimizer state but restarting
-the learning-rate schedule with 10\% warmup and 20\% final decay
-for the five-region stage.
-In contrast, m1.3 and m3.3 repeatedly resumed pre-cooldown checkpoints
-with optimizer state preserved and without rewarmup.
-Each continuation scheduled decay over the final 20\% of the combined
-parent and continuation training horizon.
-These differences in optimization history limit the interpretation
-of comparisons between mixture lineages.
+We use three descriptive labels for the later mixture lineages:
+\emph{Staged} for uniform three-region training followed by uniform
+five-region training, \emph{Uniform} for uniform five-region training
+from initialization, and \emph{Upstream-weighted} for five-region training
+with extra weight on upstream sequences from initialization.
+These lineages, compared in Supplementary
+Figures~\ref{fig:mixture-llr}--\ref{fig:mixture-probe}, used the standard
+1.12B-parameter architecture with 255-base sequences preceded by BOS
+and batches of 8,192 sequences.
+The uniform three-region mixture assigned equal weight to CDS, upstream,
+and downstream sequences, while five-region mixtures additionally
+included the projected ncRNA and enhancer datasets.
+Mixture weights were implemented using approximate component counts
+within shuffled blocks of equal-length examples. Each component was
+shuffled and sampled from a capped dataset slice, restarting when
+exhausted. Consequently, smaller datasets could be sampled repeatedly,
+while larger datasets could be only partially sampled. For example,
+the initial uniform three-region recipe repeated the downstream dataset
+approximately 3.3 times while using only a subset of the available CDS
+sequences. The resulting training budgets describe sampled sequences
+rather than unique genomic coverage or complete passes through each
+dataset. Further sampling details are given in Supplementary
+Section~\nameref{supp:training-details}.
 
+The Staged lineage accumulated
+approximately 104B model-input tokens on a uniform three-region mixture,
+comprising 42B inherited tokens and 62B additional tokens, before
+continuing for a further 62B tokens on a uniform five-region mixture
+(20\% per region). The Uniform and Upstream-weighted lineages instead used five regions
+from initialization. The Uniform mixture assigned 20\% to each region,
+whereas Upstream-weighted assigned 25\% to upstream and 18.75\% to each of the
+other four regions. All reported training exposures include BOS.
 
-\begin{figure}
-\centering
-\includegraphics[width=\linewidth]{figures/training_mixture_histories.pdf}
-\caption{Training-data exposure histories. The staged m5.1 lineage uses
-approximately 104B model-input tokens of uniform three-region training followed by 62B
-tokens with ncRNA and enhancer data added. The m1.3 and m3.3 controls use
-five-region mixtures from the start; m3.3 assigns upstream 25\% and each other
-region 18.75\%.}\label{fig:later-mixtures}
-\end{figure}
+The lineages also differed in their optimization histories.
+The first Staged continuation inherited model weights from the initial
+three-region run but initialized a new optimizer. The subsequent
+five-region stage restored optimizer state from the completed
+three-region checkpoint and restarted the learning-rate schedule,
+with 10\% warmup and 20\% final decay.
+In contrast, Uniform and Upstream-weighted repeatedly resumed checkpoints from
+before the learning-rate decay phase, preserving optimizer state
+without rewarmup and scheduling decay over the final 20\% of the
+extended training horizon. Continuation runs also differed in
+data-ordering seeds. The checkpoint histories and exact continuation
+configurations are documented in Supplementary
+Section~\nameref{supp:training-details}.
+
+We evaluated the later lineages at saved checkpoints using zero-shot
+likelihood-ratio scoring and frozen-embedding linear probes
+(Supplementary Figures~\ref{fig:mixture-llr}
+and~\ref{fig:mixture-probe}).
+Cumulative training exposure includes only the portions of ancestral
+runs inherited by each continuation, excluding subsequent training
+on branches not inherited. The trajectories show observed checkpoint
+scores without smoothing and use approximately 166B tokens as a
+common comparison horizon, although endpoint exposures are not
+exactly matched. These comparisons describe individual training
+histories in which mixture composition, cumulative regional exposure,
+data ordering, and optimization schedules differ together.
+They therefore do not isolate the causal effect of introducing
+particular functional regions at different stages of training.
 
 \subsection{Hyperparameter transfer}\label{methods:transfer}
 \begin{itemize}
@@ -866,6 +895,10 @@ scale.}\label{fig:transfer}
 \end{figure}
 
 \subsection{Scaling experiments and loss monitoring}\label{methods:scaling}
+The parameter-scaling experiments sampled the annotation-derived CDS,
+upstream, and downstream datasets in proportion to their sizes, giving
+approximately 73\%, 21\%, and 6\% of training sequences, respectively.
+
 \begin{itemize}
 \item List the eight model sizes, common approximately 84.77B-model-input-token budget,
 proportional three-region mixture, transferred hyperparameters, and checkpoint
@@ -1087,7 +1120,7 @@ Evo 2 40B & 8,192 & 1 & 630 & 66 days & 3,635 \\
 \end{tabular}
 \end{table*}
 
-Both Marin DNA configurations use checkpoint
+Both Marin DNA configurations use the Staged checkpoint
 \texttt{mix-v0.9-p1B-i24-exp135-m5.1-step-59158}.
 The optimized benchmark loads its public release,
 \texttt{marin-dna/marin-dna-exp135-m5.1}, at revision
@@ -1303,10 +1336,10 @@ given in Supplementary Section~\nameref{supp:training-details}.}
 \toprule
 Experiment & Input tokens & Batch & Training exposure & Data mixture \\
 \midrule
-Early specialists (Fig.~S4) & 512 & 2,048 &
-Not established & Upstream or CDS only \\
-Early two-region mixtures (Fig.~3A) & 512 & 2,048 &
-Not established & Upstream/CDS mixtures \\
+Early specialists (Fig.~\ref{fig:specialists}) & 512 & 2,048 &
+23.1B / 35.7B evaluated & Upstream or CDS only \\
+Early two-region mixtures (Fig.~\ref{fig:mixtures}A) & 512 & 2,048 &
+23.1B comparison & Upstream/CDS mixtures \\
 \addlinespace
 Reference calibration & 256 & 16,384 &
 2.5B target & Proportional, three regions \\
@@ -1315,15 +1348,15 @@ Transfer validation & 256 & 4,096 &
 Parameter scaling & 256 & 1,536 &
 84.77B observed & Proportional, three regions \\
 \addlinespace
-m5.1 inherited ancestry & 256 & 8,192 &
-41.95B inherited & Uniform, three regions \\
-m5.1 three-region continuation & 256 & 8,192 &
-62.03B & Uniform, three regions \\
-m5.1 five-region continuation & 256 & 8,192 &
-62.03B & Uniform, five regions \\
-m1.3 & 256 & 8,192 &
-$\sim$166B comparison & Uniform, five regions \\
-m3.3 & 256 & 8,192 &
+Staged inherited ancestry & 256 & 8,192 &
+41.95B inherited & Equal weights, three regions \\
+Staged three-region continuation & 256 & 8,192 &
+62.03B & Equal weights, three regions \\
+Staged five-region continuation & 256 & 8,192 &
+62.03B & Equal weights, five regions \\
+Uniform & 256 & 8,192 &
+$\sim$166B comparison & Equal weights, five regions \\
+Upstream-weighted & 256 & 8,192 &
 $\sim$166B comparison & Upstream 25\%; others 18.75\% \\
 \bottomrule
 \end{tabularx}
@@ -1332,6 +1365,10 @@ $\sim$166B comparison & Upstream 25\%; others 18.75\% \\
 
 \subsection{Training configuration details}
 \label{supp:training-details}
+
+The descriptive labels Staged, Uniform, and Upstream-weighted correspond
+to repository identifiers \texttt{m5.1}, \texttt{m1.3}, and
+\texttt{m3.3}, respectively.
 
 Supplementary Table~\ref{tab:models} summarizes the training
 configurations used in the experiments.
@@ -1352,7 +1389,9 @@ different optimization configuration from the standard recipe,
 with an Adam-family optimizer, a configured learning rate of
 $8\times10^{-4}$, and an inverse learning-rate schedule with
 2,000-step cycles.
-Their complete observed training horizons have not been established.
+Table~\ref{tab:models} reports the evaluated specialist checkpoints and
+the shared comparison horizon for the early mixtures; these do not
+establish the complete durations of their training runs.
 The early standard-loss promoter control also differed from the
 standard recipe by omitting reduced loss weighting for repetitive
 sequence.
@@ -1371,20 +1410,20 @@ learning rates were 0.00165607 and 0.00157196, respectively, with
 $\beta_2=0.9908626$ and
 $\epsilon=1.901774\times10^{-14}$.
 
-The m5.1 lineage comprised three training stages: 41.95B tokens
+The Staged lineage comprised three training stages: 41.95B tokens
 inherited from a uniform three-region model, a further 62.03B tokens
 of three-region training, and 62.03B tokens of five-region training.
 The first continuation initialized a new optimizer from inherited
 model weights, whereas the five-region continuation restored
 optimizer state and restarted the learning-rate schedule.
-The m1.3 and m3.3 lineages instead used repeated continuations
+The Uniform and Upstream-weighted lineages instead used repeated continuations
 from pre-cooldown checkpoints, preserving optimizer state without
 rewarmup.
 The comparison horizon for these lineages was approximately
 166B tokens, rather than their configured full horizon of
 approximately 173.7B tokens.
-The m1 lineage branched at absolute steps 23,664, 41,412, and 53,244,
-and the m3 lineage at steps 23,660, 41,405, and 53,235.
+The Uniform lineage branched at absolute steps 23,664, 41,412, and 53,244,
+and the Upstream-weighted lineage at steps 23,660, 41,405, and 53,235.
 Each extension added 29,580 and 29,579 updates, respectively.
 The corresponding data mixtures and their interpretation are
 described in Section~\nameref{methods:mixtures}.
