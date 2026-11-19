@@ -2128,22 +2128,15 @@ def _phase_start_step(mix: str, results: pd.DataFrame) -> float:
     return float(row["num_train_steps"]) - own_steps
 
 
-def _composed_curve(
-    kind: str,
-    leaf: str,
-    subset: str,
-    results: pd.DataFrame,
-    own_tokens: dict[str, float],
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Compose existing offline checkpoints on the cumulative-token axis."""
+def _composed_checkpoints(
+    leaf: str, results: pd.DataFrame, own_tokens: dict[str, float]
+) -> list[tuple[float, str, int]]:
+    """Select inherited checkpoints and their cumulative-token coordinates."""
     chain = _chain(leaf)
     offsets = [
         sum(local_data.inherited_components(mix, own_tokens).values()) for mix in chain
     ]
-    tokens: list[float] = []
-    values: list[float] = []
-    ses: list[float] = []
-
+    checkpoints = []
     for phase_index, mix in enumerate(chain):
         start = _phase_start_step(mix, results)
         cutoff = (
@@ -2152,35 +2145,45 @@ def _composed_curve(
             else np.inf
         )
         for step in BY_MIX[mix].steps:
-            # Drop the final pre-shift m5.1 checkpoint: it is only 0.9B tokens
-            # before the first post-shift point, which aligns with both controls.
-            if (
-                leaf == "exp135-zoonomia-m5.1"
-                and mix == "uniform_to_uniform_1"
-                and step == 29579
-            ):
+            # Preserve S5's omission of the point 0.9B tokens before the first
+            # post-transition checkpoint, as requested for Figure 3.
+            if (leaf == "exp135-zoonomia-m5.1"
+                    and mix == "uniform_to_uniform_1" and step == 29579):
                 continue
-            cumulative_tokens = offsets[phase_index] + (step - start) * TOKENS_PER_STEP
-            if cumulative_tokens > cutoff:
-                continue
-            value, se = _read_checkpoint(kind, mix, step)[subset]
-            tokens.append(cumulative_tokens)
-            values.append(value)
-            ses.append(se)
+            tokens = offsets[phase_index] + (step - start) * TOKENS_PER_STEP
+            if tokens <= cutoff:
+                checkpoints.append((tokens, mix, step))
+    checkpoints.sort()
+    expected = 8 if leaf == "exp135-zoonomia-m5.1" else 9
+    assert len(checkpoints) == expected
+    assert np.all(np.diff([row[0] for row in checkpoints]) > 0)
+    return checkpoints
 
-    order = np.argsort(tokens)
-    result_tokens = np.asarray(tokens)[order]
-    result_values = np.asarray(values)[order]
-    result_ses = np.asarray(ses)[order]
-    expected_checkpoints = 8 if leaf == "exp135-zoonomia-m5.1" else 9
-    assert len(result_tokens) == expected_checkpoints, (
-        f"{kind}/{leaf}: expected {expected_checkpoints} on-path checkpoints, "
-        f"got {len(result_tokens)}"
-    )
-    assert np.all(np.diff(result_tokens) > 0), (
-        f"{kind}/{leaf}: token order is not strict"
-    )
-    return result_tokens, result_values, result_ses
+
+def _composed_curve(
+    kind: str,
+    leaf: str,
+    subset: str,
+    results: pd.DataFrame,
+    own_tokens: dict[str, float],
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Compose existing offline checkpoints on the cumulative-token axis."""
+    checkpoints = _composed_checkpoints(leaf, results, own_tokens)
+    measurements = [_read_checkpoint(kind, mix, step)[subset]
+                    for _tokens, mix, step in checkpoints]
+    return (np.asarray([row[0] for row in checkpoints]),
+            np.asarray([row[0] for row in measurements]),
+            np.asarray([row[1] for row in measurements]))
+
+
+def _lineage_keep(tokens: np.ndarray, leaf: str, token_cutoff: float) -> np.ndarray:
+    """Retain the original S5 horizon, including the first control point beyond it."""
+    keep = np.ones(len(tokens), dtype=bool)
+    if leaf != "exp135-zoonomia-m5.1":
+        keep = tokens <= token_cutoff
+        if keep.any() and not keep.all():
+            keep[np.argmax(~keep)] = True
+    return keep
 
 
 def _lineage_draw_panel(
@@ -2195,13 +2198,8 @@ def _lineage_draw_panel(
     """Draw raw offline checkpoints with capless ±1 SE bars."""
     for leaf, _label, color, marker in LINEAGES:
         tokens, values, ses = _composed_curve(kind, leaf, subset, results, own_tokens)
-        if leaf != "exp135-zoonomia-m5.1":
-            keep = tokens <= token_cutoff
-            if keep.any() and not keep.all():
-                keep[np.argmax(~keep)] = True
-            tokens = tokens[keep]
-            values = values[keep]
-            ses = ses[keep]
+        keep = _lineage_keep(tokens, leaf, token_cutoff)
+        tokens, values, ses = tokens[keep], values[keep], ses[keep]
         ax.errorbar(
             tokens / 1e9,
             values * 100.0,
@@ -3073,7 +3071,7 @@ def balance_endpoint_data(data: pl.DataFrame) -> pl.DataFrame:
     return pl.concat([endpoint.select("arm", "subset", "value"), means.select("arm", "subset", "value")])
 
 
-def plot_mixture_figure(data: pl.DataFrame, results_df=None) -> Figure:
+def plot_mixture_figure(endpoint: pl.DataFrame, trajectories: pl.DataFrame) -> Figure:
     """Figure 3: early endpoints above the complete existing S5 trajectories."""
     apply_style()
     mpl.rcParams.update({
@@ -3092,7 +3090,6 @@ def plot_mixture_figure(data: pl.DataFrame, results_df=None) -> Figure:
     grid_b = fig.add_gridspec(3, 3, left=.18, right=.95, bottom=.065,
                              top=.575, wspace=.47, hspace=.45)
     axes_b = [fig.add_subplot(grid_b[i, j]) for i in range(3) for j in range(3)]
-    endpoint = balance_endpoint_data(data)
     order = ["upstream_only", "cds_only", "proportional", "balanced"]
     colors = dict(zip(order, ["#2f6f63", "#9c4f2f", "#b89446", "#6366a1"]))
     labels = ["Upstream only (100/0)", "CDS only (0/100)",
@@ -3118,15 +3115,21 @@ def plot_mixture_figure(data: pl.DataFrame, results_df=None) -> Figure:
                ["Staged m5.1", "Uniform m1.3", "Upstream-weighted m3.3"],
                loc="upper center", bbox_to_anchor=(.53, .68), ncol=1,
                frameon=False, labelspacing=.25, handlelength=1.5)
-    if results_df is None:
-        results_df = local_data.load_mixture()
-    results = results_df.set_index("mix")
-    own_tokens = {mix: float(results.loc[mix, "tokens"]) for mix in results.index}
-    tokens, _, _ = _composed_curve("llr", "exp135-zoonomia-m5.1", MACRO_SUBSET, results, own_tokens)
-    shift = sum(local_data.inherited_components("exp135-zoonomia-m5.1", own_tokens).values()) / 1e9
+    shifts = trajectories["transition_tokens"].unique()
+    assert len(shifts) == 1
+    shift = shifts.item() / 1e9
     for ax, (subset, title) in zip(axes_b, [(MACRO_SUBSET, "Macro-average"), *PANELS], strict=True):
-        _lineage_draw_panel(ax, kind="llr", subset=subset, results=results,
-                            own_tokens=own_tokens, token_cutoff=float(tokens.max()))
+        for leaf, _label, color, marker in LINEAGES:
+            curve = trajectories.filter(
+                (pl.col("lineage") == leaf) & (pl.col("subset") == subset)
+            ).sort("tokens")
+            assert curve.height > 0
+            ax.errorbar(
+                curve["tokens"].to_numpy() / 1e9,
+                curve["value"].to_numpy() * 100,
+                yerr=curve["se"].to_numpy() * 100,
+                color=color, marker=marker, ecolor=color, capsize=0, zorder=3,
+            )
         ax.axvline(shift, color="#6b7280", linestyle=(0, (4, 2)), linewidth=.7, zorder=1)
         ax.set_title(title.replace("'", "′"), pad=4)
         ax.set_xticks([0, 80, 160])
@@ -3650,11 +3653,11 @@ def region_specialist_performance(output_dir: Path) -> None:
 @cli.command("upstream_coding_mixture_balance")
 @click.pass_obj
 def upstream_coding_mixture_balance(output_dir: Path) -> None:
-    """Combined early endpoints and five-region histories; requires external metrics."""
+    """Combined early endpoints and five-region histories from bundled CSVs."""
     render(
         output_dir,
         "upstream_coding_mixture_balance",
-        lambda _: plot_mixture_figure(shared_step_data(load_trajectories())),
+        lambda _: plot_mixture_figure(*local_data.load_figure3()),
         fixed_size=True,
     )
 

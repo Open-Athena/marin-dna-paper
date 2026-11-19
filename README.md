@@ -13,7 +13,7 @@ GNU Make 4.3 or later, `pdflatex`, and BibTeX.
 
 ```sh
 make                                      # Bundled figures, then paper.pdf
-make figures                              # The 11 figures with bundled inputs
+make figures                              # The figures with bundled inputs
 make figures/learning_rate_transfer.pdf    # Incremental build of one figure
 make figure-learning_rate_transfer        # Force regeneration of one figure
 uv run --locked python src/plot.py --help  # 20 figures; time tree uses a separate script
@@ -35,7 +35,7 @@ The plotting code’s original license is retained in `src/LICENSE`.
 
 ## External snapshots
 
-Nine figures require original predictions or metric Parquets that are not bundled.
+Some figures require original predictions or metric Parquets that are not bundled.
 Ordinary paper builds use their checked-in PDFs. Explicit regeneration fails with
 the expected local path and original URL when an input is missing; it leaves
 existing publication files intact. An absent PDF also triggers this check.
@@ -73,13 +73,32 @@ The two panels have explicitly different time axes; terminal branches include di
 
 ### Figure 3 data
 
-Figure 3 uses measured checkpoint metrics from S3. Fetch and render with the
-configured AWS profile:
+`src/prepare_figure3_data.py` extracts the measured AWS checkpoint data into two
+bundled CSVs. Normal figure builds read only these CSVs and need no AWS access:
+
+- `plot_data/figure3_endpoints.csv`: 12 rows covering four conditions at step
+  22,000, their promoter and missense AUPRC, and their unweighted two-class mean.
+- `plot_data/figure3_trajectories.csv`: 216 checkpoint rows covering three
+  lineages and nine plots, including the stored eight-class macro-average and
+  standard errors, cumulative tokens, and the transition position.
+
+AUPRC values and standard errors are stored as fractions; tokens are absolute
+counts. Rows include original S3 URIs, metric names, and checkpoint identifiers
+for provenance. The export preserves the former S5 checkpoint selection and
+horizon, including its deliberate pre-transition omission; no measurements or
+uncertainty estimates are recomputed. Only Panel A's two-class means are derived.
 
 ```sh
+# Fetch missing Parquets and export both CSVs using the configured AWS profile.
+AWS_PROFILE=marin-dna make fetch-figure3-data
+# Or export using already cached Parquets, without AWS access.
+make figure3-data
+# Render entirely from the bundled CSVs.
+make figure-upstream_coding_mixture_balance
+# Fetch, export, and render together.
 AWS_PROFILE=marin-dna make fetch-figure-upstream_coding_mixture_balance
 ```
 
-Once cached, `make figure-upstream_coding_mixture_balance` regenerates the figure
-offline. Panel A uses the common step-22,000 checkpoint; Panel B retains the
-checkpoint selection and uncertainty bars of the former Supplementary Figure S5.
+The script also accepts `--output-dir` to write exports to a different directory.
+Raw Parquets remain in the gitignored `plot_data/remote/` cache. CSVs are updated
+only by the explicit preparation targets, not by ordinary figure builds.

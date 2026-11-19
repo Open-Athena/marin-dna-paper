@@ -120,6 +120,19 @@ def load_scaling_history() -> pd.DataFrame:
     return df
 
 
+FIGURE3_ENDPOINTS_PATH = ROOT / "figure3_endpoints.csv"
+FIGURE3_TRAJECTORIES_PATH = ROOT / "figure3_trajectories.csv"
+
+
+def load_figure3() -> tuple[pl.DataFrame, pl.DataFrame]:
+    """Load plotting-ready Figure 3 measurements without accessing AWS."""
+    # Preserve the exact binary floats exported from the source Parquets.
+    return tuple(
+        pl.from_pandas(pd.read_csv(local_path(path), float_precision="round_trip"))
+        for path in (FIGURE3_ENDPOINTS_PATH, FIGURE3_TRAJECTORIES_PATH)
+    )
+
+
 def load_mixture() -> pd.DataFrame:
     df = pd.read_csv(local_path(MIXTURE_RESULTS_PATH))
     print(f"Loaded {len(df)} rows from {MIXTURE_RESULTS_PATH}")

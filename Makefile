@@ -30,6 +30,7 @@ PAPER_FIGURES := \
 LOCAL_FIGURES := \
 	figures/multispecies_training_sequences.pdf \
 	figures/next_base_prediction.pdf \
+	figures/upstream_coding_mixture_balance.pdf \
 	figures/variant_scoring_workflow.pdf \
 	figures/vep_performance_vs_throughput.pdf \
 	figures/training_dataset_provenance.pdf \
@@ -44,6 +45,7 @@ LOCAL_FIGURES := \
 PLOT_SVGS := \
 	figures/multispecies_training_sequences.svg \
 	figures/next_base_prediction.svg \
+	figures/upstream_coding_mixture_balance.svg \
 	figures/vep_performance_vs_throughput.svg \
 	figures/learning_rate_transfer.svg \
 	figures/sequence_loss_scaling.svg \
@@ -117,15 +119,21 @@ figure-vep_performance_vs_throughput:
 fetch-figure-vep_performance_vs_throughput:
 	$(PLOT) --fetch vep_performance_vs_throughput
 
-# Regenerate after code changes so an old Panel A cannot masquerade as Figure 3.
-figures/upstream_coding_mixture_balance.pdf figures/upstream_coding_mixture_balance.svg &: $(FIGURE_CODE)
+# Figure 3 is regenerated entirely from bundled, plotting-ready measurements.
+figures/upstream_coding_mixture_balance.pdf figures/upstream_coding_mixture_balance.svg &: $(FIGURE_CODE) plot_data/figure3_endpoints.csv plot_data/figure3_trajectories.csv
 	$(PLOT) upstream_coding_mixture_balance
 
 .PHONY: figure-upstream_coding_mixture_balance fetch-figure-upstream_coding_mixture_balance
 figure-upstream_coding_mixture_balance:
 	$(PLOT) upstream_coding_mixture_balance
-fetch-figure-upstream_coding_mixture_balance:
-	$(PLOT) --fetch upstream_coding_mixture_balance
+fetch-figure-upstream_coding_mixture_balance: fetch-figure3-data
+	$(PLOT) upstream_coding_mixture_balance
+
+.PHONY: figure3-data fetch-figure3-data
+figure3-data:
+	$(FIGURE_PYTHON) src/prepare_figure3_data.py
+fetch-figure3-data:
+	$(FIGURE_PYTHON) src/prepare_figure3_data.py --fetch
 
 # Keep the checked-in PDF usable without external snapshots.
 figures/missense_readout_scaling.pdf figures/missense_readout_scaling.svg &:
