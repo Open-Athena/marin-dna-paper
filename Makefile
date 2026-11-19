@@ -1,6 +1,8 @@
 .DEFAULT_GOAL := all
 FIGURE_PYTHON ?= uv run --locked python
 PLOT := $(FIGURE_PYTHON) src/plot.py
+# FIXME: use measured Figure 3 inputs once S3 access is available.
+FIGURE3_FLAGS ?= --synthetic
 FIGURE_CODE := src/plot.py src/local_data.py src/metrics.py pyproject.toml uv.lock
 
 # Every PDF referenced by paper.tex, in manuscript order.
@@ -20,7 +22,6 @@ PAPER_FIGURES := \
 	figures/mendelian_zero_shot_comparison.pdf \
 	figures/mendelian_probe_comparison.pdf \
 	figures/region_specialist_performance.pdf \
-	figures/mixture_zero_shot_trajectories.pdf \
 	figures/mixture_probe_trajectories.pdf \
 	figures/vep_by_model_size.pdf \
 	figures/vep_by_sequence_likelihood.pdf \
@@ -73,7 +74,6 @@ figures-all: \
 	figure-mendelian_zero_shot_comparison \
 	figure-mendelian_probe_comparison \
 	figure-region_specialist_performance \
-	figure-mixture_zero_shot_trajectories \
 	figure-mixture_probe_trajectories \
 	figure-vep_by_model_size \
 	figure-vep_by_sequence_likelihood \
@@ -119,13 +119,13 @@ figure-vep_performance_vs_throughput:
 fetch-figure-vep_performance_vs_throughput:
 	$(PLOT) --fetch vep_performance_vs_throughput
 
-# Keep the checked-in PDF usable without external snapshots.
-figures/upstream_coding_mixture_balance.pdf figures/upstream_coding_mixture_balance.svg &:
-	$(PLOT) upstream_coding_mixture_balance
+# Regenerate after code changes so an old Panel A cannot masquerade as Figure 3.
+figures/upstream_coding_mixture_balance.pdf figures/upstream_coding_mixture_balance.svg &: $(FIGURE_CODE)
+	$(PLOT) upstream_coding_mixture_balance $(FIGURE3_FLAGS)
 
 .PHONY: figure-upstream_coding_mixture_balance fetch-figure-upstream_coding_mixture_balance
 figure-upstream_coding_mixture_balance:
-	$(PLOT) upstream_coding_mixture_balance
+	$(PLOT) upstream_coding_mixture_balance $(FIGURE3_FLAGS)
 fetch-figure-upstream_coding_mixture_balance:
 	$(PLOT) --fetch upstream_coding_mixture_balance
 

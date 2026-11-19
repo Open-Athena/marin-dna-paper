@@ -304,34 +304,27 @@ regions improved prediction of noncoding variants.
 
 \begin{figure}
 \centering
-\small
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{|p{\dimexpr\linewidth-2\tabcolsep-2\arrayrulewidth\relax}|}
-\hline
-\textbf{A \quad Balanced regional exposure}\par
 \includegraphics[width=\linewidth]{figures/upstream_coding_mixture_balance.pdf}
-\\[3pt]
-\hline
-\textbf{B \quad ncRNA performance}\par
-\textit{Planned focused plot.} Show ncRNA zero-shot AUPRC versus training
-tokens along the staged training history. Mark introduction of ncRNA and
-enhancer-region sequences at approximately 104B tokens. Use the observed
-trajectory from Supplementary Figure~\ref{fig:mixture-llr}, with its
-uncertainty;
-retain the probe view in Supplementary Figure~\ref{fig:mixture-probe}. \\[3pt]
-\hline
-\textbf{C \quad Distal-variant performance}\par
-\textit{Planned focused plot.} Show distal-variant zero-shot AUPRC versus
-training tokens, using the same lineage, transition marker, and uncertainty
-convention as panel B. Source: Supplementary Figure~\ref{fig:mixture-llr}.
-These are observed training histories, not a matched causal ablation. \\[3pt]
-\hline
-\end{tabular}
-\caption{Training-sequence selection: draft panel layout.
-\textbf{A}, Existing upstream/CDS mixture comparison: zero-shot promoter and
-missense AUPRC versus training steps. The rightmost plot is their unweighted
-mean. \textbf{B--C}, Planned ncRNA and distal-variant views around the addition
-of new training regions; complete trajectories remain in the supplement.}
+\caption{\textbf{\textcolor{red}{FIXME: Figure 3 currently uses synthetic
+values and uncertainty bars for layout only. Replace with measured results
+before interpreting or publishing this figure.}} Training-sequence composition
+and observed training histories (intended final content).
+\textbf{A}, Balanced upstream/CDS sampling in the early Qwen3 1.7B preset
+with 512-base inputs without BOS. Four training conditions are compared at
+step 22,000 (approximately 23.1B input tokens): upstream-only (100/0),
+CDS-only (0/100), proportional (approximately 10/90), and balanced (50/50).
+The three plots show zero-shot promoter and missense AUPRC and their
+unweighted two-class mean.
+\textbf{B}, Five-region training histories using the later Marin DNA 1B
+architecture with 255 bases plus BOS. Zero-shot pooled Mendelian AUPRC is
+shown for all eight variant classes and their eight-class macro-average
+for staged m5.1, uniform five-region m1.3, and upstream-weighted five-region
+m3.3. In the final figure, points will be measured checkpoints and error bars
+will denote standard errors.
+Dashed lines mark the approximately 104B-token transition at which m5.1
+introduces ncRNA and enhancer-region sequences. These lineages differ in
+data composition and optimization histories and are not controlled
+ablations of introduction timing.}
 \label{fig:mixtures}
 \end{figure}
 
@@ -359,11 +352,10 @@ upstream, and downstream sequences showed poor zero-shot prediction
 of ncRNA and distal variants. Performance on both classes increased
 markedly after ncRNA and enhancer-region sequences were introduced
 at approximately 104B training tokens
-(Figure~\ref{fig:mixtures}B--C).
+(Figure~\ref{fig:mixtures}B).
 Models trained on all five regions from initialization showed
 different trajectories, with stronger performance on these variant
-classes earlier in training (Supplementary
-Figure~\ref{fig:mixture-llr}).
+classes earlier in training (Figure~\ref{fig:mixtures}B).
 The corresponding linear-probe results showed less consistent changes
 (Supplementary Figure~\ref{fig:mixture-probe}).
 Because these training histories also differed in optimization
@@ -789,8 +781,8 @@ All four models used the Qwen3 1.7B architecture preset, 512-base
 sequences without BOS, and batches of 2,048 sequences, with architecture
 and optimization settings differing from the standard recipe
 (Supplementary Tables~\ref{tab:architectures} and~\ref{tab:models}).
-The direct mixture comparison evaluated six shared checkpoints spanning
-approximately 2.1--23.1B input tokens (Figure~\ref{fig:mixtures}A).
+The direct mixture comparison uses the common step 22,000 checkpoint,
+approximately 23.1B input tokens (Figure~\ref{fig:mixtures}A).
 The separate specialist comparison (Supplementary
 Figure~\ref{fig:specialists}) used upstream and CDS checkpoints at
 approximately 23.1B and 35.7B tokens, respectively, and therefore
@@ -801,8 +793,8 @@ We use three descriptive labels for the later mixture lineages:
 five-region training, \emph{Uniform} for uniform five-region training
 from initialization, and \emph{Upstream-weighted} for five-region training
 with extra weight on upstream sequences from initialization.
-These lineages, compared in Supplementary
-Figures~\ref{fig:mixture-llr}--\ref{fig:mixture-probe}, used the standard
+These lineages, compared in Figure~\ref{fig:mixtures}B and Supplementary
+Figure~\ref{fig:mixture-probe}, used the standard
 1.12B-parameter architecture with 255-base sequences preceded by BOS
 and batches of 8,192 sequences.
 The uniform three-region mixture assigned equal weight to CDS, upstream,
@@ -845,8 +837,8 @@ Section~\nameref{supp:training-details}.
 
 We evaluated the later lineages at saved checkpoints using zero-shot
 likelihood-ratio scoring and frozen-embedding linear probes
-(Supplementary Figures~\ref{fig:mixture-llr}
-and~\ref{fig:mixture-probe}).
+(Figure~\ref{fig:mixtures}B and Supplementary
+Figure~\ref{fig:mixture-probe}).
 Cumulative training exposure includes only the portions of ancestral
 runs inherited by each continuation, excluding subsequent training
 on branches not inherited. The trajectories show observed checkpoint
@@ -1492,14 +1484,6 @@ splicing, and synonymous panels. Both are compared with Evo 2 (40B) and
 GPN-Star (M).
 Performance is measured as AUPRC; error bars denote standard
 errors.}\label{fig:specialists}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[width=\linewidth]{figures/mixture_zero_shot_trajectories.pdf}
-\caption{Zero-shot mixture trajectories. Pooled Mendelian AUPRC versus training
-tokens for three model-mixture lineages. Error bars denote standard
-errors.}\label{fig:mixture-llr}
 \end{figure}
 
 \begin{figure}

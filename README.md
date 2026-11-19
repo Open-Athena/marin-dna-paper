@@ -70,3 +70,18 @@ Add `--fetch` to retrieve or refresh TimeTree's higher-taxon exports; the raw ex
 The offline renderer preserves source node ages while collapsing taxonomic groups and obtains counts from `data/dataset_provenance/`.
 `plot_data/dataset_timetree_sources.json` records source URLs, hashes, and the mapping between source taxa and figure groups.
 The two panels have explicitly different time axes; terminal branches include diversification hidden inside each group, and age uncertainty is not drawn.
+
+### Temporary Figure 3 data
+
+FIXME: Figure 3 currently uses deterministic synthetic endpoints, trajectories,
+and uncertainty bars, marked in both the artwork and caption. These values are
+for layout only and are not experimental results. `make` and
+`make figure-upstream_coding_mixture_balance` reproduce this draft without S3.
+Synthetic data never enter the measurement cache.
+
+Once S3 access is available, run
+`make fetch-figure-upstream_coding_mixture_balance` to render measured data.
+Then clear the `FIGURE3_FLAGS` default in the Makefile and remove the FIXME
+caption text (restoring the measured-checkpoint description). Inspect the
+regenerated figure and rebuild the paper. To explicitly regenerate from cached
+measurements, run `make figure-upstream_coding_mixture_balance FIGURE3_FLAGS=`.

@@ -2191,10 +2191,12 @@ def _lineage_draw_panel(
     results: pd.DataFrame,
     own_tokens: dict[str, float],
     token_cutoff: float,
+    curve_fn=None,
 ) -> None:
     """Draw raw offline checkpoints with capless ±1 SE bars."""
+    curve_fn = _composed_curve if curve_fn is None else curve_fn
     for leaf, _label, color, marker in LINEAGES:
-        tokens, values, ses = _composed_curve(kind, leaf, subset, results, own_tokens)
+        tokens, values, ses = curve_fn(kind, leaf, subset, results, own_tokens)
         if leaf != "exp135-zoonomia-m5.1":
             keep = tokens <= token_cutoff
             if keep.any() and not keep.all():
@@ -3058,6 +3060,113 @@ def shared_step_data(trajectories: pl.DataFrame) -> pl.DataFrame:
     return filtered
 
 
+def balance_endpoint_data(data: pl.DataFrame) -> pl.DataFrame:
+    """Select measured common-checkpoint values and the two-class mean."""
+    endpoint = data.filter(pl.col("step") == 22000)
+    assert endpoint.height == 8
+    assert endpoint.select("arm", "subset").unique().height == 8
+    assert set(endpoint["arm"]) == set(ARMS)
+    assert set(endpoint["subset"]) == set(BALANCE_SUBSETS.values())
+    assert endpoint["value"].is_not_null().all()
+    assert endpoint["value"].is_between(0, 1).all()
+    means = endpoint.group_by("arm").agg(pl.col("value").mean()).with_columns(
+        pl.lit("two_class_mean").alias("subset")
+    )
+    return pl.concat([endpoint.select("arm", "subset", "value"), means.select("arm", "subset", "value")])
+
+
+def _synthetic_mixture_curve(kind, leaf, subset, results, own_tokens):
+    """Draft layout values only; never read or write the measurement cache."""
+    region = (len(ALL_SUBSETS) - 1) / 2 if subset == MACRO_SUBSET else ALL_SUBSETS.index(subset)
+    lineage = [entry[0] for entry in LINEAGES].index(leaf)
+    tokens = np.linspace(20, 166, 9) * 1e9
+    values = .30 + .012 * region + .025 * np.sin(np.arange(9) * .8 + lineage)
+    ses = np.full(9, .012)
+    return tokens, values, ses
+
+
+def synthetic_balance_endpoints() -> pl.DataFrame:
+    """Deterministic invented endpoints, explicitly for the FIXME draft."""
+    return pl.DataFrame([
+        {"arm": arm, "subset": subset, "step": 22000,
+         "value": .28 + .018 * index + .025 * region}
+        for index, arm in enumerate(ARMS)
+        for region, subset in enumerate(BALANCE_SUBSETS.values())
+    ])
+
+
+def plot_mixture_figure(data: pl.DataFrame, results_df=None, *, synthetic=False) -> Figure:
+    """Figure 3: early endpoints above the complete existing S5 trajectories."""
+    apply_style()
+    mpl.rcParams.update({
+        "font.size": 7.5, "axes.titlesize": 8, "axes.labelsize": 7.5,
+        "xtick.labelsize": 7.2, "ytick.labelsize": 7.2,
+        "legend.fontsize": 7.2, "lines.linewidth": 0.8,
+        "lines.markersize": 2.5, "axes.linewidth": 0.6,
+    })
+    # Physical manuscript column width; preserve readable type at placement.
+    fig = plt.figure(figsize=(3.28, 6.0))
+    grid = fig.add_gridspec(4, 3, left=.18, right=.95, bottom=.065,
+                           top=.87, wspace=.47, hspace=.65,
+                           height_ratios=[.8, 1, 1, 1])
+    # A separate gap accommodates the B heading and shared lineage legend.
+    axes_a = [fig.add_subplot(grid[0, i]) for i in range(3)]
+    grid_b = fig.add_gridspec(3, 3, left=.18, right=.95, bottom=.065,
+                             top=.575, wspace=.47, hspace=.45)
+    axes_b = [fig.add_subplot(grid_b[i, j]) for i in range(3) for j in range(3)]
+    endpoint = balance_endpoint_data(data)
+    order = ["upstream_only", "cds_only", "proportional", "balanced"]
+    colors = dict(zip(order, ["#2f6f63", "#9c4f2f", "#b89446", "#6366a1"]))
+    labels = ["Upstream only (100/0)", "CDS only (0/100)",
+              "Proportional (~10/90)", "Balanced (50/50)"]
+    for ax, (subset, title) in zip(axes_a, [
+        ("tss_proximal", "Promoter"), ("missense_variant", "Missense"),
+        ("two_class_mean", "Mean of both")
+    ], strict=True):
+        for x, arm in enumerate(order):
+            value = endpoint.filter((pl.col("arm") == arm) & (pl.col("subset") == subset))["value"].item()
+            ax.plot(x, value * 100, marker="o", markersize=4, color=colors[arm], linestyle="none")
+        ax.set_title(title, pad=4)
+        ax.set_xlim(-.5, 3.5)
+        ax.set_xticks([])
+        ax.yaxis.set_major_locator(MaxNLocator(3))
+    axes_a[0].set_ylabel("AUPRC (%)")
+    fig.text(.02, .975, "A  Balanced upstream/CDS sampling", fontsize=8, weight="bold")
+    fig.legend([Line2D([], [], color=colors[a], marker="o", linestyle="none", markersize=4) for a in order],
+               labels, loc="upper center", bbox_to_anchor=(.53, .962), ncol=2,
+               frameon=False, columnspacing=.7, handletextpad=.3, handlelength=.8)
+    fig.text(.02, .695, "B  Five-region training histories", fontsize=8, weight="bold")
+    fig.legend([Line2D([], [], color=c, marker=m) for _, _, c, m in LINEAGES],
+               ["Staged m5.1", "Uniform m1.3", "Upstream-weighted m3.3"],
+               loc="upper center", bbox_to_anchor=(.53, .68), ncol=1,
+               frameon=False, labelspacing=.25, handlelength=1.5)
+    if results_df is None:
+        results_df = local_data.load_mixture()
+    results = results_df.set_index("mix")
+    own_tokens = {mix: float(results.loc[mix, "tokens"]) for mix in results.index}
+    curve_fn = _synthetic_mixture_curve if synthetic else _composed_curve
+    tokens, _, _ = curve_fn("llr", "exp135-zoonomia-m5.1", MACRO_SUBSET, results, own_tokens)
+    shift = sum(local_data.inherited_components("exp135-zoonomia-m5.1", own_tokens).values()) / 1e9
+    for ax, (subset, title) in zip(axes_b, [(MACRO_SUBSET, "Macro-average"), *PANELS], strict=True):
+        _lineage_draw_panel(ax, kind="llr", subset=subset, results=results,
+                            own_tokens=own_tokens, token_cutoff=float(tokens.max()), curve_fn=curve_fn)
+        ax.axvline(shift, color="#6b7280", linestyle=(0, (4, 2)), linewidth=.7, zorder=1)
+        ax.set_title(title.replace("'", "′"), pad=4)
+        ax.set_xticks([0, 80, 160])
+        ax.yaxis.set_major_locator(MaxNLocator(3, integer=True))
+        ax.yaxis.set_major_formatter(StrMethodFormatter("{x:.0f}"))
+    for ax in axes_b[:6]:
+        ax.tick_params(labelbottom=False)
+    for ax in axes_b[::3]:
+        ax.set_ylabel("AUPRC (%)")
+    axes_b[7].set_xlabel("Training tokens (B)")
+    if synthetic:
+        fig.text(.5, .732, "FIXME: SYNTHETIC DATA", ha="center", va="center",
+                 fontsize=9, weight="bold", color="#b00020",
+                 bbox=dict(facecolor="#fff2f2", edgecolor="#b00020", pad=3))
+    return fig
+
+
 def plot_balance(data: pl.DataFrame) -> plt.Figure:
     """Create upstream, missense, and two-subset-mean trajectory panels."""
     apply_style()
@@ -3324,7 +3433,7 @@ def _publish(staging: Path, output_dir: Path, filenames: list[str]) -> None:
         (staging / filename).replace(output_dir / filename)
 
 
-def render(output_dir: Path, name: str, draw, *, overview=False, reports=()) -> None:
+def render(output_dir: Path, name: str, draw, *, overview=False, reports=(), fixed_size=False) -> None:
     """Render into a temporary directory and publish only after saving succeeds.
 
     ``draw(staging)`` returns a Figure and may write the named reports there.
@@ -3355,7 +3464,7 @@ def render(output_dir: Path, name: str, draw, *, overview=False, reports=()) -> 
                         options = (
                             {}
                             if overview
-                            else {"bbox_inches": "tight", "transparent": True}
+                            else {"bbox_inches": None if fixed_size else "tight", "transparent": True}
                         )
                         path = staging / f"{name}.{extension}"
                         figure.savefig(path, metadata=metadata, **options)
@@ -3566,13 +3675,18 @@ def region_specialist_performance(output_dir: Path) -> None:
 
 
 @cli.command("upstream_coding_mixture_balance")
+@click.option("--synthetic", is_flag=True, help="FIXME draft only: invented data with a visible warning.")
 @click.pass_obj
-def upstream_coding_mixture_balance(output_dir: Path) -> None:
-    """Equal-step upstream/CDS mixture trajectories; requires external metrics."""
+def upstream_coding_mixture_balance(output_dir: Path, synthetic: bool = False) -> None:
+    """Combined early endpoints and five-region histories; requires external metrics."""
     render(
         output_dir,
         "upstream_coding_mixture_balance",
-        lambda _: plot_balance(shared_step_data(load_trajectories())),
+        lambda _: plot_mixture_figure(
+            synthetic_balance_endpoints() if synthetic else shared_step_data(load_trajectories()),
+            synthetic=synthetic,
+        ),
+        fixed_size=True,
     )
 
 

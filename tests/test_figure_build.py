@@ -120,7 +120,7 @@ class FigureBuildTests(unittest.TestCase):
             )
         )
         standalone = {'dataset_timetree'}
-        self.assertEqual(set(plot.cli.commands) | standalone, stems)
+        self.assertEqual((set(plot.cli.commands) - {"mixture_zero_shot_trajectories"}) | standalone, stems)
         makefile = (ROOT / "Makefile").read_text()
         for stem in stems:
             self.assertIn(f"figure-{stem}:\n", makefile)
