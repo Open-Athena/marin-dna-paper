@@ -178,10 +178,8 @@ much lower cost}
 \\[3pt]
 \hline
 \textbf{C \quad From sequences to variant scores}\par
-\includegraphics[width=\linewidth]{figures/variant_scoring_workflow.pdf}\par
-Zero-shot scoring compares reference and alternate sequence likelihoods
-without labeled variant examples. A linear probe uses labeled examples to
-learn from the frozen model's reference/alternate representations. \\[3pt]
+\includegraphics[width=\linewidth]{figures/variant_scoring_workflow.pdf}
+\\[3pt]
 \hline
 \end{tabular}
 \caption{From DNA to variant ranking.
@@ -198,8 +196,11 @@ representations. The abbreviated example shows shifted next-base targets.
 Panels A and B illustrate the later recipe with 255 DNA bases plus a BOS
 token, rather than the early 512-base experiments; mixture schedules are
 omitted. Training uses DNA without variant-effect labels.
-\textbf{C}, Variant scoring uses sequence likelihoods or a linear probe
-trained on frozen reference/alternate representations.}
+\textbf{C}, Both readouts use the frozen model. The zero-shot damage score
+negates the mean alternate-minus-reference log-likelihood ratio (LLR)
+across forward and reverse-complement strands. Only the linear probe
+uses labeled variants. Its inputs are the pooled reference embedding
+and the change in embedding after substituting the alternate allele.}
 \label{fig:model-overview}
 \end{figure}
 
@@ -1078,9 +1079,9 @@ high-impact annotations, including stop gains and canonical splice
 donor and acceptor variants. The splicing category therefore includes
 splice-region and near-exon variants rather than canonical
 splice-disrupting variants.
-All reported comparisons used chromosome-disjoint development
-partitions, with separate test partitions reserved for independent
-evaluation (Table~\ref{tab:benchmarks}).
+All reported comparisons used the development partition of each benchmark.
+Separate chromosomes were reserved for independent evaluation
+(Table~\ref{tab:benchmarks}).
 
 The Mendelian benchmark was derived from TraitGym, with additional
 missense and splicing variants~\citep{benegas2025traitgym,mendeliancard}.
@@ -1233,10 +1234,12 @@ one additional base to the left of the variant.
 Each reference and alternate sequence was evaluated in both
 forward and reverse-complement orientations
 \citep{marindnabencheval,marindnaevo2code}.
+Supplementary Section~\nameref{supp:scoring-details} describes coordinate
+handling and checks on the evaluated windows.
 
 For zero-shot scoring, we calculated the log-likelihood ratio
 between alternate and reference sequences on each strand $s$,
-and averaged the resulting scores across strands:
+then negated their mean to obtain the damage score
 \[
 \mathrm{LLR}_s =
     \ell_s(\mathrm{alt})-\ell_s(\mathrm{ref}),
@@ -1248,8 +1251,8 @@ S_{\mathrm{LLR}} =
 Here, $\ell_s$ is the sum of the natural logarithms of the
 predicted probabilities of observed nucleotides from the variant
 position to the end of the oriented window.
-Probabilities were conditioned on preceding nucleotides and
-normalized over A, C, G, and T.
+Probabilities were conditioned on the preceding tokens, including BOS
+where present, and normalized over A, C, G, and T.
 The shared prefix of the reference and alternate sequences
 cancels in the likelihood ratio, while positions following the
 variant contribute because their predicted probabilities may
@@ -1259,7 +1262,7 @@ with larger values indicating lower relative likelihood of the
 alternate sequence.
 
 For linear probing, we extracted representations from the frozen
-model's final hidden layer.
+model's final hidden layer after the decoder's final normalization.
 For each allele, hidden states were averaged across all DNA
 positions, excluding BOS where present, and the resulting vectors
 were averaged across forward and reverse-complement orientations.
@@ -1273,8 +1276,8 @@ reference representations:
 \mathbf{h}_{\mathrm{alt}}-\mathbf{h}_{\mathrm{ref}}
 \right].
 \]
-Evo~2 used its final normalized hidden states with the same
-feature construction and classifier-fitting procedure
+For Evo~2 we extracted the output of its final normalization module
+and used the same feature construction and classifier-fitting procedure
 \citep{marindnaevo2code}.
 We fitted a separate $L_2$-regularized logistic regression for
 each model checkpoint, benchmark, and variant class.
@@ -1295,8 +1298,8 @@ across up to five chromosome-grouped inner cross-validation folds.
 Feature means and standard deviations were estimated using only
 the training portion of each fit and applied to standardize the
 corresponding held-out features.
-Each variant was assigned the predicted probability of the
-positive class from the probe fitted without its chromosome.
+Each reported probe score was the predicted probability of the
+positive class from the fit that held out the variant's chromosome.
 Evaluation aggregation and uncertainty estimation are described
 in Section~\nameref{methods:statistics}.
 
@@ -1342,8 +1345,7 @@ in the accompanying plotting-data table.
 Figure~\ref{fig:missense-scaling}B,C reuses the Marin DNA missense
 endpoints from Supplementary Figure~\ref{fig:downstream}. Both scoring methods
 use the same 5,800 Mendelian missense variants or 19,059 SGE missense
-variants across all eight terminal models, retaining rows with finite
-probe predictions and forward/reverse-complement likelihood ratios.
+variants across all eight terminal models.
 AUPRC is averaged across chromosomes with weights proportional to the
 number of variants; standard errors use 1,000 chromosome-bootstrap
 resamples with seed 0. The SGE scaling comparison retains this
@@ -1370,8 +1372,6 @@ linear-probe AUPRC estimates as Supplementary
 Figure~\ref{fig:downstream}, comprising six Mendelian variant
 classes and the missense and splicing saturation genome editing
 (SGE) classes.
-Within each model and variant class, both scoring methods were
-evaluated on identical variants with finite probe predictions.
 Performance was summarized using chromosome-weighted AUPRC,
 with standard errors estimated by chromosome bootstrap
 (1,000 resamples; seed~0).
@@ -1401,10 +1401,12 @@ Figure~\ref{fig:missense-scaling}B,C and Supplementary
 Figures~\ref{fig:downstream} and~\ref{fig:loss-vep},
 both zero-shot and linear-probe performance were summarized
 using chromosome-weighted AUPRC.
-We retained variants with finite out-of-fold probe predictions
-and finite forward- and reverse-complement likelihood ratios.
-Within each variant class, the same variants were evaluated
-across all eight model sizes and both scoring methods.
+For each Marin DNA checkpoint we selected rows with a finite out-of-fold
+probe prediction, then required the strand-averaged LLR to be finite on
+every selected row. Both strand-specific LLRs were finite throughout
+these records. The retained variant identifiers were identical across
+all eight sizes within each plotted class. Each chromosome contributed
+in proportion to its number of finite scores if both labels were present.
 
 
 \begin{itemize}
@@ -1941,6 +1943,46 @@ The fit was descriptive and was not used to select model sizes
 or extrapolate performance beyond the observed range.
 
 
+\subsection{Variant-scoring implementation details}
+\label{supp:scoring-details}
+
+Both workflows read uppercase sequence from the Ensembl GRCh38 primary
+assembly. For a window of $W$ bases, the zero-based SNV index within
+the DNA sequence was $i=\lfloor W/2\rfloor$ on the forward strand and
+$W-1-i$ on its reverse complement. The reverse strand thus scores the
+complemented alleles in the same genomic interval. For Marin DNA, BOS
+adds one to the token index where present. It supplies context and is
+excluded from the scored targets and the embedding pool.
+
+At a chromosome end, both readers clip the interval and pad the
+missing flank with N before orienting the sequence. An unavailable
+reference or chromosome, a mismatch with the supplied reference allele,
+or an alternate allele outside A/C/G/T stops scoring. Marin DNA also
+rejects a non-ACGT token at a scored target. The Evo~2 likelihood code
+instead selects the A probability for an unrecognized target, while
+the original token remains in the model input
+\citep{marindnabencheval,marindnaevo2code}. We checked the released
+development coordinates against the Ensembl release~115 sequence.
+All 16,140 Mendelian reference alleles matched, and all 255-, 512- and
+8,192-base windows lay within the chromosome and contained only A/C/G/T.
+The same checks passed for all 23,853 SGE variants at the evaluated
+255-base width.
+
+Both workflows average each allele's hidden states across positions
+and strands in single precision. Marin DNA stores the resulting vectors
+in half precision and converts them to single precision before allele
+subtraction. The Evo~2 workflow defaults to single-precision storage.
+Missing embedding columns or nonfinite vectors stop probe fitting
+before the data are split by class. Class eligibility is assessed on
+the development partition. If a class fails the eligibility criteria
+or its fitting procedure raises an exception, its scores remain
+missing. Chromosome-grouped folds are formed without stratifying on
+labels. Both labels were present in the training and validation sets
+of every inner fold for the reported Marin DNA scaling probes.
+A separate classifier fitted on all eligible development examples is
+saved for reuse. Reported predictions come exclusively from the outer
+chromosome holdouts~\citep{marindnabencheval,marindnaevo2code}.
+
 % Supplementary numbering uses distinct PDF anchors.
 \setcounter{figure}{0}
 \renewcommand{\thefigure}{S\arabic{figure}}
@@ -1959,7 +2001,8 @@ dataset. \textbf{(B)} Zoom in on mammalian orders. Counts show annotation-derive
 \includegraphics[width=\linewidth]{figures/mendelian_zero_shot_comparison.pdf}
 \caption{Zero-shot Mendelian benchmark comparison. Entries report AUPRC (\%);
 Macro Avg is the unweighted mean across variant classes. Marin DNA and Evo 2 use
-LLR, GPN-Star uses calibrated LLR, and AlphaGenome uses the maximum L2
+the negative strand-averaged LLR, GPN-Star uses the negative calibrated LLR,
+and AlphaGenome uses the maximum L2
 reference/alternate prediction score.}\label{fig:benchmarks}
 \end{figure}
 
@@ -1996,7 +2039,7 @@ standard errors.}\label{fig:mixture-probe}
 \begin{figure}
 \centering
 \includegraphics[width=\linewidth]{figures/vep_by_model_size.pdf}
-\caption{VEP across model scale. Zero-shot LLR and linear probes are evaluated
+\caption{VEP across model scale. The zero-shot damage score and linear probes are evaluated
 on identical variants. Performance is chromosome-weighted AUPRC; error bars
 denote standard errors.}\label{fig:downstream}
 \end{figure}
