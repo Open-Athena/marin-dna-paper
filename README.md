@@ -60,7 +60,10 @@ replicates and seed 0; leaderboard and lineage exports retain stored metrics
 and standard errors. Mixture trajectories preserve the former supplementary
 checkpoint selection and horizon, including its deliberate pre-transition
 omission. The upstream/CDS endpoints use step 22,000, with an unweighted mean of
-the two classes; the later macro-average is the stored eight-class result.
+the two classes. Their stored matched-group bootstrap SEs are retained;
+the two-class mean uses `sqrt(SE_promoter^2 + SE_missense^2) / 2` because
+the classes have disjoint matched groups. The later macro-average is the
+stored eight-class result.
 Undefined benchmark cells remain missing rather than being imputed.
 
 The CSVs retain the values consumed by the plots, with source URIs and model or

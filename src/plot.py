@@ -2236,9 +2236,7 @@ SPECIALIST_SUBPLOT_HEIGHT_PX = 100.0
 
 SPECIALIST_INK = "#1f1e1b"
 
-AUPRC_BASELINE_PCT = 10.0
-
-ROLE_ORDER = ("Specialist", "Evo 2 (40B)", "GPN-Star (M)")
+ROLE_ORDER = ("Upstream", "CDS", "Evo 2 (40B)", "GPN-Star (M)")
 
 BASELINE_COLORS = {
     "Evo 2 (40B)": "#999999",
@@ -2255,27 +2253,17 @@ PANEL_ORDER = (
     "synonymous_variant",
 )
 
-PANEL_SPECS = {
-    "5_prime_UTR_variant": {
-        "specialist_id": "exp21-promoters-yolo-step-22000",
-        "region": "upstream",
-    },
-    "tss_proximal": {
-        "specialist_id": "exp21-promoters-yolo-step-22000",
-        "region": "upstream",
-    },
-    "missense_variant": {
-        "specialist_id": "exp27-cds-yolo-step-34000",
-        "region": "cds",
-    },
-    "splicing": {
-        "specialist_id": "exp27-cds-yolo-step-34000",
-        "region": "cds",
-    },
-    "synonymous_variant": {
-        "specialist_id": "exp27-cds-yolo-step-34000",
-        "region": "cds",
-    },
+SPECIALIST_IDS = {
+    "Upstream": "exp21-promoters-yolo-step-22000",
+    "CDS": "exp27-cds-yolo-step-34000",
+}
+
+PANEL_REGIONS = {
+    "5_prime_UTR_variant": "upstream",
+    "tss_proximal": "upstream",
+    "missense_variant": "cds",
+    "splicing": "cds",
+    "synonymous_variant": "cds",
 }
 
 SPECIALIST_SUBSET_DISPLAY = {
@@ -2293,13 +2281,12 @@ BASELINE_IDS = {
 
 
 def _specialist_draw_panel(ax: Axes, data: pd.DataFrame, subset: str) -> None:
-    """Draw one consequence panel on its own y-axis."""
+    """Compare both specialists and both generalists within one variant class."""
     assert set(data["subset"]) == {subset}
     assert data["n"].nunique() == 1
-    region = str(data["region"].iloc[0])
-    assert region in SPECIALIST_REGION_COLORS
     palette = {
-        "Specialist": SPECIALIST_REGION_COLORS[region],
+        "Upstream": SPECIALIST_REGION_COLORS["upstream"],
+        "CDS": SPECIALIST_REGION_COLORS["cds"],
         **BASELINE_COLORS,
     }
     sns.barplot(
@@ -2333,21 +2320,21 @@ def _specialist_draw_panel(ax: Axes, data: pd.DataFrame, subset: str) -> None:
         )
     ax.set_axisbelow(True)
     ax.grid(False)
-    ax.set_ylim(bottom=AUPRC_BASELINE_PCT)
+    ax.set_ylim(0, 70)
+    ax.set_yticks([0, 20, 40, 60])
     ax.set_xlabel("")
     ax.tick_params(axis="x", bottom=False, labelbottom=False)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.set_title(
         SPECIALIST_SUBSET_DISPLAY[subset],
-        color=SPECIALIST_REGION_COLORS[region],
         pad=7,
     )
     ax.set_box_aspect(1)
 
 
 def plot_specialists(data: pd.DataFrame) -> Figure:
-    """Build five independently scaled consequence panels in a 2x3 grid."""
+    """Build five consequence panels with a common AUPRC scale in a 2x3 grid."""
     mpl.rcdefaults()
     mpl.rcParams.update(
         {
@@ -2646,20 +2633,27 @@ def plot_mixture_figure(endpoint: pl.DataFrame, trajectories: pl.DataFrame) -> F
         ("two_class_mean", "Mean of both")
     ], strict=True):
         for x, arm in enumerate(order):
-            value = endpoint.filter((pl.col("arm") == arm) & (pl.col("subset") == subset))["value"].item()
-            ax.plot(x, value * 100, marker="o", markersize=4, color=colors[arm], linestyle="none")
+            row = endpoint.filter(
+                (pl.col("arm") == arm) & (pl.col("subset") == subset)
+            )
+            value, se = row["value"].item(), row["se"].item()
+            ax.bar(x, value * 100, width=.75, color=colors[arm],
+                   edgecolor=TEXT_COLOR, linewidth=.5,
+                   yerr=se * 100, error_kw={"ecolor": TEXT_COLOR,
+                                          "elinewidth": .8, "capsize": 0})
         ax.set_title(title, pad=4)
         ax.set_xlim(-.5, 3.5)
         ax.set_xticks([])
-        ax.yaxis.set_major_locator(MaxNLocator(3))
+        ax.set_ylim(0, 55)
+        ax.set_yticks([0, 25, 50])
     axes_a[0].set_ylabel("AUPRC (%)")
     fig.text(.02, .975, "A  Balanced upstream/CDS sampling", fontsize=8, weight="bold")
-    fig.legend([Line2D([], [], color=colors[a], marker="o", linestyle="none", markersize=4) for a in order],
+    fig.legend([Patch(facecolor=colors[a], edgecolor=TEXT_COLOR, linewidth=.5) for a in order],
                labels, loc="upper center", bbox_to_anchor=(.53, .962), ncol=2,
                frameon=False, columnspacing=.7, handletextpad=.3, handlelength=.8)
     fig.text(.02, .695, "B  Five-region training histories", fontsize=8, weight="bold")
     fig.legend([Line2D([], [], color=c, marker=m) for _, _, c, m in LINEAGES],
-               ["Staged m5.1", "Uniform m1.3", "Upstream-weighted m3.3"],
+               [label for _, label, _, _ in LINEAGES],
                loc="upper center", bbox_to_anchor=(.53, .68), ncol=1,
                frameon=False, labelspacing=.25, handlelength=1.5)
     shifts = trajectories["transition_tokens"].unique()

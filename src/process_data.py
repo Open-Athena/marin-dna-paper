@@ -37,13 +37,14 @@ from plot import (
     MATCHED_LOSS_COLUMN,
     MISSENSE_DATASET,
     PANEL_ORDER,
-    PANEL_SPECS,
+    PANEL_REGIONS,
     READOUTS,
     ROLE_ORDER,
     SCALING_SUBSETS,
     SCORE_TYPE,
     SHORT_NAMES,
     SPECIALIST_DATASET,
+    SPECIALIST_IDS,
     SPECIALIST_SUBSET_DISPLAY,
     SUBSET,
     TOKENS_PER_STEP,
@@ -710,9 +711,9 @@ def _lineage_keep(tokens: np.ndarray, leaf: str, token_cutoff: float) -> np.ndar
 
 
 def load_plot_data() -> pd.DataFrame:
-    """Load the five region-matched comparisons from current evals_v2 metrics."""
+    """Load both specialists and both comparators for all five variant classes."""
     required_ids = {
-        *(spec["specialist_id"] for spec in PANEL_SPECS.values()),
+        *SPECIALIST_IDS.values(),
         *BASELINE_IDS.values(),
     }
     models = {
@@ -726,9 +727,8 @@ def load_plot_data() -> pd.DataFrame:
 
     records: list[dict[str, Any]] = []
     for subset in PANEL_ORDER:
-        spec = PANEL_SPECS[subset]
         role_to_model_id = {
-            "Specialist": spec["specialist_id"],
+            **SPECIALIST_IDS,
             **BASELINE_IDS,
         }
         for role, model_id in role_to_model_id.items():
@@ -750,7 +750,7 @@ def load_plot_data() -> pd.DataFrame:
                 {
                     "subset": subset,
                     "consequence": SPECIALIST_SUBSET_DISPLAY[subset],
-                    "region": spec["region"],
+                    "region": PANEL_REGIONS[subset],
                     "role": role,
                     "model_id": model_id,
                     "protocol": DEFAULT_PROTOCOL[model.family],
@@ -769,7 +769,7 @@ def load_plot_data() -> pd.DataFrame:
 
 
 def balance_endpoint_data(data: pl.DataFrame) -> pl.DataFrame:
-    """Select measured common-checkpoint values and the two-class mean."""
+    """Select common-checkpoint values and SEs, including the two-class mean."""
     endpoint = data.filter(pl.col("step") == 22000)
     assert endpoint.height == 8
     assert endpoint.select("arm", "subset").unique().height == 8
@@ -777,10 +777,18 @@ def balance_endpoint_data(data: pl.DataFrame) -> pl.DataFrame:
     assert set(endpoint["subset"]) == set(BALANCE_SUBSETS.values())
     assert endpoint["value"].is_not_null().all()
     assert endpoint["value"].is_between(0, 1).all()
-    means = endpoint.group_by("arm").agg(pl.col("value").mean()).with_columns(
+    assert endpoint["se"].is_not_null().all()
+    assert endpoint["se"].is_finite().all() and (endpoint["se"] >= 0).all()
+    # Match compute_auprc_metrics: the two subsets have disjoint match_group
+    # bootstrap units, so the SE of their unweighted mean is sqrt(sum(SE²))/2.
+    means = endpoint.group_by("arm").agg(
+        pl.col("value").mean(),
+        (pl.col("se").pow(2).sum().sqrt() / 2).alias("se"),
+    ).with_columns(
         pl.lit("two_class_mean").alias("subset")
     )
-    return pl.concat([endpoint.select("arm", "subset", "value"), means.select("arm", "subset", "value")])
+    columns = ["arm", "subset", "value", "se"]
+    return pl.concat([endpoint.select(columns), means.select(columns)])
 
 
 def prepare_endpoints() -> pl.DataFrame:
