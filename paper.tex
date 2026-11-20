@@ -1,4 +1,5 @@
 \documentclass[a4paper,num-refs]{oup-contemporary}
+\usepackage{amsmath}
 \journal{gigascience}
 % Publication metadata remains provisional; no submission venue selected.
 \jname{TODO: journal}
@@ -854,107 +855,81 @@ particular functional regions at different stages of training.
 
 \subsection{Hyperparameter transfer}\label{methods:transfer}
 
-We calibrated optimization at a small reference scale and tested fixed
-transfer rules at larger scales,
-following the principle of small-model hyperparameter transfer
-\citep{yang2021transfer,mlodozeniec2025completed}. This separates changes
-in model capacity from avoidable differences in optimization quality.
-The experiments used the architecture family described in
-Section~\nameref{methods:architecture}, with 255 bases plus BOS, and a
-mixture of animal CDS, upstream, and downstream sequences with sampling
-weights 0.7319, 0.2062, and 0.0619, respectively. Historical configurations
-and results are recorded in the experiment report and pinned training
+We calibrated optimizer hyperparameters on a small reference model
+and applied fixed transfer rules at larger scales, following previous
+work on hyperparameter transfer
+\citep{yang2021transfer,mlodozeniec2025completed}.
+This approach allowed us to use a consistent optimization procedure
+across model sizes without independently tuning each model.
+All experiments used the architecture family described in
+Section~\nameref{methods:architecture}, with 255 DNA bases plus BOS,
+and a dataset-proportional mixture of CDS, upstream, and downstream
+sequences with sampling weights 0.7319, 0.2062, and 0.0619,
+respectively. Historical configurations and results are documented
+in the experiment reports and pinned training
 implementation~\citep{marindna109,marin4251,marintransfercode}.
 
-The reference model had approximately 25.2M parameters, hidden width 512,
-and six layers. Its configured training budget was 2.5B model-input tokens
-with batches of 16,384 sequences (4,194,304 input tokens per update),
-rounded down to 596 optimizer updates. We used Adam with Hyperball
-normalization (AdamH) for linear-layer weights and Adam for embeddings,
-normalization parameters, and remaining parameters.
-The two parameter groups have separate peak learning rates, denoted
-$\eta_H$ and $\eta_A$. Both schedules used 10\% warmup, a constant middle
-phase, and linear decay to zero over the final 20\% of training.
-Nesterov momentum was disabled.
+The reference model had approximately 25.2M parameters, hidden width
+512, and six layers. We trained it for a configured 2.5B model-input
+tokens using batches of 16,384 sequences (4,194,304 tokens per update).
+Optimization used AdamH for linear-layer weights and Adam for the
+remaining parameters, with separate peak learning rates $\eta_H$ and
+$\eta_A$, respectively.
+We performed five hyperparameter searches using
+Vizier~\citep{vizierrepo}, one for each initialization scale, jointly
+varying seven optimizer and regularization parameters
+(Supplementary Table~\ref{tab:transfer-search}).
+We selected the configuration with the lowest final monitoring loss
+among runs with finite results, obtaining an initialization scale of
+0.02. The selection criterion was sequence loss on fixed human
+monitoring datasets (Section~\nameref{methods:scaling}), rather than
+downstream variant-prediction performance.
+The search procedure and selected parameters are documented in
+Supplementary Section~\nameref{supp:transfer-details}.
 
-We ran five independent hyperparameter searches using Vizier~\citep{vizierrepo},
-one at each initialization scale, each configured for ten rounds of four
-suggestions. The seven optimizer and regularization parameters were
-varied jointly within each search
-(Supplementary Table~\ref{tab:transfer-search}), using Vizier's DEFAULT
-algorithm with continuous floating-point ranges and no explicit
-logarithmic parameter scaling. This specified up to 200
-trials; the archived results contain 195 finished runs, of which 183 had
-finite monitoring loss. We selected the run with the smallest final
-reported \texttt{eval/loss} across the finite results, obtaining a loss of
-1.228545 and initialization scale 0.02. The selected settings are given in
-Supplementary Table~\ref{tab:transfer-search}. The selection objective was
-sequence loss, not downstream variant-prediction performance.
-
-Here, validation loss denotes the human-sequence monitoring statistic
-in Section~\nameref{methods:scaling}. It is cross-entropy computed using
-natural logarithms, averaged over tokens with the specified loss weights
-across the monitoring datasets. It is not the unweighted mean of the
-three regional losses. Lowercase positions receive weight 0.01;
-lowercase denotes repeats in training sequences but non-conserved
-positions in the monitoring sequences. These monitoring loci were not
-withheld from pretraining, so the statistic measures optimization on a
-fixed monitoring set rather than generalization to independent loci.
-
-We applied the Complete(d)-inspired rules~\citep{mlodozeniec2025completed} implemented in Marin relative
-to reference batch $B_0=16{,}384$ sequences and horizon
-$T_0=2.5\times10^9$ model-input tokens. For target batch $B$ and horizon
-$T$, let $r=BT_0/(B_0T)$. Then
-\[\begin{array}{rl}
-\eta_H &= \min\!\left(0.03,\eta_{H,0}\sqrt{B/B_0}(T_0/T)^{0.3}\right),\\
+We applied the Complete(d)-inspired transfer rules
+\citep{mlodozeniec2025completed} implemented in Marin.
+For reference batch size $B_0=16{,}384$ sequences and training horizon
+$T_0=2.5\times10^9$ model-input tokens, let $B$ and $T$ denote the
+target batch size and horizon, and define $r=BT_0/(B_0T)$.
+The transferred optimizer parameters were
+\[
+\begin{aligned}
+\eta_H &= \min\!\left(0.03,
+    \eta_{H,0}\sqrt{B/B_0}(T_0/T)^{0.3}\right),\\
 \eta_A &= \min\!\left(0.03,\eta_{A,0}\sqrt{r}\right),\\
 \epsilon &= \epsilon_0/\sqrt{r},\\
-\beta_2 &= \mathrm{clip}\!\left(\beta_{2,0}^{B/B_0},0.5,0.9999\right).
-\end{array}\]
-Initialization scale, $\beta_1$, gradient-clipping threshold, and z-loss
-weight were retained. The AdamH horizon exponent 0.3 was inherited from
-Marin's text recipe rather than fitted to DNA; it differs from the 0.5
-exponent in the Complete(d) prescription. These rules depend on batch
-size and horizon, with no additional explicit model-size multiplier.
+\beta_2 &= \mathrm{clip}\!\left(
+    \beta_{2,0}^{B/B_0},0.5,0.9999\right).
+\end{aligned}
+\]
+Initialization scale, $\beta_1$, gradient-clipping threshold, and
+z-loss weight were retained from the reference calibration.
+The AdamH training-horizon exponent of 0.3 was inherited from
+Marin's text-model recipe rather than fitted to DNA, and differs
+from the exponent of 0.5 in the Complete(d) prescription.
+These rules depend on batch size and training horizon, without an
+additional explicit dependence on model size.
 
-We tested transfer at approximately 255M, 476M, and 1.12B parameters,
-using batches of 4,096 sequences and a configured 10B-input-token budget
-(9,536 updates). All three sizes therefore shared the predicted settings
-$\eta_H=0.00513490$, $\eta_A=0.00747379$, $\beta_2=0.975819$, and
-$\epsilon=4\times10^{-15}$. At each size, one run using all transferred
-settings served as the common anchor for three one-parameter-at-a-time
-sweeps. The learning-rate sweep changed only $\eta_H$, leaving $\eta_A$
-and the other parameters fixed. The $\beta_2$ and $\epsilon$ sweeps likewise
-changed only the named parameter. The grids are specified in Supplementary
-Table~\ref{tab:transfer-search}. At 1.12B only, an additional control used
-all reference-optimal settings without transfer, under the same target
-batch and training horizon. Counting the common anchor once per model
-size, each grid adds six learning-rate runs, nine $\beta_2$ runs, and nine
-$\epsilon$ runs. Exact run settings and losses are provided in the
-accompanying plotting data.
-
-The plotted export combines versions v0.14 and v0.15: v0.14 supplies the
-1.12B learning-rate and $\beta_2$ sweeps and both controls; v0.15 supplies
-its $\epsilon$ sweep and all runs at the two smaller sizes. There are 25
-runs per smaller size and 26 at 1.12B, for 76 runs in total. These are
-individual training runs, not replicated estimates at each setting.
-The export retains finished runs and runs marked crashed after more than
-99\% of configured steps, using their latest reported evaluation loss;
-70 runs were marked finished and six crashed, all with more than 99.9\%
-recorded progress.
-
-Figure~\ref{fig:transfer} shows overall monitoring loss against
-$\eta_H$ (A), $\beta_2$ (B), and $\epsilon$ (C). Supplementary
-Figure~\ref{fig:regional-transfer} uses the CDS, upstream, and downstream
-monitoring losses from these same runs, not separately trained or tuned
-regional models. Squares identify the transferred anchors, circles the
-sweep runs, and the star in Figure~\ref{fig:transfer}A the unchanged-reference
-control. Connecting lines join observed values, without fitting a response
-curve or estimating uncertainty. The transferred learning rate attained
-the lowest observed overall loss at each size, whereas some tested
-$\beta_2$ and $\epsilon$ settings gave lower loss than the transferred
-anchor. The experiments assess local sensitivity and the usefulness of
-the transferred recipe; they do not establish joint or global optima.
+We evaluated transfer at approximately 255M, 476M, and 1.12B
+parameters, using batches of 4,096 sequences and a configured
+10B-model-input-token training horizon.
+Because batch size and training horizon were identical across
+these experiments, the transfer rules predicted the same settings
+at all three scales:
+$\eta_H=0.00513490$, $\eta_A=0.00747379$,
+$\beta_2=0.975819$, and $\epsilon=4\times10^{-15}$.
+At each scale, we trained a model using all transferred settings
+and performed three one-parameter-at-a-time sweeps around this
+configuration, varying $\eta_H$, $\beta_2$, or $\epsilon$ while
+holding the other parameters fixed.
+The $\eta_H$ sweep therefore held the Adam learning rate $\eta_A$
+at its transferred value.
+At 1.12B parameters, we additionally evaluated a control using
+the unmodified reference-model settings at the target batch size
+and training horizon.
+The tested values are given in Supplementary
+Table~\ref{tab:transfer-search}.
 
 \begin{figure}
 \centering
@@ -971,6 +946,23 @@ The transferred learning rate gives the lowest observed monitoring loss
 among tested values at each scale; some tested $\beta_2$ and $\epsilon$
 settings improve on their transferred anchors.}\label{fig:transfer}
 \end{figure}
+
+
+Figure~\ref{fig:transfer} compares monitoring loss across the
+tested hyperparameters, with regional losses from the same runs
+shown in Supplementary Figure~\ref{fig:regional-transfer}.
+The transferred AdamH learning rate achieved the lowest observed
+overall monitoring loss among the tested values at all three model
+sizes, whereas some alternative $\beta_2$ and $\epsilon$ settings
+performed better than their transferred values.
+Each setting was evaluated in a single training run, without
+replication; plotted lines connect observed values rather than
+fitted response curves.
+These experiments assess the usefulness and local sensitivity of
+the transferred recipe, rather than establishing jointly or
+globally optimal hyperparameters.
+Further details of the validation runs and their provenance are
+given in Supplementary Section~\nameref{supp:transfer-details}.
 
 \subsection{Scaling experiments and loss monitoring}\label{methods:scaling}
 
@@ -1655,6 +1647,64 @@ described in Section~\nameref{methods:mixtures}.
 Exact configuration references and distinctions between configured,
 observed, and inherited training exposure are documented in the
 \href{https://github.com/Open-Athena/marin-dna-paper/blob/main/data/training_provenance/sources.json}{training-provenance record}.
+
+
+\subsection{Hyperparameter search and transfer validation details}
+\label{supp:transfer-details}
+
+The reference calibration used five independent Vizier searches,
+one for each initialization scale, each configured for ten rounds
+of four suggestions.
+Searches used Vizier's DEFAULT algorithm with continuous
+floating-point parameter ranges and no explicit logarithmic
+parameter scaling.
+The seven optimizer and regularization parameters were varied
+jointly within each initialization-scale search, with ranges
+given in Supplementary Table~\ref{tab:transfer-search}.
+The configured maximum was 200 trials; the archived results
+contain 195 finished runs, of which 183 had finite monitoring loss.
+The selected run minimized the final reported \texttt{eval/loss}
+among these finite results, with loss 1.228545 and initialization
+scale 0.02.
+The reference training budget was rounded down to 596 optimizer
+updates. Nesterov momentum was disabled.
+
+The transfer-validation experiments used a configured budget of
+10B model-input tokens, corresponding to 9,536 optimizer updates
+at a batch size of 4,096 sequences.
+At each target model size, the common transferred configuration
+was evaluated alongside one-parameter-at-a-time sweeps.
+These added six AdamH learning-rate runs, nine $\beta_2$ runs,
+and nine $\epsilon$ runs per model size.
+Counting the transferred configuration once, there were 25 runs
+at each of 255M and 476M parameters and 26 at 1.12B parameters,
+including an additional unchanged-reference control at the
+largest size.
+
+The plotting data combine experiment exports v0.14 and v0.15.
+Version v0.14 supplies the 1.12B learning-rate and $\beta_2$
+sweeps and both control configurations; v0.15 supplies the 1.12B
+$\epsilon$ sweep and all runs at the two smaller model sizes.
+Of the 76 recorded runs, 70 were marked finished and six were
+marked crashed after more than 99.9\% of their configured steps.
+For these six runs, the latest reported monitoring loss was used.
+The plots therefore represent individual training runs, rather
+than replicated estimates of expected performance at each setting.
+
+The overall monitoring statistic pools weighted token losses
+across the three human monitoring datasets, rather than taking
+the unweighted mean of their regional losses.
+Its construction and interpretation, including the absence of
+held-out genomic loci, are described in
+Section~\nameref{methods:scaling}.
+The regional comparisons in
+Supplementary Figure~\ref{fig:regional-transfer} use CDS,
+upstream, and downstream monitoring losses from the same
+transfer-validation runs, rather than independently optimized
+regional models.
+Exact configurations, reported losses, and source revisions
+are available in the accompanying experiment records and
+plotting data.
 
 
 % Supplementary numbering uses distinct PDF anchors.
