@@ -854,17 +854,8 @@ particular functional regions at different stages of training.
 
 \subsection{Hyperparameter transfer}\label{methods:transfer}
 
-\begin{figure}
-\centering
-\includegraphics[width=\linewidth]{figures/hyperparameter_transfer_workflow.pdf}
-\caption{Hyperparameter calibration and transfer workflow. A small-model
-reference sweep calibrates optimizer settings, which are transformed for target
-batch sizes and token horizons using fixed transfer
-rules.}\label{fig:transfer-workflow}
-\end{figure}
-
 We calibrated optimization at a small reference scale and tested fixed
-transfer rules at larger scales (Figure~\ref{fig:transfer-workflow}),
+transfer rules at larger scales,
 following the principle of small-model hyperparameter transfer
 \citep{yang2021transfer,mlodozeniec2025completed}. This separates changes
 in model capacity from avoidable differences in optimization quality.

@@ -3198,12 +3198,5 @@ def variant_scoring_workflow(output_dir: Path) -> None:
     render_artwork(output_dir, "variant_scoring_workflow")
 
 
-@cli.command("hyperparameter_transfer_workflow")
-@click.pass_obj
-def hyperparameter_transfer_workflow(output_dir: Path) -> None:
-    """Convert the authored hyperparameter-transfer workflow."""
-    render_artwork(output_dir, "hyperparameter_transfer_workflow")
-
-
 if __name__ == "__main__":
     cli()

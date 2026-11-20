@@ -6,7 +6,7 @@ FIGURE_CODE := src/plot.py src/local_data.py src/metrics.py pyproject.toml uv.lo
 
 DATA_FIGURES := upstream_coding_mixture_balance vep_by_model_size vep_by_sequence_likelihood missense_readout_scaling mixture_zero_shot_trajectories mixture_probe_trajectories mendelian_zero_shot_comparison mendelian_probe_comparison region_specialist_performance hyperparameter_transfer regional_hyperparameter_transfer sequence_loss_scaling vep_performance_vs_throughput dataset_timetree
 SCHEMATIC_FIGURES := multispecies_training_sequences next_base_prediction
-ARTWORK_FIGURES := variant_scoring_workflow training_dataset_provenance hyperparameter_transfer_workflow evaluation_benchmarks
+ARTWORK_FIGURES := variant_scoring_workflow training_dataset_provenance evaluation_benchmarks
 ALL_FIGURES := $(DATA_FIGURES) $(SCHEMATIC_FIGURES) $(ARTWORK_FIGURES)
 GENERATED_SVGS := $(addprefix figures/,$(addsuffix .svg,$(DATA_FIGURES) $(SCHEMATIC_FIGURES)))
 
