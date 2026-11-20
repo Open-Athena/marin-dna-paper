@@ -429,7 +429,7 @@ def shape_legend_handles(include_reference: bool = True):
     handles = [sweep, optimal]
     labels = ["Sweep", "Optimal (predicted)"]
     if include_reference:
-        handles.append(Line2D([0], [0], marker="D", **common))
+        handles.append(Line2D([0], [0], marker="*", markersize=10, **common))
         labels.append("Control (reference)")
     return handles, labels
 
@@ -732,7 +732,7 @@ def plot_axis(
                 zorder=4,
             )
 
-        # Negative control (1B only): diamond at the (interpolated) untransferred value.
+        # Negative control (1B only): star at the (interpolated) untransferred value.
         neg = (
             scale[scale["role"] == "negative-control"]
             if include_negative_control
@@ -751,7 +751,8 @@ def plot_axis(
                     [x],
                     [row[y_field]],
                     color=color,
-                    marker="D",
+                    marker="*",
+                    s=100,
                     edgecolors="k",
                     zorder=4,
                 )
@@ -785,86 +786,53 @@ def plot_axis(
     ax.grid(False)
 
 
-# Learning rate
+# Hyperparameter transfer
 
-LEARNING_RATE_SUBPLOT_HEIGHT_PX = 148.0
-
-
-def plot_learning_rate(df: pd.DataFrame, palette: dict, params: list[int]) -> Figure:
-    # A compact near-square canvas matches this single panel's information
-    # density. The article declares its exact display width, so typography stays
-    # consistent with wider multi-panel figures.
-    fig, ax = plt.subplots(figsize=figsize(7.2, 7.2))
-    plot_axis(
-        ax,
-        df,
-        axis_role="learning_rate",
-        axis_field="learning_rate",
-        # Plain text (no Greek symbol) so the whole label renders in the page
-        # font, matching the y-axis/legend labels — any mathtext/symbol segment
-        # forces the label into DejaVu, which renders at a different size.
-        axis_label="Learning rate",
-        log_scale=True,
-        palette=palette,
-        native_numeric_axis=True,
-    )
-    ax.set_box_aspect(1)
-    # A little extra gap so the x-axis label clears the rotated LR tick labels.
-    ax.xaxis.labelpad = 6
-    fig.tight_layout(rect=(0, 0.21, 1, 1))
-    set_square_subplot_height(fig, [ax], LEARNING_RATE_SUBPLOT_HEIGHT_PX)
-    # A vertical legend block uses the plot's right side efficiently and avoids
-    # a separate column-spacing decision for this compact square panel.
-    attach_stacked_legends_right(
-        fig,
-        ax,
-        palette,
-        params,
-        include_reference=True,
-    )
-    return fig
-
-
-# Optimizer
-
-OPTIMIZER_SUBPLOT_HEIGHT_PX = 148.0
-
-
-def plot_optimizer(df: pd.DataFrame, palette: dict, params: list[int]) -> Figure:
-    fig, axes = plt.subplots(1, 2, figsize=figsize(FIGURE_WIDTH, 5.8))
-    plot_axis(
-        axes[0],
-        df,
-        axis_role="beta2",
-        axis_field="beta2",
-        axis_label="β₂",
-        log_scale=False,
-        palette=palette,
-        native_numeric_axis=True,
-        include_negative_control=False,
-    )
-    plot_axis(
-        axes[1],
-        df,
-        axis_role="epsilon",
-        axis_field="epsilon",
-        axis_label="ε",
-        log_scale=True,
-        palette=palette,
-        native_numeric_axis=True,
-        include_negative_control=False,
-    )
-    for ax in axes:
+def plot_hyperparameter_transfer(
+    df: pd.DataFrame, palette: dict, params: list[int]
+) -> Figure:
+    """Three sweeps and a legend cell in a single-column 2x2 grid."""
+    fig, grid = plt.subplots(2, 2, figsize=figsize(6.5, 6.8))
+    axes = list(grid.flat)[:3]
+    for ax, (role, field, label, log_scale) in zip(axes, _HYPER_COLS, strict=True):
+        plot_axis(
+            ax,
+            df,
+            axis_role=role,
+            axis_field=field,
+            axis_label=r"$\eta_H$" if role == "learning_rate" else label,
+            log_scale=log_scale,
+            palette=palette,
+            native_numeric_axis=True,
+            include_negative_control=(role == "learning_rate"),
+        )
         ax.set_box_aspect(1)
-    fig.tight_layout(rect=(0, 0.31, 1, 1), w_pad=0)
-    set_square_subplot_height(fig, axes, OPTIMIZER_SUBPLOT_HEIGHT_PX)
-    pack_horizontal_axes(fig, axes)
-    attach_legends_below(
-        fig,
-        palette,
-        params,
-        include_reference=False,
-        legend_y=0.35,
+    for ax, letter in zip(axes, "ABC", strict=True):
+        ax.set_title(letter, loc="left", weight="bold")
+    legend_ax = grid[1, 1]
+    legend_ax.set_box_aspect(1)
+    legend_ax.set_axis_off()
+    fig.tight_layout(h_pad=1.3, w_pad=0.7)
+    param_handles, param_labels = params_legend_handles(palette, params)
+    param_legend = legend_ax.legend(
+        param_handles,
+        param_labels,
+        title="Model parameters",
+        loc="upper left",
+        bbox_to_anchor=(0, 1.05),
+        alignment="left",
+        **TWO_LEGEND_KW,
+    )
+    legend_ax.add_artist(param_legend)
+    run_handles, _ = shape_legend_handles(include_reference=True)
+    legend_ax.legend(
+        run_handles,
+        ["Sweep", "Transferred", "Reference"],
+        title="Run type",
+        loc="lower left",
+        bbox_to_anchor=(0, -0.05),
+        alignment="left",
+        **TWO_LEGEND_KW,
     )
     return fig
 
@@ -3057,25 +3025,14 @@ def cli(ctx: click.Context, output_dir: Path) -> None:
     ctx.obj = output_dir
 
 
-@cli.command("learning_rate_transfer")
+@cli.command("hyperparameter_transfer")
 @click.pass_obj
-def learning_rate_transfer(output_dir: Path) -> None:
-    """Transfer-validation loss versus learning rate."""
+def hyperparameter_transfer(output_dir: Path) -> None:
+    """Transfer-validation loss versus learning rate, beta2, and epsilon."""
     render(
         output_dir,
-        "learning_rate_transfer",
-        lambda _: _transfer_figure(plot_learning_rate, "learning_rate_transfer"),
-    )
-
-
-@cli.command("optimizer_parameter_transfer")
-@click.pass_obj
-def optimizer_parameter_transfer(output_dir: Path) -> None:
-    """Transfer-validation loss versus optimizer parameters."""
-    render(
-        output_dir,
-        "optimizer_parameter_transfer",
-        lambda _: _transfer_figure(plot_optimizer, "optimizer_parameter_transfer"),
+        "hyperparameter_transfer",
+        lambda _: _transfer_figure(plot_hyperparameter_transfer, "hyperparameter_transfer"),
     )
 
 

@@ -968,8 +968,7 @@ RECIPES = {
     "mendelian_zero_shot_comparison": lambda: {"mendelian_zero_shot_comparison": prepare_zero_shot_comparison()},
     "mendelian_probe_comparison": lambda: {"mendelian_probe_comparison": prepare_probe_comparison()},
     "region_specialist_performance": lambda: {"region_specialist_performance": prepare_specialists()},
-    "learning_rate_transfer": lambda: {"learning_rate_transfer": local_data.load_transfer()},
-    "optimizer_parameter_transfer": lambda: {"optimizer_parameter_transfer": local_data.load_transfer()},
+    "hyperparameter_transfer": lambda: {"hyperparameter_transfer": local_data.load_transfer()},
     "regional_hyperparameter_transfer": lambda: {"regional_hyperparameter_transfer": local_data.load_transfer()},
     "sequence_loss_scaling": lambda: {
         "sequence_loss_scaling_results": local_data.load_scaling_results(),

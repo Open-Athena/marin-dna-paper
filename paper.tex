@@ -952,13 +952,12 @@ The export retains finished runs and runs marked crashed after more than
 70 runs were marked finished and six crashed, all with more than 99.9\%
 recorded progress.
 
-Figure~\ref{fig:transfer} shows overall monitoring loss against $\eta_H$;
-Supplementary Figure~\ref{fig:optimizer-transfer} shows the corresponding
-$\beta_2$ and $\epsilon$ sweeps. Supplementary
+Figure~\ref{fig:transfer} shows overall monitoring loss against
+$\eta_H$ (A), $\beta_2$ (B), and $\epsilon$ (C). Supplementary
 Figure~\ref{fig:regional-transfer} uses the CDS, upstream, and downstream
 monitoring losses from these same runs, not separately trained or tuned
 regional models. Squares identify the transferred anchors, circles the
-sweep runs, and the diamond in Figure~\ref{fig:transfer} the unchanged-reference
+sweep runs, and the star in Figure~\ref{fig:transfer}A the unchanged-reference
 control. Connecting lines join observed values, without fitting a response
 curve or estimating uncertainty. The transferred learning rate attained
 the lowest observed overall loss at each size, whereas some tested
@@ -968,11 +967,18 @@ the transferred recipe; they do not establish joint or global optima.
 
 \begin{figure}
 \centering
-\includegraphics[width=\linewidth]{figures/learning_rate_transfer.pdf}
-\caption{Learning-rate transfer at 255M, 476M, and 1B parameters. Circles vary the AdamH learning rate with other settings fixed; squares
-mark the transferred settings. The diamond is the 1B control using all
-reference-optimal settings unchanged. The transferred learning rate gives
-the lowest observed monitoring loss among tested values at each scale.}\label{fig:transfer}
+\includegraphics[width=\linewidth]{figures/hyperparameter_transfer.pdf}
+\caption{Hyperparameter transfer at 255M, 476M, and 1B parameters.
+\textbf{(A)} AdamH learning rate $\eta_H$.
+\textbf{(B)} Adam $\beta_2$, the decay rate for the exponential moving
+average of squared gradients. \textbf{(C)} Adam $\epsilon$, the constant
+added to the denominator for numerical stability. Circles vary the
+indicated parameter with other settings fixed; squares mark the
+transferred settings. The star
+in A is the 1B control using all reference-optimal settings unchanged.
+The transferred learning rate gives the lowest observed monitoring loss
+among tested values at each scale; some tested $\beta_2$ and $\epsilon$
+settings improve on their transferred anchors.}\label{fig:transfer}
 \end{figure}
 
 \subsection{Scaling experiments and loss monitoring}\label{methods:scaling}
@@ -1035,7 +1041,7 @@ Consequently, equal regional sequence counts do not imply equal
 contributions to overall loss. The same monitoring sets were used for
 reference hyperparameter selection, transfer validation, and the scaling
 curves (Figures~\ref{fig:transfer} and~\ref{fig:scaling}; Supplementary
-Figures~\ref{fig:optimizer-transfer} and~\ref{fig:regional-transfer}).
+Figure~\ref{fig:regional-transfer}).
 The statistic tracks optimization on fixed conservation-weighted human
 sequences; it is not an estimate of generalization to withheld genomes
 or independent genomic regions. Training and monitoring losses also
@@ -1732,20 +1738,11 @@ bars denote standard errors.}\label{fig:loss-vep}
 
 \begin{figure}
 \centering
-\includegraphics[width=\linewidth]{figures/optimizer_parameter_transfer.pdf}
-\caption{Adam $\beta_2$ and $\epsilon$ transfer. Target-scale loss is compared
-across one-parameter-at-a-time sweeps at the model sizes in
-Figure~\ref{fig:transfer}. Squares mark transferred settings; circles
-mark tested alternatives. The unchanged-reference control is omitted.}\label{fig:optimizer-transfer}
-\end{figure}
-
-\begin{figure}
-\centering
 \includegraphics[width=\linewidth]{figures/regional_hyperparameter_transfer.pdf}
 \caption{Region-specific hyperparameter transfer. Validation loss versus
 AdamH learning rate, $\beta_2$, and $\epsilon$, evaluated separately for
 CDS, upstream, and downstream monitoring sequences from the same training
-runs as Figures~\ref{fig:transfer} and~\ref{fig:optimizer-transfer}.
+runs as Figure~\ref{fig:transfer}.
 Squares mark transferred settings; circles mark tested alternatives.}\label{fig:regional-transfer}
 \end{figure}
 \end{document}
