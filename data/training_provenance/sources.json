@@ -19,7 +19,9 @@
     "experiments/references/reference_hyperparameter_sweep.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/experiments/references/reference_hyperparameter_sweep.py",
     "experiments/dna/exp109_bolinas_scaling_analysis/reference_hparams.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/experiments/dna/exp109_bolinas_scaling_analysis/reference_hparams.py",
     "experiments/dna/exp109_bolinas_scaling_analysis/transfer_validation.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/experiments/dna/exp109_bolinas_scaling_analysis/transfer_validation.py",
-    "lib/levanter/src/levanter/eval.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/lib/levanter/src/levanter/eval.py"
+    "lib/levanter/src/levanter/eval.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/lib/levanter/src/levanter/eval.py",
+    "lib/levanter/src/levanter/main/train_lm.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/lib/levanter/src/levanter/main/train_lm.py",
+    "experiments/dna/exp109_bolinas_scaling_analysis/scaling_sweep_analysis.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/experiments/dna/exp109_bolinas_scaling_analysis/scaling_sweep_analysis.py"
   },
   "mixture_source": "https://github.com/marin-community/marin/blob/a41a83fdddfdef85a75e39b56c32949518e3f578/experiments/dna/exp135_bolinas_mix_sweep.py",
   "evidence_notes": [
@@ -165,6 +167,67 @@
       "Reference loss selection and transfer validation do not establish generalization to withheld loci.",
       "The transferred AdamH learning rate minimizes observed loss at all three sizes. Beta2 and epsilon alternatives sometimes outperform their anchors; no replicated-run uncertainty is available.",
       "The crashed-run inclusion rule is based on recorded progress, not independent proof of the failure cause."
+    ]
+  },
+  "scaling_and_monitoring_evidence": {
+    "scaling_report": "https://github.com/marin-community/marin/issues/4251#issuecomment-4454919955",
+    "monitoring_construction_commit": "712d3c1722ff4fdfcb3e56be61e30f3caac83ecd",
+    "monitoring_construction_sources": {
+      "snakemake/training_dataset/dataset_creation/workflow/rules/dataset.smk": "https://github.com/Open-Athena/marin-dna/blob/712d3c1722ff4fdfcb3e56be61e30f3caac83ecd/snakemake/training_dataset/dataset_creation/workflow/rules/dataset.smk",
+      "snakemake/training_dataset/dataset_creation/config/config.yaml": "https://github.com/Open-Athena/marin-dna/blob/712d3c1722ff4fdfcb3e56be61e30f3caac83ecd/snakemake/training_dataset/dataset_creation/config/config.yaml",
+      "snakemake/training_dataset/dataset_creation/config/human_chrom_mapping.tsv": "https://github.com/Open-Athena/marin-dna/blob/712d3c1722ff4fdfcb3e56be61e30f3caac83ecd/snakemake/training_dataset/dataset_creation/config/human_chrom_mapping.tsv"
+    },
+    "monitoring_cards": [
+      {
+        "region": "cds",
+        "dataset": "bolinas-dna/genomes-v5-validation-intervals-v5_255_255",
+        "revision": "daff592f213aaa1cab1711d477a79ff6b1bc4ef4",
+        "reported_sequences": 16384
+      },
+      {
+        "region": "upstream",
+        "dataset": "bolinas-dna/genomes-v5-validation-intervals-v1_255_255",
+        "revision": "a761bc0b663a9827303f3112e4667d53d5326fac",
+        "reported_sequences": 16384
+      },
+      {
+        "region": "downstream",
+        "dataset": "bolinas-dna/genomes-v5-validation-intervals-v15_255_255",
+        "revision": "d7b27eecd68453934ebb3e7e6e78d5401789faa5",
+        "reported_sequences": 16384
+      }
+    ],
+    "assembly": "GCF_000001405.40",
+    "window_bp": 255,
+    "stride_bp": 255,
+    "sample_seed": 42,
+    "max_samples_per_region": 16384,
+    "conservation_track": "cactus241way.phyloP.bw",
+    "uppercase_threshold": 2.27,
+    "lowercase_weight": 0.01,
+    "scaling_version": "v0.5",
+    "models": 8,
+    "configured_tokens": 84767420928,
+    "batch_sequences": 1536,
+    "input_tokens_per_sequence": 256,
+    "updates": 215574,
+    "accounted_input_tokens": 84767145984,
+    "terminal_checkpoint_step": 215573,
+    "figure_inputs": [
+      "plot_data/sequence_loss_scaling_results.csv",
+      "plot_data/sequence_loss_scaling_history.csv",
+      "plot_data/vep_by_sequence_likelihood.csv"
+    ],
+    "fit_implementation": "src/plot.py:_fit_kaplan_law",
+    "notes": [
+      "All eight exports are marked finished and have terminal logged step 215573. Configured target tokens differ from full-batch accounting by 274944 tokens.",
+      "The budget represents one nominal source-pool pass; it is not evidence that every distinct training example or genomic base was seen exactly once.",
+      "Monitoring construction removes chromosome holdouts; training and monitoring cases encode repeats and conservation respectively.",
+      "Published cards establish released monitoring-set counts and construction, not the exact historical dataset revisions or tokenizer caches consumed by each training job.",
+      "Current dataset code uses Polars sampling; the original pinned construction used pandas sampling with random_state=42. Do not assume that regenerating with a different sampler reproduces the same windows.",
+      "The cards cite pipeline commit 8db58254831f4da240bd0a87a606fb8870f790ff, which is not available in the local Git object database; original construction commit and published cards were inspected separately.",
+      "Parameter-scaling loss fitting uses all eight terminal pooled weighted losses, with unweighted nonlinear least squares in raw loss space, not log-transformed loss.",
+      "Loss-versus-VEP trends are unweighted linear fits and Pearson correlations over eight model sizes per readout and class; these are not independent training replicates."
     ]
   }
 }

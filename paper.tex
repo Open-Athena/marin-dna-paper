@@ -976,46 +976,123 @@ the lowest observed monitoring loss among tested values at each scale.}\label{fi
 \end{figure}
 
 \subsection{Scaling experiments and loss monitoring}\label{methods:scaling}
-The parameter-scaling experiments sampled the annotation-derived CDS,
-upstream, and downstream datasets in proportion to their sizes, giving
-approximately 73\%, 21\%, and 6\% of training sequences, respectively.
 
-\begin{itemize}
-\item List the eight model sizes, common approximately 84.77B-model-input-token budget,
-proportional three-region mixture, transferred hyperparameters, and checkpoint
-selection. TODO: supply exact run configurations and completed token counts.
-\item Define the fixed human monitoring sequences, their overlap with
-training, and loss aggregation. Explain that lowercase marks repetitive bases
-in training but non-conserved bases in monitoring, with 1\% weight in both.
-Document the statistic's role in tuning and model choice, and its limitations
-as an estimate of generalization. TODO: specify sequence provenance and
-conservation-mask construction.
-\item Use Figure~\ref{fig:scaling} to document predictable sequence-loss scaling
-\citep{kaplan2020scaling}. Specify the Kaplan-style fitting equation, endpoints,
-fitting procedure,
-and goodness-of-fit calculation. Define region-matched log-likelihood used in
-downstream analyses. TODO: recover exact fitting settings from the plot code.
-\end{itemize}
+We trained eight models with approximately 45.9M, 75.5M, 128.5M, 254.8M,
+475.9M, 1.12B, 2.27B, and 4.02B parameters to compare sequence modeling
+and variant prediction across model sizes. Architectures are listed in
+Supplementary Table~\ref{tab:architectures}; parameter counts used in the
+plots are the training configuration's estimates. These runs used the
+same dataset-proportional CDS/upstream/downstream mixture as the
+hyperparameter-transfer experiments (weights 0.7319, 0.2062, and 0.0619),
+rather than the equal-weight or five-region mixtures in
+Section~\nameref{methods:mixtures}. Training used 255-base sequences plus
+BOS and an effective batch of 1,536 sequences (393,216 input tokens per
+update). The configured budget was 331,122,738 sequence examples, or
+84,767,420,928 input tokens, corresponding to one nominal pass through
+the source mixture. Rounding down to complete batches gave 215,574
+updates and 84,767,145,984 input tokens per model (Supplementary
+Table~\ref{tab:models}). Thus the sweep held training-token exposure
+fixed, not training compute~\citep{marindna109,marin4251,marintransfercode}.
 
+All sizes used the transferred settings from
+Section~\nameref{methods:transfer}, evaluated at this batch and token
+budget: AdamH learning rate 0.00165607, Adam learning rate 0.00157196,
+$\beta_2=0.990863$, and $\epsilon=1.90177\times10^{-14}$.
+Initialization scale, $\beta_1$, gradient clipping, and z-loss weight
+were retained from the reference calibration. Learning-rate schedules
+used 10\% warmup and linear decay over the final 20\% of training.
+There was one run per size, with no size-specific retuning.
+All eight exported runs finished; the final logged step and checkpoint
+identifier are 215,573 because steps are indexed from zero. We used
+these terminal checkpoints, rather than selecting a different
+loss-minimizing checkpoint for each size, for the downstream comparisons
+in Figure~\ref{fig:missense-scaling}A and Supplementary
+Figures~\ref{fig:downstream} and~\ref{fig:loss-vep}.
 
-The human-sequence monitoring statistic, referred to as validation loss,
-used conservation-based case encoding rather than the repeat masking
-applied to training sequences.
-Lowercase bases represented non-conserved positions, including those
-without conservation scores, and received the same reduced loss weight
-of 0.01.
-The monitored genomic loci were not withheld from pretraining.
-Consequently, this statistic was used to track optimization and compare
-models, rather than to estimate generalization to held-out genomes
-or independent genomic regions.
+The fixed human monitoring datasets used the CDS (v5), upstream (v1),
+and downstream (v15) interval recipes on GRCh38
+(RefSeq assembly GCF\_000001405.40). The construction pipeline tiled
+each region set into 255-base windows with stride 255, retained windows
+on chromosomes with RefSeq-to-UCSC name mappings, and sampled up to
+16,384 windows per region without replacement using seed 42. The
+published dataset cards report 16,384 sequences in each regional set.
+Unlike the training sequences, whose lowercase bases mark repeats,
+monitoring sequences had their case overwritten using the Cactus
+241-mammal phyloP conservation track: bases with scores at least 2.27
+were uppercase, and all others, including missing scores, were lowercase
+\citep{pollard2010phylop,marindnamonitoringcode,marindnamonitoringcds,marindnamonitoringupstream,marindnamonitoringdownstream}.
+These datasets were designated for evaluation by the training loader,
+but their genomic loci were not excluded from the training pool;
+the construction replaced the earlier chromosome-based holdout
+\citep{marindnamonitoring84}.
 
+Monitoring loss is the weighted average of next-base cross-entropy
+computed using natural logarithms. Uppercase targets have weight 1 and
+lowercase targets weight 0.01. Overall loss pools weighted token losses
+across all three monitoring datasets and divides by their total token
+weight; regional losses use the same calculation within each dataset.
+Consequently, equal regional sequence counts do not imply equal
+contributions to overall loss. The same monitoring sets were used for
+reference hyperparameter selection, transfer validation, and the scaling
+curves (Figures~\ref{fig:transfer} and~\ref{fig:scaling}; Supplementary
+Figures~\ref{fig:optimizer-transfer} and~\ref{fig:regional-transfer}).
+The statistic tracks optimization on fixed conservation-weighted human
+sequences; it is not an estimate of generalization to withheld genomes
+or independent genomic regions. Training and monitoring losses also
+use different case-encoding conventions and should not be interpreted
+as a conventional training--test generalization gap.
+
+Figure~\ref{fig:scaling} shows logged training and monitoring losses
+against optimizer step on logarithmic axes. Training losses were
+subsampled at the steps for which monitoring loss was also logged;
+step zero was omitted from the logarithmic axis, and the retained points
+were connected without smoothing. For the inset, we fitted the
+Kaplan-style relationship~\citep{kaplan2020scaling}
+\[
+L(N)=A N^{-\alpha}+L_{\infty},
+\]
+where $N$ is the parameter count and $L$ is the terminal overall
+monitoring loss, using all eight endpoints. We used unweighted nonlinear
+least squares in loss space (SciPy's \texttt{curve\_fit}), with bounds
+$A\geq0$, $0\leq\alpha\leq5$, and
+$0\leq L_{\infty}\leq\min L$, and at most 10,000 function evaluations.
+We checked convergence, finite parameter covariance, and that fitted
+parameters were not within 1\% of their bounds, relative to the bound
+interval (or parameter magnitude for the unbounded amplitude).
+The displayed $R^2$ is $1-\sum_i(L_i-\widehat L_i)^2/
+\sum_i(L_i-\overline L)^2$, calculated on these same endpoints.
+This is a descriptive fit at a fixed training-token budget; its fit
+quality does not establish a compute-optimal scaling rule or validate
+extrapolation beyond the tested sizes.
+
+For Supplementary Figure~\ref{fig:loss-vep}, we defined region-matched
+sequence log-likelihood as the negative terminal regional monitoring
+loss. Missense, splicing, and synonymous variants were matched to CDS
+loss; promoter and 5$'$ UTR variants to upstream loss; and 3$'$ UTR
+variants to downstream loss. This quantity summarizes the monitoring
+sequences, not the likelihood of each evaluated variant. The plot uses
+the same eight terminal models and paired zero-shot and linear-probe
+AUPRC estimates as Supplementary Figure~\ref{fig:downstream}: six
+Mendelian classes and the missense and splicing SGE classes. Within each
+model and class, both readouts were evaluated on the same variants with
+finite probe predictions, using chromosome-weighted AUPRC and
+chromosome-bootstrap standard errors (1,000 resamples; random seed 0).
+For each benchmark, variant class,
+and readout, we fitted an ordinary unweighted least-squares line through
+the eight model endpoints and reported Pearson's correlation coefficient.
+The AUPRC error bars were not used as regression weights. These
+correlations describe variation across model sizes, not independent
+replicate experiments or a causal effect of improving sequence loss.
 
 \begin{figure}
 \centering
 \includegraphics[width=\linewidth]{figures/sequence_loss_scaling.pdf}
 \caption{Sequence loss across model sizes. Eight models from 46M to 4B
-parameters are each trained on approximately 84.77B model-input tokens. The inset shows a
-Kaplan-style power-law fit to final validation loss.}\label{fig:scaling}
+parameters are each trained on approximately 84.77B model-input tokens
+from the proportional CDS/upstream/downstream mixture. Curves show logged
+training and conservation-weighted human monitoring losses. The inset
+shows a Kaplan-style power-law fit to the eight terminal monitoring
+losses; $R^2$ describes the fit to these endpoints.}\label{fig:scaling}
 \end{figure}
 
 \subsection{Evaluation benchmarks}\label{methods:benchmarks}
@@ -1646,7 +1723,8 @@ denote standard errors.}\label{fig:downstream}
 \begin{figure}
 \centering
 \includegraphics[width=\linewidth]{figures/vep_by_sequence_likelihood.pdf}
-\caption{VEP versus matched-region validation log-likelihood (negative loss)
+\caption{VEP versus matched-region sequence log-likelihood (negative
+regional monitoring loss)
 across eight parameter-scaling endpoints. Performance is chromosome-weighted
 AUPRC. Lines are least-squares fits; $r$ denotes Pearson correlation and error
 bars denote standard errors.}\label{fig:loss-vep}
