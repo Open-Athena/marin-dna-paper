@@ -537,7 +537,7 @@ def load_loss_vs_auprc(
     results: pd.DataFrame | None = None,
     metrics: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
-    """Join paired AUPRCs to each consequence's matched validation LL."""
+    """Join paired AUPRCs to each class's negative regional monitoring loss."""
     if results is None:
         results = pd.read_csv(local_data.SCALING_RESULTS_PATH)
     if metrics is None:
@@ -554,6 +554,7 @@ def load_loss_vs_auprc(
 
     data = metrics.merge(metadata, on="params", how="left", validate="many_to_one")
     assert len(data) == len(metrics)
+    # Retain the legacy CSV column name: ll is negative regional monitoring loss.
     data["ll"] = np.nan
     for subset, loss_column in MATCHED_LOSS_COLUMN.items():
         mask = data["subset"] == subset
@@ -962,14 +963,17 @@ RECIPES = {
     "vep_by_model_size": lambda: {"vep_by_model_size": prepare_scaling()},
     "vep_by_sequence_likelihood": lambda: {
         "vep_by_sequence_likelihood": load_loss_vs_auprc(metrics=prepare_scaling())},
-    "missense_readout_scaling": lambda: {"missense_readout_scaling": prepare_missense()},
+    "missense_readout_scaling": lambda: {
+        "missense_readout_scaling": prepare_missense(),
+        "sequence_loss_scaling_results": local_data.load_scaling_results(),
+        "vep_by_model_size": prepare_scaling(),
+    },
     "mixture_zero_shot_trajectories": lambda: {"mixture_zero_shot_trajectories": prepare_trajectories("llr")},
     "mixture_probe_trajectories": lambda: {"mixture_probe_trajectories": prepare_trajectories("probe")},
     "mendelian_zero_shot_comparison": lambda: {"mendelian_zero_shot_comparison": prepare_zero_shot_comparison()},
     "mendelian_probe_comparison": lambda: {"mendelian_probe_comparison": prepare_probe_comparison()},
     "region_specialist_performance": lambda: {"region_specialist_performance": prepare_specialists()},
-    "learning_rate_transfer": lambda: {"learning_rate_transfer": local_data.load_transfer()},
-    "optimizer_parameter_transfer": lambda: {"optimizer_parameter_transfer": local_data.load_transfer()},
+    "hyperparameter_transfer": lambda: {"hyperparameter_transfer": local_data.load_transfer()},
     "regional_hyperparameter_transfer": lambda: {"regional_hyperparameter_transfer": local_data.load_transfer()},
     "sequence_loss_scaling": lambda: {
         "sequence_loss_scaling_results": local_data.load_scaling_results(),

@@ -429,7 +429,7 @@ def shape_legend_handles(include_reference: bool = True):
     handles = [sweep, optimal]
     labels = ["Sweep", "Optimal (predicted)"]
     if include_reference:
-        handles.append(Line2D([0], [0], marker="D", **common))
+        handles.append(Line2D([0], [0], marker="*", markersize=10, **common))
         labels.append("Control (reference)")
     return handles, labels
 
@@ -732,7 +732,7 @@ def plot_axis(
                 zorder=4,
             )
 
-        # Negative control (1B only): diamond at the (interpolated) untransferred value.
+        # Negative control (1B only): star at the (interpolated) untransferred value.
         neg = (
             scale[scale["role"] == "negative-control"]
             if include_negative_control
@@ -751,7 +751,8 @@ def plot_axis(
                     [x],
                     [row[y_field]],
                     color=color,
-                    marker="D",
+                    marker="*",
+                    s=100,
                     edgecolors="k",
                     zorder=4,
                 )
@@ -785,86 +786,53 @@ def plot_axis(
     ax.grid(False)
 
 
-# Learning rate
+# Hyperparameter transfer
 
-LEARNING_RATE_SUBPLOT_HEIGHT_PX = 148.0
-
-
-def plot_learning_rate(df: pd.DataFrame, palette: dict, params: list[int]) -> Figure:
-    # A compact near-square canvas matches this single panel's information
-    # density. The article declares its exact display width, so typography stays
-    # consistent with wider multi-panel figures.
-    fig, ax = plt.subplots(figsize=figsize(7.2, 7.2))
-    plot_axis(
-        ax,
-        df,
-        axis_role="learning_rate",
-        axis_field="learning_rate",
-        # Plain text (no Greek symbol) so the whole label renders in the page
-        # font, matching the y-axis/legend labels — any mathtext/symbol segment
-        # forces the label into DejaVu, which renders at a different size.
-        axis_label="Learning rate",
-        log_scale=True,
-        palette=palette,
-        native_numeric_axis=True,
-    )
-    ax.set_box_aspect(1)
-    # A little extra gap so the x-axis label clears the rotated LR tick labels.
-    ax.xaxis.labelpad = 6
-    fig.tight_layout(rect=(0, 0.21, 1, 1))
-    set_square_subplot_height(fig, [ax], LEARNING_RATE_SUBPLOT_HEIGHT_PX)
-    # A vertical legend block uses the plot's right side efficiently and avoids
-    # a separate column-spacing decision for this compact square panel.
-    attach_stacked_legends_right(
-        fig,
-        ax,
-        palette,
-        params,
-        include_reference=True,
-    )
-    return fig
-
-
-# Optimizer
-
-OPTIMIZER_SUBPLOT_HEIGHT_PX = 148.0
-
-
-def plot_optimizer(df: pd.DataFrame, palette: dict, params: list[int]) -> Figure:
-    fig, axes = plt.subplots(1, 2, figsize=figsize(FIGURE_WIDTH, 5.8))
-    plot_axis(
-        axes[0],
-        df,
-        axis_role="beta2",
-        axis_field="beta2",
-        axis_label="β₂",
-        log_scale=False,
-        palette=palette,
-        native_numeric_axis=True,
-        include_negative_control=False,
-    )
-    plot_axis(
-        axes[1],
-        df,
-        axis_role="epsilon",
-        axis_field="epsilon",
-        axis_label="ε",
-        log_scale=True,
-        palette=palette,
-        native_numeric_axis=True,
-        include_negative_control=False,
-    )
-    for ax in axes:
+def plot_hyperparameter_transfer(
+    df: pd.DataFrame, palette: dict, params: list[int]
+) -> Figure:
+    """Three sweeps and a legend cell in a single-column 2x2 grid."""
+    fig, grid = plt.subplots(2, 2, figsize=figsize(6.5, 6.8))
+    axes = list(grid.flat)[:3]
+    for ax, (role, field, label, log_scale) in zip(axes, _HYPER_COLS, strict=True):
+        plot_axis(
+            ax,
+            df,
+            axis_role=role,
+            axis_field=field,
+            axis_label=r"$\eta_H$" if role == "learning_rate" else label,
+            log_scale=log_scale,
+            palette=palette,
+            native_numeric_axis=True,
+            include_negative_control=(role == "learning_rate"),
+        )
         ax.set_box_aspect(1)
-    fig.tight_layout(rect=(0, 0.31, 1, 1), w_pad=0)
-    set_square_subplot_height(fig, axes, OPTIMIZER_SUBPLOT_HEIGHT_PX)
-    pack_horizontal_axes(fig, axes)
-    attach_legends_below(
-        fig,
-        palette,
-        params,
-        include_reference=False,
-        legend_y=0.35,
+    for ax, letter in zip(axes, "ABC", strict=True):
+        ax.set_title(letter, loc="left", weight="bold")
+    legend_ax = grid[1, 1]
+    legend_ax.set_box_aspect(1)
+    legend_ax.set_axis_off()
+    fig.tight_layout(h_pad=1.3, w_pad=0.7)
+    param_handles, param_labels = params_legend_handles(palette, params)
+    param_legend = legend_ax.legend(
+        param_handles,
+        param_labels,
+        title="Model parameters",
+        loc="upper left",
+        bbox_to_anchor=(0, 1.05),
+        alignment="left",
+        **TWO_LEGEND_KW,
+    )
+    legend_ax.add_artist(param_legend)
+    run_handles, _ = shape_legend_handles(include_reference=True)
+    legend_ax.legend(
+        run_handles,
+        ["Sweep", "Transferred", "Reference"],
+        title="Run type",
+        loc="lower left",
+        bbox_to_anchor=(0, -0.05),
+        alignment="left",
+        **TWO_LEGEND_KW,
     )
     return fig
 
@@ -1056,9 +1024,9 @@ def _write_kaplan_fit_report(
 
 
 def plot_loss_scaling(
-    history: pd.DataFrame, results: pd.DataFrame, palette: dict, report_path: Path
+    history: pd.DataFrame, results: pd.DataFrame, palette: dict
 ) -> Figure:
-    """1x2: train/eval loss vs step. Inset on eval panel: final loss vs params with Kaplan fit."""
+    """Training and monitoring trajectories, supporting the main scaling figure."""
     name_to_params = dict(zip(results["run_name"], results["params"], strict=True))
     history = history.assign(params=history["run_name"].map(name_to_params))
     # Log-x cannot show step=0; the step-0 eval is pre-training and not informative anyway.
@@ -1067,10 +1035,8 @@ def plot_loss_scaling(
     fig, axes = plt.subplots(1, 2, figsize=figsize(FIGURE_WIDTH, 6.5))
     panels = [
         (axes[0], "train/loss", "Train loss"),
-        (axes[1], "eval/loss", "Validation loss"),
+        (axes[1], "eval/loss", "Monitoring loss"),
     ]
-    # Eval-loss lines need a high zorder so they draw over the inset on the right panel.
-    line_zorder = {axes[0]: 2, axes[1]: 20}
     for ax, metric, ylabel in panels:
         sub = history[history["metric"] == metric]
         for params in sorted(sub["params"].unique()):
@@ -1079,7 +1045,7 @@ def plot_loss_scaling(
                 line["step"],
                 line["value"],
                 color=palette[int(params)],
-                zorder=line_zorder[ax],
+                zorder=2,
             )
         ax.set_xscale("log")
         ax.set_yscale("log")
@@ -1089,10 +1055,6 @@ def plot_loss_scaling(
         ax.set_box_aspect(1)
         # Loss values span ~0.5–1.5; render as plain decimals rather than 6×10⁻¹ etc.
         set_plain_decimal_yticks(ax)
-
-    # Inset on eval-loss panel: final eval loss vs params with Kaplan scaling-law fit.
-    # Sits in the bottom-left empty region (low-step / low-loss has no curve data there).
-    _attach_kaplan_inset(axes[1], results, palette, report_path)
 
     fig.tight_layout(rect=(0, 0.08, 1, 1))
     set_square_subplot_height(fig, axes, LOSS_SCALING_SUBPLOT_HEIGHT_PX)
@@ -1104,98 +1066,24 @@ def plot_loss_scaling(
     return fig
 
 
-def _attach_kaplan_inset(
-    parent_ax, results: pd.DataFrame, palette: dict, report_path: Path
+def _plot_terminal_monitoring_loss(
+    ax: Axes, results: pd.DataFrame, report_path: Path
 ) -> None:
-    """Embed a small params-vs-loss panel with Kaplan fit inside `parent_ax`.
-
-    Inset axes uses parent-axes-fraction coords. The fit equation/constants sit
-    in the open space just to the right of the inset.
-    """
+    """Promote the original inset fit without extending its observed size range."""
     fit_df = results.dropna(subset=["params", "eval_loss"]).sort_values("params")
+    assert len(fit_df) == 8 and fit_df["params"].is_unique
     P = fit_df["params"].astype(float).to_numpy()
     L = fit_df["eval_loss"].astype(float).to_numpy()
     A, alpha, L_inf = _fit_kaplan_law(P, L, report_path)
     pred = A * P ** (-alpha) + L_inf
-    ss_res = float(np.sum((L - pred) ** 2))
-    ss_tot = float(np.sum((L - L.mean()) ** 2))
-    r2 = 1.0 - ss_res / ss_tot if ss_tot > 0 else float("nan")
-
-    # zorder=0 puts the inset under parent's eval-loss lines (which use zorder=20),
-    # so the curves visually cross over the inset like a framed window beneath them.
-    # Keep the bottom (y0) where it is; the height controls only the top edge.
-    inset_bounds = (0.10, 0.17, 0.27, 0.40)
-    inset = parent_ax.inset_axes(list(inset_bounds), zorder=0)
-
-    # Replace the default rectangular background/spines with a rounded FancyBboxPatch
-    # placed in parent axes-fraction coords, so the inset reads as a card with rounded edges.
-    inset.patch.set_visible(False)
-    for spine in inset.spines.values():
-        spine.set_visible(False)
-    rounded_bg = FancyBboxPatch(
-        (inset_bounds[0], inset_bounds[1]),
-        inset_bounds[2],
-        inset_bounds[3],
-        boxstyle="round,pad=0,rounding_size=0.025",
-        transform=parent_ax.transAxes,
-        facecolor="none",
-        edgecolor="black",
-        linewidth=0.2,
-        zorder=0,
-        clip_on=False,
-    )
-    parent_ax.add_patch(rounded_bg)
-
-    # Y-range: zoom to the data points with a little padding. The asymptote and
-    # fit details live in a text block to the right, so the inset needn't reach
-    # all the way down to L_inf.
-    dataspan = float(L.max() - L.min()) or 1.0
-    inset.set_ylim(L.min() - 0.12 * dataspan, L.max() + 0.12 * dataspan)
-
-    P_grid = np.geomspace(P.min() * 0.92, P.max() * 1.08, 200)
-    inset.plot(
-        P_grid,
-        A * P_grid ** (-alpha) + L_inf,
-        color="0.2",
-        alpha=0.92,
-        zorder=2,
-    )
-    for p, loss in zip(P, L, strict=True):
-        inset.scatter(
-            [p],
-            [loss],
-            color=palette[int(p)],
-            edgecolors="k",
-            zorder=3,
-        )
-
-    inset.set_xscale("log")
-    inset.set_xlabel("Parameters (N)", labelpad=2)
-    inset.set_ylabel("")
-    inset.tick_params(length=2.5, pad=1)
-    inset.minorticks_off()
-    inset.grid(False)
-    set_plain_decimal_yticks(inset)
-
-    # Fit equation + constants in the open space just right of the inset (the
-    # empty low-loss/early-step corner), bottom-aligned to the inset plot. No
-    # background box (transparent) so it doesn't mask the loss curves; high
-    # zorder keeps the text itself on top.
-    parent_ax.text(
-        inset_bounds[0] + inset_bounds[2] + 0.03,
-        inset_bounds[1],
-        r"$L(N) = A \cdot N^{-\alpha} + L_{\infty}$"
-        "\n"
-        rf"$A = {A:.3g},\ \alpha = {alpha:.3f}$"
-        "\n"
-        rf"$L_{{\infty}} = {L_inf:.3f},\ R^2 = {r2:.3f}$",
-        transform=parent_ax.transAxes,
-        ha="left",
-        va="bottom",
-        fontsize=MATPLOTLIB_NOTE_SIZE,
-        color="0.15",
-        linespacing=1.6,
-        zorder=25,
+    r2 = 1.0 - float(np.sum((L - pred) ** 2)) / float(np.sum((L - L.mean()) ** 2))
+    P_grid = np.geomspace(P.min(), P.max(), 200)
+    ax.plot(P_grid, A * P_grid ** (-alpha) + L_inf, color="0.2", zorder=2)
+    ax.scatter(P, L, color="black", edgecolors="k", zorder=3)
+    ax.set_ylabel("Terminal monitoring\nloss")
+    ax.text(
+        0.97, 0.95, rf"$\alpha = {alpha:.3f}$" + "\n" + rf"$R^2 = {r2:.3f}$",
+        transform=ax.transAxes, ha="right", va="top", fontsize=MATPLOTLIB_NOTE_SIZE,
     )
 
 
@@ -1388,7 +1276,7 @@ def plot_scaling(data: pd.DataFrame | None = None) -> Figure:
     return fig
 
 
-# Likelihood
+# Regional monitoring loss
 
 MATCHED_LOSS_COLUMN = {
     "missense_variant": "eval_loss_cds",
@@ -1406,13 +1294,12 @@ ANNOTATION_HEADROOM_SUBSETS = frozenset({"synonymous_variant", "3_prime_UTR_vari
 ANNOTATION_HEADROOM_FRACTION = 0.3
 
 
-def _likelihood_plot_panel(
+def _monitoring_loss_plot_panel(
     ax: plt.Axes,
     data: pd.DataFrame,
     *,
     title: str,
     add_annotation_headroom: bool,
-    show_xlabel: bool,
     show_ylabel: bool,
 ) -> None:
     """Draw paired protocol fits and endpoint AUPRCs for one consequence."""
@@ -1466,8 +1353,6 @@ def _likelihood_plot_panel(
         )
 
     ax.set_title(title)
-    if show_xlabel:
-        ax.set_xlabel("LL (−loss)", labelpad=X_LABEL_PAD)
     if show_ylabel:
         ax.set_ylabel("AUPRC (%)")
     ax.grid(False)
@@ -1478,8 +1363,8 @@ def _likelihood_plot_panel(
     ax.set_box_aspect(1)
 
 
-def plot_likelihood(data: pd.DataFrame | None = None) -> Figure:
-    """Build the combined Mendelian + SGE LL-versus-AUPRC figure."""
+def plot_monitoring_loss(data: pd.DataFrame | None = None) -> Figure:
+    """Plot AUPRC against negative regional monitoring loss for both benchmarks."""
     if data is None:
         data = local_data.load_plot_csv("vep_by_sequence_likelihood")
 
@@ -1516,12 +1401,11 @@ def plot_likelihood(data: pd.DataFrame | None = None) -> Figure:
         panel = data[
             (data["dataset"] == "mendelian_traits") & (data["subset"] == subset)
         ]
-        _likelihood_plot_panel(
+        _monitoring_loss_plot_panel(
             axes[axis_name],
             panel,
             title=title,
             add_annotation_headroom=subset in ANNOTATION_HEADROOM_SUBSETS,
-            show_xlabel=index >= 3,
             show_ylabel=index in (0, 3),
         )
 
@@ -1532,12 +1416,11 @@ def plot_likelihood(data: pd.DataFrame | None = None) -> Figure:
     assert tuple((subset, title) for _, subset, title in sge_axes) == tuple(SGE_SUBSETS)
     for index, (axis_name, subset, title) in enumerate(sge_axes):
         panel = data[(data["dataset"] == "sge") & (data["subset"] == subset)]
-        _likelihood_plot_panel(
+        _monitoring_loss_plot_panel(
             axes[axis_name],
             panel,
             title=title,
             add_annotation_headroom=False,
-            show_xlabel=True,
             show_ylabel=index == 0,
         )
 
@@ -1596,6 +1479,17 @@ def plot_likelihood(data: pd.DataFrame | None = None) -> Figure:
     sge_top = max(axes[name].get_position().y1 for name, *_ in sge_axes)
     fig.text(0.02, mendelian_top + 0.012, "Mendelian", weight="bold")
     fig.text(0.02, sge_top + 0.012, "SGE", weight="bold")
+    # Use one full-width label per benchmark to keep the three-column grid readable.
+    renderer = fig.canvas.get_renderer()
+    for row in (mendelian_rows[1], sge_row):
+        bounds = Bbox.union([ax.get_window_extent(renderer) for ax in row])
+        tick_bottom = min(ax.xaxis.get_tightbbox(renderer).y0 for ax in row)
+        x, y = fig.transFigure.inverted().transform(
+            ((bounds.x0 + bounds.x1) / 2, tick_bottom - 3 * fig.dpi / 72)
+        )
+        fig.text(
+            x, y, "Negative regional monitoring loss", ha="center", va="top"
+        )
     return fig
 
 
@@ -1604,8 +1498,6 @@ def plot_likelihood(data: pd.DataFrame | None = None) -> Figure:
 MISSENSE_DATASET = "mendelian_traits"
 
 SUBSET = "missense_variant"
-
-MISSENSE_SUBPLOT_HEIGHT_PX = 164.0
 
 MARIN = "MarinDNA"
 
@@ -1629,13 +1521,11 @@ def _format_parameter_count(value: float, _position: int) -> str:
     return f"{value:g}"
 
 
-def plot_missense(data: pd.DataFrame | None = None) -> Figure:
-    """Build the combined MarinDNA + Evo 2 missense scaling figure."""
-    if data is None:
-        data = local_data.load_plot_csv("missense_readout_scaling")
-    fig, ax = plt.subplots(figsize=figsize(8.4, 7.2))
-
-    for family in FAMILIES:
+def _plot_missense_readouts(
+    ax: Axes, data: pd.DataFrame, families: tuple[str, ...]
+) -> None:
+    """Preserve the existing paired missense points and stored standard errors."""
+    for family in families:
         family_key = "marindna" if family == MARIN else "evo2"
         marker = MODEL_FAMILY_MARKERS[family_key]
         for score_type, _label, protocol in READOUTS:
@@ -1665,65 +1555,60 @@ def plot_missense(data: pd.DataFrame | None = None) -> Figure:
                 zorder=2,
             )
 
-    ax.set_xscale("log")
-    ax.xaxis.set_major_locator(LogLocator(base=10))
-    ax.xaxis.set_major_formatter(FuncFormatter(_format_parameter_count))
-    ax.set_xlabel("Model parameters", labelpad=X_LABEL_PAD)
     ax.set_ylabel("AUPRC (%)")
-    ax.grid(False)
-    ax.margins(x=0.04)
-    ax.set_box_aspect(1)
-    fig.subplots_adjust(left=0.16, right=0.62, top=0.95, bottom=0.16)
-    set_square_subplot_height(fig, (ax,), MISSENSE_SUBPLOT_HEIGHT_PX)
 
+
+def plot_missense(report_path: Path) -> Figure:
+    """Sequence-loss scaling and paired Mendelian/SGE missense readouts."""
+    results = local_data.load_plot_csv("sequence_loss_scaling_results")
+    mendelian = local_data.load_plot_csv("missense_readout_scaling")
+    scaling = local_data.load_plot_csv("vep_by_model_size")
+    sge = scaling[(scaling["dataset"] == "sge") & (scaling["subset"] == SUBSET)].copy()
+    sge["family"] = MARIN
+    assert set(sge["params"]) == set(results["params"])
+    assert set(mendelian.loc[mendelian["family"] == MARIN, "params"]) == set(results["params"])
+
+    fig, grid = plt.subplots(2, 2, figsize=figsize(6.5, 6.8))
+    axes = list(grid.flat)[:3]
+    _plot_terminal_monitoring_loss(axes[0], results, report_path)
+    _plot_missense_readouts(axes[1], mendelian, FAMILIES)
+    _plot_missense_readouts(axes[2], sge, (MARIN,))
+    for ax, title in zip(axes, (
+        "A  Sequence\n    monitoring loss", "B  Mendelian\n    missense", "C  SGE missense"
+    ), strict=True):
+        ax.set_title(title, loc="left", weight="bold", fontsize=MATPLOTLIB_BASE_SIZE)
+        ax.set_xscale("log")
+        ax.xaxis.set_major_locator(LogLocator(base=10))
+        ax.xaxis.set_major_formatter(FuncFormatter(_format_parameter_count))
+        ax.set_xlabel("Model parameters", labelpad=X_LABEL_PAD)
+        ax.grid(False)
+        ax.margins(x=0.04)
+        ax.set_box_aspect(1)
+    legend_ax = grid[1, 1]
+    legend_ax.set_box_aspect(1)
+    legend_ax.set_axis_off()
+    fig.tight_layout(h_pad=1.3, w_pad=0.7)
     protocol_handles = [
-        Line2D(
-            [0],
-            [0],
-            color=SCORING_PROTOCOL_COLORS[protocol],
-            linestyle=SCORING_PROTOCOL_LINESTYLES[protocol],
-            label=label,
-        )
+        Line2D([0], [0], color=SCORING_PROTOCOL_COLORS[protocol],
+               linestyle=SCORING_PROTOCOL_LINESTYLES[protocol], label=label)
         for _score, label, protocol in READOUTS
     ]
     family_handles = [
-        Line2D(
-            [0],
-            [0],
-            color="#4b4b4b",
-            marker=MODEL_FAMILY_MARKERS["marindna" if family == MARIN else "evo2"],
-            markerfacecolor="#b8b0a3",
-            markeredgecolor="#1f1e1b",
-            linestyle="none",
-            label=family,
-        )
-        for family in FAMILIES
+        Line2D([0], [0], color="#4b4b4b",
+               marker=MODEL_FAMILY_MARKERS[key], markerfacecolor="#b8b0a3",
+               markeredgecolor="#1f1e1b", linestyle="none", label=label)
+        for key, label in (("marindna", "Marin DNA"), ("evo2", "Evo 2 (B only)"))
     ]
-    axis_position = ax.get_position()
-    legend_x = axis_position.x1 + 0.04
-    protocol_legend = fig.legend(
-        handles=protocol_handles,
-        title="Scoring protocol",
-        ncol=1,
-        loc="upper left",
-        bbox_to_anchor=(legend_x, axis_position.y1),
-        frameon=False,
-        handlelength=2.4,
+    protocol_legend = legend_ax.legend(
+        handles=protocol_handles, title="Scoring method", loc="upper left",
+        bbox_to_anchor=(0, 1.05), frameon=False, alignment="left",
+        handlelength=1.6, handletextpad=0.5,
     )
-    fig.add_artist(protocol_legend)
-    fig.canvas.draw()
-    protocol_bottom = (
-        protocol_legend.get_window_extent(renderer=fig.canvas.get_renderer()).y0
-        / fig.bbox.height
-    )
-    fig.legend(
-        handles=family_handles,
-        title="Model family",
-        ncol=1,
-        loc="upper left",
-        bbox_to_anchor=(legend_x, protocol_bottom - 0.025),
-        frameon=False,
-        handletextpad=0.4,
+    legend_ax.add_artist(protocol_legend)
+    legend_ax.legend(
+        handles=family_handles, title="Model family", loc="lower left",
+        bbox_to_anchor=(0, -0.05), frameon=False, alignment="left",
+        handlelength=1.6, handletextpad=0.5,
     )
     return fig
 
@@ -3035,7 +2920,6 @@ def _loss_scaling_figure(staging: Path) -> Figure:
         local_data.load_plot_csv("sequence_loss_scaling_history"),
         results,
         palette(params),
-        staging / "sequence_loss_scaling_fit.txt",
     )
 
 
@@ -3057,25 +2941,14 @@ def cli(ctx: click.Context, output_dir: Path) -> None:
     ctx.obj = output_dir
 
 
-@cli.command("learning_rate_transfer")
+@cli.command("hyperparameter_transfer")
 @click.pass_obj
-def learning_rate_transfer(output_dir: Path) -> None:
-    """Transfer-validation loss versus learning rate."""
+def hyperparameter_transfer(output_dir: Path) -> None:
+    """Transfer-validation loss versus learning rate, beta2, and epsilon."""
     render(
         output_dir,
-        "learning_rate_transfer",
-        lambda _: _transfer_figure(plot_learning_rate, "learning_rate_transfer"),
-    )
-
-
-@cli.command("optimizer_parameter_transfer")
-@click.pass_obj
-def optimizer_parameter_transfer(output_dir: Path) -> None:
-    """Transfer-validation loss versus optimizer parameters."""
-    render(
-        output_dir,
-        "optimizer_parameter_transfer",
-        lambda _: _transfer_figure(plot_optimizer, "optimizer_parameter_transfer"),
+        "hyperparameter_transfer",
+        lambda _: _transfer_figure(plot_hyperparameter_transfer, "hyperparameter_transfer"),
     )
 
 
@@ -3093,12 +2966,11 @@ def regional_hyperparameter_transfer(output_dir: Path) -> None:
 @cli.command("sequence_loss_scaling")
 @click.pass_obj
 def sequence_loss_scaling(output_dir: Path) -> None:
-    """Training/validation loss scaling and the Kaplan fit report."""
+    """Supplementary training and monitoring loss trajectories."""
     render(
         output_dir,
         "sequence_loss_scaling",
         _loss_scaling_figure,
-        reports=("sequence_loss_scaling_fit.txt",),
     )
 
 
@@ -3126,15 +2998,19 @@ def vep_by_model_size(output_dir: Path) -> None:
 @cli.command("vep_by_sequence_likelihood")
 @click.pass_obj
 def vep_by_sequence_likelihood(output_dir: Path) -> None:
-    """Paired endpoint AUPRC versus sequence loss; reads bundled CSVs."""
-    render(output_dir, "vep_by_sequence_likelihood", lambda _: plot_likelihood())
+    """AUPRC versus negative regional monitoring loss; reads bundled CSVs."""
+    render(output_dir, "vep_by_sequence_likelihood", lambda _: plot_monitoring_loss())
 
 
 @cli.command("missense_readout_scaling")
 @click.pass_obj
 def missense_readout_scaling(output_dir: Path) -> None:
-    """MarinDNA/Evo 2 missense readouts; reads bundled CSVs."""
-    render(output_dir, "missense_readout_scaling", lambda _: plot_missense())
+    """Three-panel model scaling and variant prediction; reads bundled CSVs."""
+    render(
+        output_dir, "missense_readout_scaling",
+        lambda staging: plot_missense(staging / "sequence_loss_scaling_fit.txt"),
+        reports=("sequence_loss_scaling_fit.txt",),
+    )
 
 
 @cli.command("mixture_zero_shot_trajectories")
@@ -3239,13 +3115,6 @@ def evaluation_benchmarks(output_dir: Path) -> None:
 def variant_scoring_workflow(output_dir: Path) -> None:
     """Convert the authored variant-scoring workflow."""
     render_artwork(output_dir, "variant_scoring_workflow")
-
-
-@cli.command("hyperparameter_transfer_workflow")
-@click.pass_obj
-def hyperparameter_transfer_workflow(output_dir: Path) -> None:
-    """Convert the authored hyperparameter-transfer workflow."""
-    render_artwork(output_dir, "hyperparameter_transfer_workflow")
 
 
 if __name__ == "__main__":

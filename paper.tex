@@ -1,4 +1,5 @@
 \documentclass[a4paper,num-refs]{oup-contemporary}
+\usepackage{amsmath}
 \journal{gigascience}
 % Publication metadata remains provisional; no submission venue selected.
 \jname{TODO: journal}
@@ -384,14 +385,27 @@ measurements of variant effects. This allows us to examine whether the
 benefits of scaling depend on the evaluation task and scoring protocol.
 [TODO reference Method for details]
 
+To investigate how model scale affects variant prediction, we trained
+eight Marin DNA models ranging from 46M to 4B parameters, each using
+the same training-data mixture and approximately 85B input tokens.
+We calibrated optimizer hyperparameters on a 25M-parameter reference
+model and transferred them to larger models using fixed rules for
+batch size and training duration (Methods).
+Across the eight model sizes, sequence monitoring loss decreased
+smoothly with parameter count and was well described by a power-law
+relationship (Figure~\ref{fig:missense-scaling}A).
+Thus, the common training recipe produced progressively better
+sequence predictors over the tested model-size range.
+
+
 \begin{itemize}
 \item Mendelian missense prediction reveals information that likelihood
-scores alone miss. Lead with Figure~\ref{fig:missense-scaling}A: as model size
+scores alone miss. Lead with Figure~\ref{fig:missense-scaling}B: as model size
 increases, likelihood-based ranking worsens beyond an intermediate size while
 probe performance improves. The analogous pattern in Evo 2 shows that this
 observation spans two model families; it does not establish a shared mechanism.
 \item One scoring rule is therefore insufficient to judge whether scaling
-has improved a model. Use the planned Figure~\ref{fig:missense-scaling}B
+has improved a model. Use Figure~\ref{fig:missense-scaling}C
 to contrast SGE missense, where both readouts improve; cite Supplementary
 Figure~\ref{fig:downstream} for the existing evidence. Explain SGE as
 experimental
@@ -405,27 +419,25 @@ optimum, and improvements should be assessed across tasks and readouts.
 \end{itemize}
 \begin{figure}
 \centering
-\small
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{|p{\dimexpr\linewidth-2\tabcolsep-2\arrayrulewidth\relax}|}
-\hline
-\textbf{A \quad Mendelian missense}\par
-\includegraphics[width=\linewidth]{figures/missense_readout_scaling.pdf} \\[3pt]
-\hline
-\textbf{B \quad Experimental missense effects}\par
-\textit{Planned SGE comparison.} Plot chromosome-weighted AUPRC versus
-model size for Marin DNA SGE missense variants under zero-shot likelihood
-scoring and linear probing. Use matched variants, consistent readout colors,
-a logarithmic model-size axis, and standard-error bars. Draw on the existing
-results in Supplementary Figure~\ref{fig:downstream}; include no unverified
-Evo 2 SGE measurements. \\[3pt]
-\hline
-\end{tabular}
-\caption{Scaling and readout choice: draft panel layout.
-\textbf{A}, Existing Marin DNA and Evo 2 Mendelian missense comparison on
-identical variants. Performance is chromosome-weighted AUPRC; error bars
-denote standard errors. \textbf{B}, Planned experimental SGE missense panel
-contrasting the two readouts using existing Marin DNA results.}
+\includegraphics[width=\linewidth]{figures/missense_readout_scaling.pdf}
+\caption{Model scaling and variant prediction.
+\textbf{A}, Terminal conservation-weighted human monitoring loss across
+eight Marin DNA model sizes, with the descriptive fit
+$L(N)=AN^{-\alpha}+L_{\infty}$ ($A=17.6$, $L_{\infty}=0.192$;
+$\alpha$ and $R^2$ shown in the panel). The curve is restricted to the
+observed parameter range. These models used approximately 84.77B
+model-input tokens each, the dataset-proportional CDS/upstream/downstream
+mixture, and transferred optimization settings, rather than the final
+Staged five-region recipe. Monitoring loci were not excluded from
+pretraining; the fixed-token fit establishes neither generalization to
+independent loci nor compute-optimal scaling.
+\textbf{B}, Mendelian missense AUPRC for the same Marin DNA models and
+the available Evo 2 models (1B, 7B, and 40B), using zero-shot
+likelihood-ratio scoring and linear probes.
+\textbf{C}, SGE missense AUPRC for the eight Marin DNA models under
+both scoring methods. B and C use the established matched-variant
+comparisons and chromosome-weighted AUPRC; error bars show $\pm$ one
+standard error. Connecting lines join measured endpoints.}
 \label{fig:missense-scaling}
 \end{figure}
 
@@ -853,97 +865,212 @@ They therefore do not isolate the causal effect of introducing
 particular functional regions at different stages of training.
 
 \subsection{Hyperparameter transfer}\label{methods:transfer}
-\begin{itemize}
-\item Use Figure~\ref{fig:transfer-workflow} to explain calibration and
-transfer.
-Situate the calibration in hyperparameter-transfer literature
+
+We calibrated optimizer hyperparameters on a small reference model
+and applied fixed transfer rules at larger scales, following previous
+work on hyperparameter transfer
 \citep{yang2021transfer,mlodozeniec2025completed}.
-Explain how poor tuning can confound model-size comparisons.
-Specify the approximately 25M-parameter reference sweep, 2.5B-token
-horizon, 16,384-sequence batch (4,194,304 input tokens), Vizier search, tuned parameters, and selection
-objective. Refer to Section~\nameref{methods:scaling} for the monitoring
-statistic.
-TODO: provide search spaces, trial counts, and selection rules.
-\item The Complete(d)-inspired transfer uses the reference batch $B_0=16{,}384$
-sequences and horizon $T_0=2.5\times10^9$ model-input tokens. Writing
-$r=(BT_0)/(B_0T)$, it sets
-$\eta_H=\eta_{H,0}\sqrt{B/B_0}(T_0/T)^{0.3}$,
-$\eta_A=\eta_{A,0}\sqrt{r}$,
-$\epsilon=\epsilon_0/\sqrt{r}$, and
-$\beta_2=\mathrm{clip}(\beta_{2,0}^{B/B_0},0.5,0.9999)$.
-Both learning rates are capped at 0.03. Initialization scale, $\beta_1$,
-gradient clipping and z-loss are unchanged. The exponent 0.3 is inherited
-from Marin's text recipe, rather than fitted to DNA, and differs from the
-0.5 token-horizon exponent in Complete(d).
-\item Document target validation at 255M, 476M, and 1B, changed batch sizes and
-token horizons, sweep grids, and unchanged-reference controls. Specify the
-regional checks and criterion for comparing predicted and observed optima.
-Use Figure~\ref{fig:transfer} for learning-rate validation and Supplementary
-Figures~\ref{fig:optimizer-transfer} and~\ref{fig:regional-transfer} for the
-other optimizer and regional checks. Describe the support for the scaling
-recipe without claiming globally optimal tuning or universal transfer.
-\end{itemize}
+This approach allowed us to use a consistent optimization procedure
+across model sizes without independently tuning each model.
+All experiments used the architecture family described in
+Section~\nameref{methods:architecture}, with 255 DNA bases plus BOS,
+and a dataset-proportional mixture of CDS, upstream, and downstream
+sequences with sampling weights 0.7319, 0.2062, and 0.0619,
+respectively. Historical configurations and results are documented
+in the experiment reports and pinned training
+implementation~\citep{marindna109,marin4251,marintransfercode}.
+
+The reference model had approximately 25.2M parameters, hidden width
+512, and six layers. We trained it for a configured 2.5B model-input
+tokens using batches of 16,384 sequences (4,194,304 tokens per update).
+Optimization used AdamH for linear-layer weights and Adam for the
+remaining parameters, with separate peak learning rates $\eta_H$ and
+$\eta_A$, respectively.
+We performed five hyperparameter searches using
+Vizier~\citep{vizierrepo}, one for each initialization scale, jointly
+varying seven optimizer and regularization parameters
+(Supplementary Table~\ref{tab:transfer-search}).
+We selected the configuration with the lowest final monitoring loss
+among runs with finite results, obtaining an initialization scale of
+0.02. The selection criterion was sequence loss on fixed human
+monitoring datasets (Section~\nameref{methods:scaling}), rather than
+downstream variant-prediction performance.
+The search procedure and selected parameters are documented in
+Supplementary Section~\nameref{supp:transfer-details}.
+
+We applied the Complete(d)-inspired transfer rules
+\citep{mlodozeniec2025completed} implemented in Marin.
+For reference batch size $B_0=16{,}384$ sequences and training horizon
+$T_0=2.5\times10^9$ model-input tokens, let $B$ and $T$ denote the
+target batch size and horizon, and define $r=BT_0/(B_0T)$.
+The transferred optimizer parameters were
+\[
+\begin{aligned}
+\eta_H &= \min\!\left(0.03,
+    \eta_{H,0}\sqrt{B/B_0}(T_0/T)^{0.3}\right),\\
+\eta_A &= \min\!\left(0.03,\eta_{A,0}\sqrt{r}\right),\\
+\epsilon &= \epsilon_0/\sqrt{r},\\
+\beta_2 &= \mathrm{clip}\!\left(
+    \beta_{2,0}^{B/B_0},0.5,0.9999\right).
+\end{aligned}
+\]
+Initialization scale, $\beta_1$, gradient-clipping threshold, and
+z-loss weight were retained from the reference calibration.
+The AdamH training-horizon exponent of 0.3 was inherited from
+Marin's text-model recipe rather than fitted to DNA, and differs
+from the exponent of 0.5 in the Complete(d) prescription.
+These rules depend on batch size and training horizon, without an
+additional explicit dependence on model size.
+
+We evaluated transfer at approximately 255M, 476M, and 1.12B
+parameters, using batches of 4,096 sequences and a configured
+10B-model-input-token training horizon.
+Because batch size and training horizon were identical across
+these experiments, the transfer rules predicted the same settings
+at all three scales:
+$\eta_H=0.00513490$, $\eta_A=0.00747379$,
+$\beta_2=0.975819$, and $\epsilon=4\times10^{-15}$.
+At each scale, we trained a model using all transferred settings
+and performed three one-parameter-at-a-time sweeps around this
+configuration, varying $\eta_H$, $\beta_2$, or $\epsilon$ while
+holding the other parameters fixed.
+The $\eta_H$ sweep therefore held the Adam learning rate $\eta_A$
+at its transferred value.
+At 1.12B parameters, we additionally evaluated a control using
+the unmodified reference-model settings at the target batch size
+and training horizon.
+The tested values are given in Supplementary
+Table~\ref{tab:transfer-search}.
 
 \begin{figure}
 \centering
-\includegraphics[width=\linewidth]{figures/hyperparameter_transfer_workflow.pdf}
-\caption{Hyperparameter calibration and transfer workflow. A small-model
-reference sweep calibrates optimizer settings, which are transformed for target
-batch sizes and token horizons using fixed transfer
-rules.}\label{fig:transfer-workflow}
+\includegraphics[width=\linewidth]{figures/hyperparameter_transfer.pdf}
+\caption{Hyperparameter transfer at 255M, 476M, and 1B parameters.
+\textbf{(A)} AdamH learning rate $\eta_H$.
+\textbf{(B)} Adam $\beta_2$, the decay rate for the exponential moving
+average of squared gradients. \textbf{(C)} Adam $\epsilon$, the constant
+added to the denominator for numerical stability. Circles vary the
+indicated parameter with other settings fixed; squares mark the
+transferred settings. The star
+in A is the 1B control using all reference-optimal settings unchanged.
+The transferred learning rate gives the lowest observed monitoring loss
+among tested values at each scale; some tested $\beta_2$ and $\epsilon$
+settings improve on their transferred anchors.}\label{fig:transfer}
 \end{figure}
 
-\begin{figure}
-\centering
-\includegraphics[width=\linewidth]{figures/learning_rate_transfer.pdf}
-\caption{Learning-rate transfer at 255M, 476M, and 1B parameters. The control
-uses the reference-sweep optimum unchanged; sweep points test target-scale
-settings. The transferred prediction gives the lowest observed loss at each
-scale.}\label{fig:transfer}
-\end{figure}
 
-\subsection{Scaling experiments and loss monitoring}\label{methods:scaling}
-The parameter-scaling experiments sampled the annotation-derived CDS,
-upstream, and downstream datasets in proportion to their sizes, giving
-approximately 73\%, 21\%, and 6\% of training sequences, respectively.
-
-\begin{itemize}
-\item List the eight model sizes, common approximately 84.77B-model-input-token budget,
-proportional three-region mixture, transferred hyperparameters, and checkpoint
-selection. TODO: supply exact run configurations and completed token counts.
-\item Define the fixed human monitoring sequences, their overlap with
-training, and loss aggregation. Explain that lowercase marks repetitive bases
-in training but non-conserved bases in monitoring, with 1\% weight in both.
-Document the statistic's role in tuning and model choice, and its limitations
-as an estimate of generalization. TODO: specify sequence provenance and
-conservation-mask construction.
-\item Use Figure~\ref{fig:scaling} to document predictable sequence-loss scaling
-\citep{kaplan2020scaling}. Specify the Kaplan-style fitting equation, endpoints,
-fitting procedure,
-and goodness-of-fit calculation. Define region-matched log-likelihood used in
-downstream analyses. TODO: recover exact fitting settings from the plot code.
-\end{itemize}
+Figure~\ref{fig:transfer} compares monitoring loss across the
+tested hyperparameters, with regional losses from the same runs
+shown in Supplementary Figure~\ref{fig:regional-transfer}.
+The transferred AdamH learning rate achieved the lowest observed
+overall monitoring loss among the tested values at all three model
+sizes, whereas some alternative $\beta_2$ and $\epsilon$ settings
+performed better than their transferred values.
+Each setting was evaluated in a single training run, without
+replication; plotted lines connect observed values rather than
+fitted response curves.
+These experiments assess the usefulness and local sensitivity of
+the transferred recipe, rather than establishing jointly or
+globally optimal hyperparameters.
+Further details of the validation runs and their provenance are
+given in Supplementary Section~\nameref{supp:transfer-details}.
 
 
-The human-sequence monitoring statistic, referred to as validation loss,
-used conservation-based case encoding rather than the repeat masking
-applied to training sequences.
-Lowercase bases represented non-conserved positions, including those
-without conservation scores, and received the same reduced loss weight
-of 0.01.
-The monitored genomic loci were not withheld from pretraining.
-Consequently, this statistic was used to track optimization and compare
-models, rather than to estimate generalization to held-out genomes
-or independent genomic regions.
+\subsection{Scaling experiments and loss monitoring}
+\label{methods:scaling}
+
+We trained eight models ranging from 45.9M to 4.02B parameters to
+investigate how model size affects sequence modeling and variant
+prediction. The architectures are listed in Supplementary
+Table~\ref{tab:architectures}; parameter counts used in the analyses
+are estimates from the training configurations.
+All models used the same dataset-proportional mixture of CDS, upstream,
+and downstream sequences (sampling weights 0.7319, 0.2062, and 0.0619),
+rather than the balanced or five-region mixtures described in
+Section~\nameref{methods:mixtures}.
+Training used 255-base sequences preceded by BOS, with an effective
+batch size of 1,536 sequences (393,216 input tokens per update).
+Each model was trained on approximately 84.77B model-input tokens,
+corresponding to one nominal pass through the source mixture.
+Thus, training-token exposure was held fixed across model sizes,
+rather than training compute~\citep{marindna109,marin4251,marintransfercode}.
+
+All model sizes used the hyperparameters transferred from the reference
+calibration (Section~\nameref{methods:transfer}), evaluated at the
+scaling experiment's batch size and training horizon.
+The transferred AdamH and Adam learning rates were 0.00165607 and
+0.00157196, respectively, with $\beta_2=0.990863$ and
+$\epsilon=1.90177\times10^{-14}$.
+Initialization scale, $\beta_1$, gradient clipping, and z-loss weight
+were retained from the reference calibration.
+Training used the standard learning-rate schedule, with 10\% warmup
+and linear decay over the final 20\% of training.
+We trained one model at each size without size-specific retuning,
+and used the terminal checkpoint of each run for all downstream
+comparisons (Figure~\ref{fig:missense-scaling}B,C and Supplementary
+Figures~\ref{fig:downstream} and~\ref{fig:loss-vep}).
+Exact training budgets and checkpoint details are provided in
+Supplementary Section~\nameref{supp:scaling-details}.
+
+We constructed fixed human sequence datasets to monitor loss during
+training and hyperparameter selection.
+These comprised CDS, upstream, and downstream regions from the GRCh38
+reference genome (RefSeq assembly \texttt{GCF\_000001405.40}),
+using the corresponding interval definitions described in
+Section~\nameref{methods:data}.
+Each region was tiled into non-overlapping 255-base windows, from
+which 16,384 sequences were sampled without replacement.
+Unlike training sequences, where lowercase bases indicate repeat
+masking, monitoring sequences used case to encode evolutionary
+conservation. Bases with Cactus 241-mammal phyloP scores of at least
+2.27 were uppercase, while all other bases, including positions
+without scores, were lowercase
+\citep{pollard2010phylop,marindnamonitoringcode,
+marindnamonitoringcds,marindnamonitoringupstream,
+marindnamonitoringdownstream}.
+The monitored genomic loci were not excluded from pretraining.
 
 
-\begin{figure}
-\centering
-\includegraphics[width=\linewidth]{figures/sequence_loss_scaling.pdf}
-\caption{Sequence loss across model sizes. Eight models from 46M to 4B
-parameters are each trained on approximately 84.77B model-input tokens. The inset shows a
-Kaplan-style power-law fit to final validation loss.}\label{fig:scaling}
-\end{figure}
+
+
+Monitoring loss was calculated as weighted next-nucleotide
+cross-entropy using natural logarithms, with uppercase and lowercase
+targets assigned weights of 1 and 0.01, respectively.
+Overall monitoring loss was computed by pooling weighted token losses
+across the three regional datasets and dividing by the sum of their
+token weights, rather than averaging the regional losses.
+Consequently, equal numbers of sequences in each region did not
+necessarily contribute equally to the overall statistic.
+The same monitoring datasets were used for reference hyperparameter
+selection, transfer validation, and the scaling experiments
+(Figure~\ref{fig:transfer} and Supplementary Figure~\ref{fig:scaling}).
+Because the monitored loci were not withheld from training, this
+statistic measures sequence-modeling performance on a fixed,
+conservation-weighted collection of human sequences rather than
+generalization to independent genomic regions.
+Moreover, training and monitoring losses use different case-encoding
+conventions and should not be interpreted as a conventional
+training--test generalization gap.
+
+We examined sequence-loss scaling using the training and monitoring
+loss trajectories shown in Supplementary Figure~\ref{fig:scaling}.
+To summarize the relationship between model size and terminal
+monitoring loss, we fitted the power-law relationship
+\citep{kaplan2020scaling}
+\[
+L(N) = A N^{-\alpha} + L_{\infty},
+\]
+where $N$ is the model parameter count and $L(N)$ is the terminal
+overall monitoring loss.
+The fit used unweighted nonlinear least squares in loss space,
+using all eight model endpoints.
+The fitted relationship and coefficient of determination ($R^2$)
+are shown in Figure~\ref{fig:missense-scaling}A; fitting procedures and
+diagnostics are described in Supplementary
+Section~\nameref{supp:scaling-details}.
+This is a descriptive relationship at a fixed training-token budget,
+rather than an estimate of compute-optimal scaling or evidence for
+extrapolation beyond the tested model sizes.
 
 \subsection{Evaluation benchmarks}\label{methods:benchmarks}
 \begin{itemize}
@@ -1096,6 +1223,52 @@ percentages, and bars show $\pm$ one stored standard error. All five panels
 show both specialists and both generalists on a common 0--70\% vertical
 scale. The source metric locations and model identifiers are retained
 in the accompanying plotting-data table.
+
+
+Figure~\ref{fig:missense-scaling}B,C reuses the Marin DNA missense
+endpoints from Supplementary Figure~\ref{fig:downstream}. Both scoring methods
+use the same 5,800 Mendelian missense variants or 19,059 SGE missense
+variants across all eight terminal models, retaining rows with finite
+probe predictions and forward/reverse-complement likelihood ratios.
+AUPRC is averaged across chromosomes with weights proportional to the
+number of variants; standard errors use 1,000 chromosome-bootstrap
+resamples with seed 0. The SGE scaling comparison retains this
+chromosome-weighted aggregation, rather than averaging across assays.
+Panel B also retains the archived paired Evo 2 summaries for 1B, 7B,
+and 40B models, each reporting 5,800 Mendelian missense variants for
+both readouts. Their point estimates and stored standard errors were
+used unchanged. Source locations and model identifiers are recorded in
+the plotting-data tables. No Evo 2 SGE measurements are included.
+
+For Supplementary Figure~\ref{fig:loss-vep}, we examined associations
+between regional sequence-modeling performance and variant prediction
+across the eight model sizes.
+The horizontal coordinate is the negative terminal conservation-weighted
+regional monitoring loss for the corresponding functional region.
+Missense, splicing, and synonymous variants were matched to CDS
+monitoring loss; promoter and 5$'$ UTR variants to upstream loss;
+and 3$'$ UTR variants to downstream loss.
+This quantity is a conservation-weighted summary of monitoring
+sequences, not the log-likelihood of individual evaluated variants.
+
+We used the same eight terminal models and paired zero-shot and
+linear-probe AUPRC estimates as Supplementary
+Figure~\ref{fig:downstream}, comprising six Mendelian variant
+classes and the missense and splicing saturation genome editing
+(SGE) classes.
+Within each model and variant class, both scoring methods were
+evaluated on identical variants with finite probe predictions.
+Performance was summarized using chromosome-weighted AUPRC,
+with standard errors estimated by chromosome bootstrap
+(1,000 resamples; seed~0).
+For each benchmark, variant class, and scoring method, we fitted
+an unweighted ordinary least-squares regression through the eight
+model endpoints and calculated Pearson's correlation coefficient.
+AUPRC uncertainty estimates were not used as regression weights.
+These associations describe differences across model sizes, rather
+than independent experimental replicates or causal effects of
+improving sequence loss.
+
 
 \begin{itemize}
 \item For the contextual comparison with Carbon, record that its model card
@@ -1298,8 +1471,7 @@ the Registry of candidate cis-regulatory elements.
 \todo
 \bibliography{paper}
 \clearpage
-\onecolumn
-\section*{Supplementary material}
+\twocolumn[\section*{Supplementary material}]
 % Source audit: data/dataset_provenance/sources.json records the source
 % commits of the exported manifests and the remaining provenance gaps.
 % In particular, do not treat inspected HF card revisions as training-job
@@ -1311,7 +1483,7 @@ the Registry of candidate cis-regulatory elements.
 
 
 
-\begin{table}
+\begin{table*}[t]
 \centering\small
 \caption{Model architectures. Widths denote hidden and feed-forward
 dimensions; Q/KV denotes query and key/value attention head counts.
@@ -1337,7 +1509,7 @@ Reference ($\sim$25M) & 6 & 512 & 2048 & 4/4 & Separate \\
 Qwen3 1.7B preset & 28 & 2048 & 6144 & 16/8 & Tied \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 \subsection{Architecture configuration details}
 \label{supp:architecture-details}
@@ -1369,7 +1541,7 @@ Further experiment-specific configurations are given in
 Supplementary Table~\ref{tab:models}.
 
 
-\begin{table}
+\begin{table*}[t]
 \centering\small
 \caption{Training configurations. Batch sizes are effective sequences
 per optimizer update. Training exposure is measured in model-input
@@ -1404,8 +1576,46 @@ Upstream-weighted & 256 & 8,192 &
 $\sim$166B comparison & Upstream 25\%; others 18.75\% \\
 \bottomrule
 \end{tabularx}
-\end{table}
+\end{table*}
 
+
+\begin{table}[tp]
+\centering\small\setlength{\tabcolsep}{3pt}
+\caption{Reference calibration search and target-scale validation grids.
+Reference parameters were searched jointly within each initialization
+search; target parameters were varied one at a time around the transferred
+anchor. Values are rounded for display.}
+\label{tab:transfer-search}
+\begin{tabularx}{\linewidth}{@{}LLr@{}}
+\toprule
+Parameter & Search range & Selected \\
+\midrule
+Initialization scale & 0.04, 0.02, 0.01, 0.005, 0.0025 & 0.02 \\
+AdamH learning rate $\eta_H$ & $[5\times10^{-5},0.03]$ & 0.0155661 \\
+Adam learning rate $\eta_A$ & $[5\times10^{-5},0.03]$ & 0.0298951 \\
+$\beta_1$ & $[0.5,1.0]$ & 0.667560 \\
+$\beta_2$ & $[0.5,1.0]$ & 0.906727 \\
+$\epsilon$ & $[10^{-15},10^{-3}]$ & $10^{-15}$ \\
+Gradient-clipping threshold & $[0.1,1.0]$ & 0.995188 \\
+Z-loss weight & $[10^{-7},0.1]$ & $4.31288\times10^{-6}$ \\
+\bottomrule
+\end{tabularx}
+\par\medskip
+\begin{tabularx}{\linewidth}{@{}lL@{}}
+\toprule
+Parameter & Target grid including transferred anchor \\
+\midrule
+$\eta_H$ & Seven logarithmically spaced values from
+$8.78906\times10^{-4}$ to $0.03$, with central value $0.00513490$. \\
+$\beta_2$ & Seven linearly spaced values from $0.951737$ to $0.9999$,
+with central value $0.975819$, plus lower values
+$0.7$, $0.783912$, and $0.867825$. \\
+$\epsilon$ & Anchor $4\times10^{-15}$; six logarithmically spaced
+values above it through $10^{-3}$, and three below it with the same
+multiplicative spacing, reaching $8\times10^{-21}$. \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \subsection{Training configuration details}
 \label{supp:training-details}
@@ -1473,8 +1683,127 @@ observed, and inherited training exposure are documented in the
 \href{https://github.com/Open-Athena/marin-dna-paper/blob/main/data/training_provenance/sources.json}{training-provenance record}.
 
 
-\clearpage
-\twocolumn
+\subsection{Hyperparameter search and transfer validation details}
+\label{supp:transfer-details}
+
+The reference calibration used five independent Vizier searches,
+one for each initialization scale, each configured for ten rounds
+of four suggestions.
+Searches used Vizier's DEFAULT algorithm with continuous
+floating-point parameter ranges and no explicit logarithmic
+parameter scaling.
+The seven optimizer and regularization parameters were varied
+jointly within each initialization-scale search, with ranges
+given in Supplementary Table~\ref{tab:transfer-search}.
+The configured maximum was 200 trials; the archived results
+contain 195 finished runs, of which 183 had finite monitoring loss.
+The selected run minimized the final reported \texttt{eval/loss}
+among these finite results, with loss 1.228545 and initialization
+scale 0.02.
+The reference training budget was rounded down to 596 optimizer
+updates. Nesterov momentum was disabled.
+
+The transfer-validation experiments used a configured budget of
+10B model-input tokens, corresponding to 9,536 optimizer updates
+at a batch size of 4,096 sequences.
+At each target model size, the common transferred configuration
+was evaluated alongside one-parameter-at-a-time sweeps.
+These added six AdamH learning-rate runs, nine $\beta_2$ runs,
+and nine $\epsilon$ runs per model size.
+Counting the transferred configuration once, there were 25 runs
+at each of 255M and 476M parameters and 26 at 1.12B parameters,
+including an additional unchanged-reference control at the
+largest size.
+
+The plotting data combine experiment exports v0.14 and v0.15.
+Version v0.14 supplies the 1.12B learning-rate and $\beta_2$
+sweeps and both control configurations; v0.15 supplies the 1.12B
+$\epsilon$ sweep and all runs at the two smaller model sizes.
+Of the 76 recorded runs, 70 were marked finished and six were
+marked crashed after more than 99.9\% of their configured steps.
+For these six runs, the latest reported monitoring loss was used.
+The plots therefore represent individual training runs, rather
+than replicated estimates of expected performance at each setting.
+
+The overall monitoring statistic pools weighted token losses
+across the three human monitoring datasets, rather than taking
+the unweighted mean of their regional losses.
+Its construction and interpretation, including the absence of
+held-out genomic loci, are described in
+Section~\nameref{methods:scaling}.
+The regional comparisons in
+Supplementary Figure~\ref{fig:regional-transfer} use CDS,
+upstream, and downstream monitoring losses from the same
+transfer-validation runs, rather than independently optimized
+regional models.
+Exact configurations, reported losses, and source revisions
+are available in the accompanying experiment records and
+plotting data.
+
+
+\subsection{Scaling experiment and loss-monitoring details}
+\label{supp:scaling-details}
+
+The scaling experiments used a configured budget of 331,122,738
+sequence examples, equivalent to 84,767,420,928 model-input tokens.
+With an effective batch size of 1,536 sequences, rounding down to
+complete batches yielded 215,574 optimizer updates and
+84,767,145,984 input tokens per model.
+All eight exported training runs finished.
+The final logged step and checkpoint identifier were 215,573,
+because training steps were indexed from zero.
+Terminal checkpoints were used for downstream evaluation without
+selecting different loss-minimizing checkpoints for individual models.
+
+The fixed human monitoring datasets used the CDS (v5), upstream (v1),
+and downstream (v15) interval recipes on GRCh38
+(\texttt{GCF\_000001405.40}).
+The construction pipeline generated 255-base windows at a stride of
+255 bases, retained windows on chromosomes with RefSeq-to-UCSC
+name mappings, and sampled up to 16,384 windows per region without
+replacement using seed~42.
+The published dataset cards report 16,384 sequences in each regional
+set.
+Sequence case was overwritten using the Cactus 241-mammal phyloP
+conservation track, with scores of at least 2.27 classified as
+conserved and missing scores treated as non-conserved.
+The datasets were designated for evaluation by the training loader,
+but their genomic loci were not excluded from pretraining.
+This construction replaced an earlier chromosome-based holdout
+\citep{marindnamonitoring84}.
+Dataset construction code and released monitoring sequences are
+documented in the corresponding source records
+\citep{marindnamonitoringcode,marindnamonitoringcds,
+marindnamonitoringupstream,marindnamonitoringdownstream}.
+
+For Supplementary Figure~\ref{fig:scaling}, logged training losses were subsampled
+at the optimizer steps for which monitoring loss was also recorded.
+Step zero was excluded from the logarithmic horizontal axis, and
+observed points were connected without smoothing.
+The terminal monitoring-loss scaling relationship in
+Figure~\ref{fig:missense-scaling}A was fitted using
+SciPy's \texttt{curve\_fit}, minimizing unweighted squared residuals
+in loss space.
+The parameter bounds were $A\geq0$, $0\leq\alpha\leq5$, and
+$0\leq L_{\infty}\leq\min_i L_i$, with a maximum of 10,000 function
+evaluations.
+We checked convergence, finite parameter covariance, and that
+fitted parameters were not within 1\% of their bounds, measured
+relative to the bounded interval or parameter magnitude for the
+unbounded amplitude.
+The reported coefficient of determination was calculated from
+the eight terminal losses as
+\[
+R^2 =
+1-\frac{\sum_i(L_i-\widehat{L}_i)^2}
+        {\sum_i(L_i-\overline{L})^2},
+\]
+where $\widehat{L}_i$ denotes the fitted loss and $\overline{L}$
+the mean observed loss.
+The fit was descriptive and was not used to select model sizes
+or extrapolate performance beyond the observed range.
+
+
 % Supplementary numbering uses distinct PDF anchors.
 \setcounter{figure}{0}
 \renewcommand{\thefigure}{S\arabic{figure}}
@@ -1538,25 +1867,40 @@ denote standard errors.}\label{fig:downstream}
 \begin{figure}
 \centering
 \includegraphics[width=\linewidth]{figures/vep_by_sequence_likelihood.pdf}
-\caption{VEP versus matched-region validation log-likelihood (negative loss)
-across eight parameter-scaling endpoints. Performance is chromosome-weighted
-AUPRC. Lines are least-squares fits; $r$ denotes Pearson correlation and error
-bars denote standard errors.}\label{fig:loss-vep}
-\end{figure}
-
-\begin{figure}
-\centering
-\includegraphics[width=\linewidth]{figures/optimizer_parameter_transfer.pdf}
-\caption{Adam $\beta_2$ and $\epsilon$ transfer. Target-scale loss is compared
-across optimizer settings at the same model sizes as
-Figure~\ref{fig:transfer}.}\label{fig:optimizer-transfer}
+\caption{VEP versus negative regional monitoring loss. Each variant
+class is matched to its corresponding monitoring region: CDS for missense,
+splicing, and synonymous variants; upstream for promoter and 5$'$ UTR;
+and downstream for 3$'$ UTR. The horizontal coordinate is the negative
+terminal conservation-weighted regional monitoring loss, computed as
+next-nucleotide cross-entropy on fixed human sequences with weights 1
+for conserved bases and 0.01 for non-conserved or missing-score bases.
+Higher horizontal values indicate lower monitoring loss. Each panel shows
+eight model-size endpoints per scoring method. Performance is
+chromosome-weighted AUPRC; error bars denote AUPRC standard errors.
+Lines are ordinary unweighted least-squares fits, and $r$ denotes
+Pearson's correlation coefficient.}\label{fig:loss-vep}
 \end{figure}
 
 \begin{figure}
 \centering
 \includegraphics[width=\linewidth]{figures/regional_hyperparameter_transfer.pdf}
 \caption{Region-specific hyperparameter transfer. Validation loss versus
-learning rate, $\beta_2$, and $\epsilon$, evaluated separately for CDS,
-upstream, and downstream regions.}\label{fig:regional-transfer}
+AdamH learning rate, $\beta_2$, and $\epsilon$, evaluated separately for
+CDS, upstream, and downstream monitoring sequences from the same training
+runs as Figure~\ref{fig:transfer}.
+Squares mark transferred settings; circles mark tested alternatives.}\label{fig:regional-transfer}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{figures/sequence_loss_scaling.pdf}
+\caption{Training and monitoring loss trajectories across model sizes.
+Eight Marin DNA models from 46M to 4.02B parameters were each trained
+on approximately 84.77B model-input tokens from the dataset-proportional
+CDS/upstream/downstream mixture. Curves show logged training loss and
+conservation-weighted human monitoring loss; monitoring loci were not
+withheld from pretraining. Training losses are shown at steps with
+recorded monitoring loss, without smoothing; step zero is omitted from
+the logarithmic axis. The terminal monitoring-loss fit is shown in
+Figure~\ref{fig:missense-scaling}A.}\label{fig:scaling}
 \end{figure}
 \end{document}
