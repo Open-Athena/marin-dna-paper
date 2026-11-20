@@ -2505,40 +2505,40 @@ z
   </g>
   <g id="legend_2">
    <g id="line2d_98">
-    <path d="M 71.038238 147.670875
-L 76.438238 147.670875
-L 81.838238 147.670875
+    <path d="M 81.414113 147.670875
+L 86.814113 147.670875
+L 92.214112 147.670875
 " style="fill: none; stroke: #9c4f2f; stroke-width: 0.8; stroke-linecap: square"/>
     <g>
-     <use xlink:href="#m822f68f433" x="76.438238" y="147.670875" style="fill: #9c4f2f; stroke: #9c4f2f"/>
+     <use xlink:href="#m822f68f433" x="86.814113" y="147.670875" style="fill: #9c4f2f; stroke: #9c4f2f"/>
     </g>
    </g>
    <g id="text_67">
-    <text style="font-size: 7.2px; font-family: 'Lato', sans-serif; text-anchor: start; fill: #1f1e1b" x="87.598238" y="150.190875" transform="rotate(-0 87.598238 150.190875)">Staged m5.1</text>
+    <text style="font-size: 7.2px; font-family: 'Lato', sans-serif; text-anchor: start; fill: #1f1e1b" x="97.974113" y="150.190875" transform="rotate(-0 97.974113 150.190875)">Staged</text>
    </g>
    <g id="line2d_99">
-    <path d="M 71.038238 156.439125
-L 76.438238 156.439125
-L 81.838238 156.439125
+    <path d="M 81.414113 156.439125
+L 86.814113 156.439125
+L 92.214112 156.439125
 " style="fill: none; stroke: #465c6e; stroke-width: 0.8; stroke-linecap: square"/>
     <g>
-     <use xlink:href="#mf03bd167e7" x="76.438238" y="156.439125" style="fill: #465c6e; stroke: #465c6e"/>
+     <use xlink:href="#mf03bd167e7" x="86.814113" y="156.439125" style="fill: #465c6e; stroke: #465c6e"/>
     </g>
    </g>
    <g id="text_68">
-    <text style="font-size: 7.2px; font-family: 'Lato', sans-serif; text-anchor: start; fill: #1f1e1b" x="87.598238" y="158.959125" transform="rotate(-0 87.598238 158.959125)">Uniform m1.3</text>
+    <text style="font-size: 7.2px; font-family: 'Lato', sans-serif; text-anchor: start; fill: #1f1e1b" x="97.974113" y="158.959125" transform="rotate(-0 97.974113 158.959125)">Uniform</text>
    </g>
    <g id="line2d_100">
-    <path d="M 71.038238 165.207375
-L 76.438238 165.207375
-L 81.838238 165.207375
+    <path d="M 81.414113 165.207375
+L 86.814113 165.207375
+L 92.214112 165.207375
 " style="fill: none; stroke: #6f7d3f; stroke-width: 0.8; stroke-linecap: square"/>
     <g>
-     <use xlink:href="#m5c0fbdc3d3" x="76.438238" y="165.207375" style="fill: #6f7d3f; stroke: #6f7d3f"/>
+     <use xlink:href="#m5c0fbdc3d3" x="86.814113" y="165.207375" style="fill: #6f7d3f; stroke: #6f7d3f"/>
     </g>
    </g>
    <g id="text_69">
-    <text style="font-size: 7.2px; font-family: 'Lato', sans-serif; text-anchor: start; fill: #1f1e1b" x="87.598238" y="167.727375" transform="rotate(-0 87.598238 167.727375)">Upstream-weighted m3.3</text>
+    <text style="font-size: 7.2px; font-family: 'Lato', sans-serif; text-anchor: start; fill: #1f1e1b" x="97.974113" y="167.727375" transform="rotate(-0 97.974113 167.727375)">Upstream-weighted</text>
    </g>
   </g>
  </g>

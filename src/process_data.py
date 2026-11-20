@@ -37,13 +37,14 @@ from plot import (
     MATCHED_LOSS_COLUMN,
     MISSENSE_DATASET,
     PANEL_ORDER,
-    PANEL_SPECS,
+    PANEL_REGIONS,
     READOUTS,
     ROLE_ORDER,
     SCALING_SUBSETS,
     SCORE_TYPE,
     SHORT_NAMES,
     SPECIALIST_DATASET,
+    SPECIALIST_IDS,
     SPECIALIST_SUBSET_DISPLAY,
     SUBSET,
     TOKENS_PER_STEP,
@@ -710,9 +711,9 @@ def _lineage_keep(tokens: np.ndarray, leaf: str, token_cutoff: float) -> np.ndar
 
 
 def load_plot_data() -> pd.DataFrame:
-    """Load the five region-matched comparisons from current evals_v2 metrics."""
+    """Load both specialists and both comparators for all five variant classes."""
     required_ids = {
-        *(spec["specialist_id"] for spec in PANEL_SPECS.values()),
+        *SPECIALIST_IDS.values(),
         *BASELINE_IDS.values(),
     }
     models = {
@@ -726,9 +727,8 @@ def load_plot_data() -> pd.DataFrame:
 
     records: list[dict[str, Any]] = []
     for subset in PANEL_ORDER:
-        spec = PANEL_SPECS[subset]
         role_to_model_id = {
-            "Specialist": spec["specialist_id"],
+            **SPECIALIST_IDS,
             **BASELINE_IDS,
         }
         for role, model_id in role_to_model_id.items():
@@ -750,7 +750,7 @@ def load_plot_data() -> pd.DataFrame:
                 {
                     "subset": subset,
                     "consequence": SPECIALIST_SUBSET_DISPLAY[subset],
-                    "region": spec["region"],
+                    "region": PANEL_REGIONS[subset],
                     "role": role,
                     "model_id": model_id,
                     "protocol": DEFAULT_PROTOCOL[model.family],
