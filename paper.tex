@@ -178,10 +178,8 @@ much lower cost}
 \\[3pt]
 \hline
 \textbf{C \quad From sequences to variant scores}\par
-\includegraphics[width=\linewidth]{figures/variant_scoring_workflow.pdf}\par
-Zero-shot scoring compares reference and alternate sequence likelihoods
-without labeled variant examples. A linear probe uses labeled examples to
-learn from the frozen model's reference/alternate representations. \\[3pt]
+\includegraphics[width=\linewidth]{figures/variant_scoring_workflow.pdf}
+\\[3pt]
 \hline
 \end{tabular}
 \caption{From DNA to variant ranking.
@@ -198,8 +196,11 @@ representations. The abbreviated example shows shifted next-base targets.
 Panels A and B illustrate the later recipe with 255 DNA bases plus a BOS
 token, rather than the early 512-base experiments; mixture schedules are
 omitted. Training uses DNA without variant-effect labels.
-\textbf{C}, Variant scoring uses sequence likelihoods or a linear probe
-trained on frozen reference/alternate representations.}
+\textbf{C}, Both readouts use the frozen model. The zero-shot damage score
+negates the mean alternate-minus-reference log-likelihood ratio (LLR)
+across forward and reverse-complement strands. Only the linear probe
+uses labeled variants. Its inputs are the pooled reference embedding
+and the change in embedding after substituting the alternate allele.}
 \label{fig:model-overview}
 \end{figure}
 
@@ -218,33 +219,25 @@ assessing both variant-prediction performance and computational cost.
 
 \begin{figure}
 \centering
-\small
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{|p{\dimexpr\linewidth-2\tabcolsep-2\arrayrulewidth\relax}|}
-\hline
-\textbf{A \quad Aggregate variant-prediction performance}\par
-\textit{Planned zero-shot comparison.} Plot macro-average Mendelian AUPRC
-for Marin DNA, Evo 2, GPN-Star, and AlphaGenome; distinguish single-sequence,
-alignment-based, and supervised model families.\par
-\textit{Planned probe comparison.} Separately plot macro-averages of
-chromosome-weighted AUPRC for Marin DNA and Evo 2. Keep the two aggregation
-schemes distinct. Current evidence: Supplementary
-Figures~\ref{fig:benchmarks} and~\ref{fig:benchmark-probes}. \\[3pt]
-\hline
-\textbf{B \quad Training and inference costs}\par
-\includegraphics[width=\linewidth]{figures/vep_performance_vs_throughput.pdf}%
-\par
-\textit{Planned training-cost comparison.} Add final-model training FLOPs
-for Marin DNA 1B and Evo 2 40B (approximately $1{,}980\times$ fewer for
-Marin DNA), separate from total research costs. The existing throughput plot
-uses deployed contexts: 256 versus 8,192 tokens for this comparison. \\[3pt]
-\hline
-\end{tabular}
-\caption{Performance and cost: draft panel layout.
-\textbf{A}, Planned aggregate performance comparisons for two readouts.
-\textbf{B}, Existing zero-shot Mendelian macro-average AUPRC versus variants
-scored per hour on a GH200, with a planned training-cost comparison.
-Throughput is measured at deployed, rather than equal, context lengths.}
+\includegraphics[width=\linewidth]{figures/vep_performance_vs_throughput.pdf}
+\caption{Competitive variant prediction at substantially lower computational cost.
+\textbf{A}, Mendelian macro-AUPRC across eight variant classes. Error bars show $\pm$ one
+standard error. Zero-shot scoring averages pooled per-class
+AUPRC. Linear probing averages chromosome-weighted per-class AUPRC.
+Compare models within each scoring method. Marin DNA and Evo~2 are single-sequence
+models, GPN-Star uses alignments, and AlphaGenome uses experimental
+supervision. Per-class results appear
+in Supplementary Figures~\ref{fig:benchmarks} and~\ref{fig:benchmark-probes}.
+\textbf{B}, The same zero-shot scores versus measured GH200 throughput.
+Both Marin DNA points use the Staged 1B model's benchmark score. Its
+deployed context is 255 bases plus BOS (256 tokens), versus 8,192 tokens
+for Evo~2. At these contexts, scoring one million variants takes an
+estimated 41 minutes with optimized FP8 and 66 days with Evo~2 40B.
+Timings include both alleles and strands and pooled embeddings.
+Table~\ref{tab:scoring-cost} and Section~\nameref{methods:efficiency}
+detail timing exclusions and the historical compiled-BF16 reference.
+FP8 validation covers zero-shot scoring. Compatibility with existing
+BF16-trained probes remains unresolved.}
 \label{fig:throughput}
 \end{figure}
 
@@ -1072,120 +1065,247 @@ This is a descriptive relationship at a fixed training-token budget,
 rather than an estimate of compute-optimal scaling or evidence for
 extrapolation beyond the tested model sizes.
 
+
 \subsection{Evaluation benchmarks}\label{methods:benchmarks}
-\begin{itemize}
-\item Anchor clinical curation in ClinVar~\citep{landrum2020clinvar}.
-Describe Mendelian sources, pathogenic and putatively benign labels,
-consequence classes, and inclusion criteria. Explain control matching and
-chromosome-disjoint development/test splits. Document changes from TraitGym,
-including the 0.1\% control allele-frequency threshold and expanded variant
-classes. TODO: pin source releases, matching rules, and split assignments.
-Relative to TraitGym~\citep{benegas2025traitgym}, the minimum control allele
-frequency was lowered from 5\% to 0.1\% (``non-rare''). The larger control pool
-allowed matching of TSS distance and, for splicing variants, exon distance
-within consequence classes. Missense and splicing variants and additional
-pathogenic sources were added. Preserve the pinned dataset card as provenance
-for the construction and matching diagnostics~\citep{mendeliancard}.
-\item Describe SGE assay sources in
-MaveDB~\citep{findlay2018sge,esposito2019mavedb},
-gene coverage, variant inclusion,
-and conversion of assay measurements to evaluation labels. TODO: supply
-accession/version identifiers, thresholds, and counts.
-\item Use Figure~\ref{fig:evaluation} and Table~\ref{tab:benchmarks} to document
-benchmark flow, class counts, exclusions, and split sizes. Distinguish
-chromosome-disjoint evaluation labels from the separate question of pretraining
-sequence exposure.
-\end{itemize}
-\textcolor{red}{JK: it's not obvious to me what the distinction between
-what Figure~\ref{fig:evaluation} and Table~\ref{tab:benchmarks} are doing is
-here. Needs to be
-worked out in detail, to see what we're trying to document here.}
 
-% Draft counts and source descriptions transcribed from blog/eval_datasets.svg.
-% These are the blog snapshot, not yet verified against versioned dataset
-% records.
-\begin{table*}
-\caption{Draft evaluation benchmark summary. Counts reproduce the blog's
-benchmark diagram; train/validation/test counts and source versions remain
-to be verified. Positive and negative labels are defined separately below.}
+We evaluated variant-effect prediction using two complementary sources
+of evidence for single-nucleotide variants (SNVs) on GRCh38.
+The Mendelian benchmark distinguishes variants implicated in inherited
+disease from population controls, whereas the saturation genome editing
+(SGE) benchmark distinguishes variants with abnormal and normal
+functional effects measured experimentally.
+Both benchmarks used Ensembl variant consequences and excluded
+high-impact annotations, including stop gains and canonical splice
+donor and acceptor variants. The splicing category therefore includes
+splice-region and near-exon variants rather than canonical
+splice-disrupting variants.
+All reported comparisons used the development partition of each benchmark.
+Separate chromosomes were reserved for independent evaluation
+(Table~\ref{tab:benchmarks}).
+
+The Mendelian benchmark was derived from TraitGym, with additional
+missense and splicing variants~\citep{benegas2025traitgym,mendeliancard}.
+Pathogenic SNVs included OMIM submissions to
+ClinVar~\citep{amberger2015omim,landrum2020clinvar} and noncoding
+variants curated from the Mendelian disease literature~\citep{smedley2016regulatory}.
+We also included disease-associated
+regulatory variants from HGMD~\citep{stenson2017hgmd},
+using the variant list released with Sei~\citep{chen2022sei}.
+OMIM curation used the 19 October 2025 ClinVar GRCh38 release and
+corresponding submission summary, retaining literature-based
+pathogenic assertions with consistent clinical significance and
+excluding reclassified entries.
+After deduplication, we retained pathogenic candidates with allele
+frequencies below 0.1\% in gnomAD v4.1~\citep{chao2024gnomad}.
+Putatively benign controls were drawn from gnomAD SNVs with allele
+number at least 25,000 and frequency above 0.1\%.
+
+Each pathogenic SNV was matched to nine controls without replacement,
+requiring the same chromosome and annotated consequence.
+Promoter variants were additionally matched within distance bins
+for the nearest protein-coding transcription start site and exon,
+while splicing and distal variants were matched within class-specific
+bins for distance to the nearest coding exon.
+Within these strata, controls were selected using Euclidean distance
+on robustly scaled distances to the nearest coding and noncoding
+transcription start sites and exons.
+Pathogenic variants without sufficient matched controls were excluded,
+and missense positives were capped at 1,000.
+The final benchmark contained 2,563 matched groups, each comprising
+one pathogenic variant and nine population controls.
+Exact matching bins, variant retention, and diagnostic summaries
+are documented in the pinned dataset release and construction
+workflow~\citep{mendeliancard,marindnabenchbuilder}.
+
+The SGE benchmark comprised MaveDB score sets measuring the effects
+of genomic edits at endogenous loci on cell fitness or proliferation
+\citep{findlay2018sge,esposito2019mavedb,sgebenchcard}.
+We retained missense and splicing SNVs with experimentally calibrated
+binary functional classifications, assigning abnormal effects as
+positives and normal effects as negatives.
+Classification preferentially used ClinGen/ExCALIBR thresholds for
+eight genes (BAP1, BARD1, BRCA1, PALB2, RAD51C, RAD51D, VHL, and
+XRCC2). Two genes (CTCF and SFPQ) used investigator-provided
+thresholds, while DDX3X used harmonized author classifications.
+Intermediate and unclassified variants were excluded, including
+BRCA2 variants for which no calibration was available.
+Unlike the Mendelian benchmark, SGE variants were not matched or
+subsampled to balance classes.
+The pinned release identifies the MaveDB accessions and
+assay-specific calibration thresholds~\citep{sgebenchcard}.
+
+
+\begin{table}[htbp]
+\centering\small
+\caption{Composition and chromosome-disjoint partitions of the
+variant-effect benchmarks.
+Development comprises odd autosomes and chromosome X; the reserved
+test partition comprises even autosomes and chromosome Y.
+Reported performance comparisons use the development partition.
+Positive counts represent pathogenic SNVs for Mendelian disease
+and abnormal functional effects for SGE.
+Mature miRNA is included in the release totals but excluded from
+the eight-class Mendelian macro-average because it has only four
+development positives.
+Counts are from the pinned dataset releases
+\citep{mendeliancard,sgebenchcard}.}
 \label{tab:benchmarks}
-\centering
-\small
-\setlength{\tabcolsep}{4pt}
-\renewcommand{\arraystretch}{1.15}
-\begin{tabularx}{\linewidth}{@{}p{0.13\linewidth}L L L@{}}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrrr@{}}
 \toprule
-Benchmark & Sources & Positive label & Negative label \\
+& \multicolumn{2}{c}{Development}
+& \multicolumn{2}{c}{Reserved test} \\
+\cmidrule(lr){2-3}\cmidrule(l){4-5}
+Class & Total & Positive & Total & Positive \\
 \midrule
-Mendelian & OMIM, Smedley et al., HGMD; gnomAD controls. Releases: TODO. &
-Pathogenic; allele frequency $<0.1\%$. Exact inclusion rules: TODO. &
-Non-rare gnomAD controls; allele frequency $>0.1\%$. Nine matched controls
-per pathogenic variant. \\
-SGE & MaveDB, 11 studies. Accessions, genes, and versions: TODO. &
-Abnormal function, using ClinGen/ExCALIBR or author thresholds.
-Per-assay thresholds: TODO. &
-Normal function under the corresponding assay classification.
-Ambiguous-label exclusions: TODO. \\
+\multicolumn{5}{@{}l}{\textit{Mendelian disease}} \\
+Missense & 5,800 & 580 & 4,200 & 420 \\
+Splicing & 3,190 & 319 & 2,310 & 231 \\
+5$'$ UTR & 2,100 & 210 & 950 & 95 \\
+Promoter & 2,050 & 205 & 650 & 65 \\
+ncRNA & 1,150 & 115 & 440 & 44 \\
+3$'$ UTR & 770 & 77 & 330 & 33 \\
+Distal & 580 & 58 & 410 & 41 \\
+Synonymous & 460 & 46 & 190 & 19 \\
+\addlinespace[2pt]
+Mature miRNA & 40 & 4 & 10 & 1 \\
+\midrule
+Total & 16,140 & 1,614 & 9,490 & 949 \\
+\addlinespace
+\multicolumn{5}{@{}l}{\textit{SGE}} \\
+Missense & 19,059 & 3,007 & 12,257 & 1,243 \\
+Splicing & 4,794 & 519 & 2,631 & 216 \\
+\midrule
+Total & 23,853 & 3,526 & 14,888 & 1,459 \\
 \bottomrule
-\end{tabularx}
-\par\medskip
-\begin{tabularx}{\linewidth}{@{}l L r r r r r r@{}}
-\toprule
-Benchmark & Variant class & Positive & Negative & Total & Train & Validation &
-Test \\
-\midrule
-Mendelian & Missense & ? & ? & 10,000 & ? & ? & ? \\
-& Splicing & ? & ? & 5,500 & ? & ? & ? \\
-& 5-prime UTR & ? & ? & 3,050 & ? & ? & ? \\
-& Promoter & ? & ? & 2,700 & ? & ? & ? \\
-& ncRNA & ? & ? & 1,590 & ? & ? & ? \\
-& 3-prime UTR & ? & ? & 1,100 & ? & ? & ? \\
-& Distal & ? & ? & 990 & ? & ? & ? \\
-& Synonymous & ? & ? & 650 & ? & ? & ? \\
-& Mature miRNA$^{a}$ & ? & ? & 50 & ? & ? & ? \\
-& Total in diagram & 2,563 & 23,067 & 25,630 & ? & ? & ? \\
-\midrule
-SGE & Missense & 4,250 & 27,066 & 31,316 & ? & ? & ? \\
-& Splicing & 735 & 6,690 & 7,425 & ? & ? & ? \\
-& Total in diagram & 4,985 & 33,756 & 38,741 & ? & ? & ? \\
-\bottomrule
-\end{tabularx}
-\par\smallskip
-\parbox{\linewidth}{\footnotesize
-?: not provided in the blog diagram; TODO: obtain exact label and split counts
-from versioned dataset records. The diagram specifies GRCh38 SNVs, excludes
-HIGH-impact annotations, and assigns odd chromosomes to training/validation
-and even chromosomes to testing; the internal training/validation partition
-is TODO. Confirm these rules and counts for each benchmark and analysis.
-Mendelian matching uses chromosome, consequence, TSS distance, and exon
-distance; SGE uses no matching or subsampling.
-$^{a}$The diagram lists mature miRNA separately, whereas the main results
-summarize eight variant classes. TODO: establish whether this subset is
-excluded, merged, or otherwise treated differently before finalizing totals.}
-\end{table*}
+\end{tabular}
+\end{table}
 
-\begin{figure}
-\centering
-\includegraphics[width=\linewidth]{figures/evaluation_benchmarks.pdf}
-\caption{Variant effect prediction benchmarks. Clinical Mendelian and
-experimental SGE evidence provide complementary labels across the displayed
-variant classes and subset sizes.}\label{fig:evaluation}
-\end{figure}
+Both benchmarks assigned odd autosomes and chromosome X to the
+development partition (named \texttt{train} in the released datasets)
+and even autosomes and chromosome Y to a reserved test partition
+(Table~\ref{tab:benchmarks}).
+Each Mendelian matched group and each SGE gene was assigned entirely
+to one partition.
+All performance results reported here use the development partition,
+rather than the reserved test partition.
+For linear probes, predictions were obtained by holding out each
+development chromosome in turn, fitting on the remaining development
+chromosomes, and selecting regularization by chromosome-grouped
+cross-validation within the fitting data
+(Section~\nameref{methods:probes}).
+Thus, variant labels from the evaluated chromosome were not used
+to fit its probe, although the development partition was used
+throughout model development.
+These label partitions are distinct from genomic sequence exposure
+during pretraining.
 
-\subsection{Zero-shot scoring and linear probes}\label{methods:scoring}
-\begin{itemize}
-\item Introduce the two scoring workflows in Figure~\ref{fig:model-overview}C.
-Define reference/alternate sequence construction, variant centering,
-LLR sign and aggregation, scoring windows, and forward/reverse-complement
-handling. TODO: specify exact equations and model-specific token handling.
-\item Specify embedding layer and pooling, reference/alternate feature
-construction, probe family, fitting, tuning, and evaluation splits. Distinguish
-subset-specific probes from any pooled analysis. TODO: document regularization,
-preprocessing, and labeled-data usage from the evaluation implementation.
-\item Define matched-variant inclusion across readouts and model sizes, and
-handling of missing predictions. TODO: document all exclusions and ensure
-no evaluation-label leakage in probe selection.
-\end{itemize}
+The Mendelian macro-average reported in Figure~\ref{fig:throughput}
+included the eight variant classes with at least 30 pathogenic
+variants in the development partition.
+Mature miRNA variants were retained in the dataset release but
+excluded from this aggregate because only four development
+positives were available.
+The missense comparisons in Figure~\ref{fig:missense-scaling}B,C
+used 5,800 Mendelian and 19,059 SGE development variants,
+respectively.
+Section~\nameref{methods:probes} gives the criteria for fitting a probe.
+Section~\nameref{methods:statistics} describes variant inclusion for
+paired comparisons, evaluation metrics, and uncertainty estimation.
+
+
+\subsection{Zero-shot scoring}
+\label{methods:scoring}
+
+Zero-shot scoring and linear probing used the same reference and
+alternate sequences as inputs to the frozen model
+(Figure~\ref{fig:model-overview}C).
+For each single-nucleotide variant (SNV), we extracted a genomic
+window from GRCh38, verified the reference allele, and substituted
+the alternate base to construct a second sequence with identical
+flanking context.
+The standard Marin DNA models used 255-base windows centred on
+the variant, with 127 bases on either side and a preceding
+beginning-of-sequence (BOS) token.
+The early upstream/CDS experiments used 512-base windows, while
+Evo~2 used 8,192-base windows, both without BOS.
+For these even-length windows, the forward sequence contained
+one additional base to the left of the variant.
+Each reference and alternate sequence was evaluated in both
+forward and reverse-complement orientations
+\citep{marindnabencheval,marindnaevo2code}.
+Supplementary Section~\nameref{supp:scoring-details} describes coordinate
+handling and checks on the evaluated windows.
+
+For zero-shot scoring, we calculated the log-likelihood ratio
+between alternate and reference sequences on each strand $s$,
+then negated their mean to obtain the damage score
+\[
+\mathrm{LLR}_s =
+    \ell_s(\mathrm{alt})-\ell_s(\mathrm{ref}),
+\qquad
+S_{\mathrm{LLR}} =
+    -\frac{\mathrm{LLR}_{\mathrm{fwd}}
+           +\mathrm{LLR}_{\mathrm{rc}}}{2}.
+\]
+Here, $\ell_s$ is the sum of the natural logarithms of the
+predicted probabilities of observed nucleotides from the variant
+position to the end of the oriented window.
+Probabilities were conditioned on the preceding tokens, including BOS
+where present, and normalized over A, C, G, and T.
+The shared prefix of the reference and alternate sequences
+cancels in the likelihood ratio, while positions following the
+variant contribute because their predicted probabilities may
+depend on the substituted base.
+We used $S_{\mathrm{LLR}}$ to rank variants in both benchmarks,
+with larger values indicating lower relative likelihood of the
+alternate sequence.
+
+\subsection{Linear probes}
+\label{methods:probes}
+
+We extracted representations from the frozen model's final hidden
+layer after the decoder's final normalization.
+For each allele, hidden states were averaged across all DNA
+positions, excluding BOS where present, and the resulting vectors
+were averaged across forward and reverse-complement orientations.
+The probe features comprised the reference representation
+concatenated with the signed difference between alternate and
+reference representations:
+\[
+\mathbf{x} =
+\left[
+\mathbf{h}_{\mathrm{ref}},
+\mathbf{h}_{\mathrm{alt}}-\mathbf{h}_{\mathrm{ref}}
+\right].
+\]
+For Evo~2 we extracted the output of its final normalization module
+and used the same feature construction and classifier-fitting procedure
+\citep{marindnaevo2code}.
+We fitted a separate $L_2$-regularized logistic regression for
+each model checkpoint, benchmark, and variant class.
+Probe fitting required both labels and at least 300 development
+variants distributed across at least three chromosomes.
+Mature miRNA did not meet these requirements and was excluded
+from linear-probe evaluation.
+
+Following the chromosome-holdout design of
+TraitGym~\citep{benegas2025traitgym,marindnabencheval},
+we obtained out-of-fold predictions by holding out each
+development chromosome in turn and fitting the probe using the
+remaining development chromosomes.
+Within each outer training fold, the inverse regularization
+strength $C$ was selected from 17 logarithmically spaced values
+between $10^{-12}$ and $10^4$, maximizing mean average precision
+across up to five chromosome-grouped inner cross-validation folds.
+Feature means and standard deviations were estimated using only
+the training portion of each fit and applied to standardize the
+corresponding held-out features.
+Each reported probe score was the predicted probability of the
+positive class from the fit that held out the variant's chromosome.
+Evaluation aggregation and uncertainty estimation are described
+in Section~\nameref{methods:statistics}.
+
 
 \subsection{Statistical analysis and comparator
 evaluation}\label{methods:statistics}
@@ -1228,8 +1348,7 @@ in the accompanying plotting-data table.
 Figure~\ref{fig:missense-scaling}B,C reuses the Marin DNA missense
 endpoints from Supplementary Figure~\ref{fig:downstream}. Both scoring methods
 use the same 5,800 Mendelian missense variants or 19,059 SGE missense
-variants across all eight terminal models, retaining rows with finite
-probe predictions and forward/reverse-complement likelihood ratios.
+variants across all eight terminal models.
 AUPRC is averaged across chromosomes with weights proportional to the
 number of variants; standard errors use 1,000 chromosome-bootstrap
 resamples with seed 0. The SGE scaling comparison retains this
@@ -1256,8 +1375,6 @@ linear-probe AUPRC estimates as Supplementary
 Figure~\ref{fig:downstream}, comprising six Mendelian variant
 classes and the missense and splicing saturation genome editing
 (SGE) classes.
-Within each model and variant class, both scoring methods were
-evaluated on identical variants with finite probe predictions.
 Performance was summarized using chromosome-weighted AUPRC,
 with standard errors estimated by chromosome bootstrap
 (1,000 resamples; seed~0).
@@ -1268,6 +1385,31 @@ AUPRC uncertainty estimates were not used as regression weights.
 These associations describe differences across model sizes, rather
 than independent experimental replicates or causal effects of
 improving sequence loss.
+
+
+The Mendelian macro-averages in Figure~\ref{fig:throughput}A
+were calculated as unweighted means across eight variant classes.
+For zero-shot scoring, AUPRC was calculated by pooling variants
+within each class, whereas linear-probe AUPRC was calculated
+separately by chromosome and averaged within each class with
+weights proportional to chromosome variant counts
+(Supplementary Figures~\ref{fig:benchmarks}
+and~\ref{fig:benchmark-probes}).
+The two aggregate scores therefore use different weighting
+conventions and should be compared across models within each
+scoring method, rather than directly between scoring methods.
+
+For the scaling comparisons in
+Figure~\ref{fig:missense-scaling}B,C and Supplementary
+Figures~\ref{fig:downstream} and~\ref{fig:loss-vep},
+both zero-shot and linear-probe performance were summarized
+using chromosome-weighted AUPRC.
+For each Marin DNA checkpoint we selected rows with a finite out-of-fold
+probe prediction, then required the strand-averaged LLR to be finite on
+every selected row. Both strand-specific LLRs were finite throughout
+these records. The retained variant identifiers were identical across
+all eight sizes within each plotted class. Each chromosome contributed
+in proportion to its number of finite scores if both labels were present.
 
 
 \begin{itemize}
@@ -1804,6 +1946,46 @@ The fit was descriptive and was not used to select model sizes
 or extrapolate performance beyond the observed range.
 
 
+\subsection{Variant-scoring implementation details}
+\label{supp:scoring-details}
+
+Both workflows read uppercase sequence from the Ensembl GRCh38 primary
+assembly. For a window of $W$ bases, the zero-based SNV index within
+the DNA sequence was $i=\lfloor W/2\rfloor$ on the forward strand and
+$W-1-i$ on its reverse complement. The reverse strand thus scores the
+complemented alleles in the same genomic interval. For Marin DNA, BOS
+adds one to the token index where present. It supplies context and is
+excluded from the scored targets and the embedding pool.
+
+At a chromosome end, both readers clip the interval and pad the
+missing flank with N before orienting the sequence. An unavailable
+reference or chromosome, a mismatch with the supplied reference allele,
+or an alternate allele outside A/C/G/T stops scoring. Marin DNA also
+rejects a non-ACGT token at a scored target. The Evo~2 likelihood code
+instead selects the A probability for an unrecognized target, while
+the original token remains in the model input
+\citep{marindnabencheval,marindnaevo2code}. We checked the released
+development coordinates against the Ensembl release~115 sequence.
+All 16,140 Mendelian reference alleles matched, and all 255-, 512- and
+8,192-base windows lay within the chromosome and contained only A/C/G/T.
+The same checks passed for all 23,853 SGE variants at the evaluated
+255-base width.
+
+Both workflows average each allele's hidden states across positions
+and strands in single precision. Marin DNA stores the resulting vectors
+in half precision and converts them to single precision before allele
+subtraction. The Evo~2 workflow defaults to single-precision storage.
+Missing embedding columns or nonfinite vectors stop probe fitting
+before the data are split by class. Class eligibility is assessed on
+the development partition. If a class fails the eligibility criteria
+or its fitting procedure raises an exception, its scores remain
+missing. Chromosome-grouped folds are formed without stratifying on
+labels. Both labels were present in the training and validation sets
+of every inner fold for the reported Marin DNA scaling probes.
+A separate classifier fitted on all eligible development examples is
+saved for reuse. Reported predictions come exclusively from the outer
+chromosome holdouts~\citep{marindnabencheval,marindnaevo2code}.
+
 % Supplementary numbering uses distinct PDF anchors.
 \setcounter{figure}{0}
 \renewcommand{\thefigure}{S\arabic{figure}}
@@ -1822,7 +2004,8 @@ dataset. \textbf{(B)} Zoom in on mammalian orders. Counts show annotation-derive
 \includegraphics[width=\linewidth]{figures/mendelian_zero_shot_comparison.pdf}
 \caption{Zero-shot Mendelian benchmark comparison. Entries report AUPRC (\%);
 Macro Avg is the unweighted mean across variant classes. Marin DNA and Evo 2 use
-LLR, GPN-Star uses calibrated LLR, and AlphaGenome uses the maximum L2
+the negative strand-averaged LLR, GPN-Star uses the negative calibrated LLR,
+and AlphaGenome uses the maximum L2
 reference/alternate prediction score.}\label{fig:benchmarks}
 \end{figure}
 
@@ -1859,7 +2042,7 @@ standard errors.}\label{fig:mixture-probe}
 \begin{figure}
 \centering
 \includegraphics[width=\linewidth]{figures/vep_by_model_size.pdf}
-\caption{VEP across model scale. Zero-shot LLR and linear probes are evaluated
+\caption{VEP across model scale. The zero-shot damage score and linear probes are evaluated
 on identical variants. Performance is chromosome-weighted AUPRC; error bars
 denote standard errors.}\label{fig:downstream}
 \end{figure}

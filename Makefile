@@ -6,7 +6,7 @@ FIGURE_CODE := src/plot.py src/local_data.py src/metrics.py pyproject.toml uv.lo
 
 DATA_FIGURES := upstream_coding_mixture_balance vep_by_model_size vep_by_sequence_likelihood missense_readout_scaling mixture_zero_shot_trajectories mixture_probe_trajectories mendelian_zero_shot_comparison mendelian_probe_comparison region_specialist_performance hyperparameter_transfer regional_hyperparameter_transfer sequence_loss_scaling vep_performance_vs_throughput dataset_timetree
 SCHEMATIC_FIGURES := multispecies_training_sequences next_base_prediction
-ARTWORK_FIGURES := variant_scoring_workflow training_dataset_provenance evaluation_benchmarks
+ARTWORK_FIGURES := variant_scoring_workflow training_dataset_provenance
 ALL_FIGURES := $(DATA_FIGURES) $(SCHEMATIC_FIGURES) $(ARTWORK_FIGURES)
 GENERATED_SVGS := $(addprefix figures/,$(addsuffix .svg,$(DATA_FIGURES) $(SCHEMATIC_FIGURES)))
 
@@ -22,7 +22,7 @@ CSV_region_specialist_performance := plot_data/region_specialist_performance.csv
 CSV_hyperparameter_transfer := plot_data/hyperparameter_transfer.csv
 CSV_regional_hyperparameter_transfer := plot_data/regional_hyperparameter_transfer.csv
 CSV_sequence_loss_scaling := plot_data/sequence_loss_scaling_results.csv plot_data/sequence_loss_scaling_history.csv
-CSV_vep_performance_vs_throughput := plot_data/vep_performance_vs_throughput_leaderboard.csv plot_data/vep_performance_vs_throughput_inference_costs.csv
+CSV_vep_performance_vs_throughput := plot_data/mendelian_zero_shot_comparison.csv plot_data/mendelian_probe_comparison.csv plot_data/gh200_scoring_rates.csv
 CSV_dataset_timetree := plot_data/dataset_timetree.csv
 
 .PHONY: all figures figures-all process-data fetch-data fetch-sweeps figure-clean clean mrproper

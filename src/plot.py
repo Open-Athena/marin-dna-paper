@@ -1615,104 +1615,83 @@ def plot_missense(report_path: Path) -> Figure:
 
 # Throughput
 
-MACRO_COLUMN = "Macro Avg (8 subsets)"
-
-THROUGHPUT_COLUMN = "Throughput (variants / hour)"
-
-MODEL_NAMES = (
-    "exp135-1B-m5.1",
-    "Evo 2 (1B base)",
-    "Evo 2 (7B)",
-    "Evo 2 (40B)",
-)
-
-DISPLAY_NAMES = {
-    "exp135-1B-m5.1": "MarinDNA 1B",
-    "Evo 2 (1B base)": "Evo 2 1B",
-    "Evo 2 (7B)": "Evo 2 7B",
-    "Evo 2 (40B)": "Evo 2 40B",
+_HEADLINE_MODELS = {
+    "mix-v0.9-p1B-i24-exp135-m5.1-step-59158": "Marin DNA 1B",
+    "evo2_40b": "Evo 2 40B",
+    "evo2_7b": "Evo 2 7B",
+    "evo2_1b_base": "Evo 2 1B base",
+    "GPN-Star-M": "GPN-Star (M)",
+    "AlphaGenome": "AlphaGenome",
+}
+_HEADLINE_COLORS = {
+    "marin_dna": "#236759",
+    "evo2": "#52677b",
+    "gpn_star": "#937436",
+    "alphagenome": "#94647d",
 }
 
-MARINDNA_COLOR = SCORING_PROTOCOL_COLORS["llr"]
 
-EVO2_COLOR = "#8a7d69"
+def plot_throughput(zero_shot, probes, rates) -> Figure:
+    """Mendelian aggregate scores and deployed GH200 throughput (Figure 2)."""
+    fig = plt.figure(figsize=(5.0, 6.4))
+    grid = fig.add_gridspec(2, 2, height_ratios=(1, 1.65),
+                            left=.14, right=.97, top=.92, bottom=.18,
+                            hspace=.95, wspace=.30, width_ratios=(6, 4))
+    zero = zero_shot[zero_shot["subset"] == MACRO_SUBSET].set_index("method_id")
+    probe = probes[probes["subset"] == MACRO_SUBSET].set_index("method_id")
+    ids = list(_HEADLINE_MODELS)
+    for col, (scores, title, models) in enumerate([
+        (zero, "Zero-shot", ids), (probe, "Linear probe", ids[:4])
+    ]):
+        ax = fig.add_subplot(grid[0, col])
+        assert scores.index.is_unique and set(scores.index) == set(models)
+        for x, model in enumerate(models):
+            score = scores.loc[model]
+            value, se = 100 * score["value"], 100 * score["se"]
+            ax.bar(x, value, width=.75, color=_HEADLINE_COLORS[score["family"]],
+                   edgecolor=TEXT_COLOR, linewidth=.5, yerr=se,
+                   error_kw={"ecolor": TEXT_COLOR, "elinewidth": .8, "capsize": 0})
+            ax.annotate(f"{value:.1f}", (x, value + se), xytext=(0, 2),
+                        textcoords="offset points", ha="center", fontsize=8)
+        ax.set_title(title, fontsize=10)
+        ax.set_xlim(-.5, len(models) - .5)
+        ax.set_xticks(range(len(models)), [_HEADLINE_MODELS[m] for m in models],
+                      rotation=45, ha="right", rotation_mode="anchor", fontsize=8)
+        ax.set_ylim(0, 65)
+        ax.set_yticks([0, 20, 40, 60])
+        if col == 0:
+            ax.set_ylabel("Macro-AUPRC (%)", fontsize=9)
 
-
-def _headline_data(
-    leaderboard: pd.DataFrame,
-    inference_costs: pd.DataFrame,
-) -> pd.DataFrame:
-    assert leaderboard["Model"].is_unique
-    assert inference_costs["Model"].is_unique
-    assert set(inference_costs["Model"]) == set(MODEL_NAMES)
-    selected = leaderboard[leaderboard["Model"].isin(MODEL_NAMES)][
-        ["Model", MACRO_COLUMN]
-    ]
-    assert set(selected["Model"]) == set(MODEL_NAMES)
-    data = inference_costs.merge(selected, on="Model", validate="one_to_one")
-    assert len(data) == len(MODEL_NAMES)
-    assert data["Time (s / 1M variants)"].gt(0).all()
-    data[THROUGHPUT_COLUMN] = 1_000_000 * 60 * 60 / data["Time (s / 1M variants)"]
-    assert data[THROUGHPUT_COLUMN].gt(0).all()
-    assert data[MACRO_COLUMN].between(0, 100).all()
-    return data
-
-
-def plot_throughput(leaderboard: pd.DataFrame, inference_costs: pd.DataFrame) -> Figure:
-    data = _headline_data(leaderboard, inference_costs)
-    evo2 = data[data["Family"] == "Evo 2"].sort_values("Parameters (B)")
-    marindna = data[data["Family"] == "MarinDNA"]
-    assert len(evo2) == 3
-    assert len(marindna) == 1
-
-    fig, ax = plt.subplots(figsize=figsize(7.0, 3.2))
-    ax.plot(
-        evo2[THROUGHPUT_COLUMN],
-        evo2[MACRO_COLUMN],
-        color=EVO2_COLOR,
-        marker=MODEL_FAMILY_MARKERS["evo2"],
-        markeredgecolor="#1f1e1b",
-        label="Evo 2",
-        zorder=2,
-    )
-    ax.plot(
-        marindna[THROUGHPUT_COLUMN],
-        marindna[MACRO_COLUMN],
-        color=MARINDNA_COLOR,
-        marker=MODEL_FAMILY_MARKERS["marindna"],
-        markeredgecolor="#1f1e1b",
-        linestyle="none",
-        label="MarinDNA",
-        zorder=3,
-    )
-
-    label_offsets = {
-        "exp135-1B-m5.1": (-8, 0, "right", "center"),
-        "Evo 2 (1B base)": (8, 0, "left", "center"),
-        "Evo 2 (7B)": (8, 0, "left", "center"),
-        "Evo 2 (40B)": (8, 0, "left", "center"),
-    }
-    for _, row in data.iterrows():
-        model = str(row["Model"])
-        score = float(row[MACRO_COLUMN])
-        dx, dy, ha, va = label_offsets[model]
-        ax.annotate(
-            DISPLAY_NAMES[model],
-            xy=(float(row[THROUGHPUT_COLUMN]), score),
-            xytext=(dx, dy),
-            textcoords="offset points",
-            ha=ha,
-            va=va,
-            color=MARINDNA_COLOR if model == "exp135-1B-m5.1" else EVO2_COLOR,
-            fontweight="bold" if model == "exp135-1B-m5.1" else "normal",
-        )
-
+    fig.text(.02, .98, "A   Mendelian variant prediction", va="top", weight="bold")
+    ax = fig.add_subplot(grid[1, :])
+    ax.set_title("B   Performance versus scoring throughput", loc="left",
+                 weight="bold", fontsize=10, pad=10)
+    timing = rates.join(zero[["value", "family"]], on="method_id", validate="many_to_one")
+    assert len(timing) == 5 and timing["value"].notna().all()
+    offsets = {"Optimized FP8": (-4, 9), "Compiled BF16": (-4, -16),
+               "Evo 2 40B": (5, 5), "Evo 2 7B": (5, 4), "Evo 2 1B base": (5, -9)}
+    for row in timing.itertuples():
+        config = row.configuration
+        color = _HEADLINE_COLORS[row.family]
+        marin = row.family == "marin_dna"
+        ax.scatter(row.variants_per_hour, 100 * row.value, s=34, edgecolors=color,
+                   facecolors="white" if config == "Compiled BF16" else color, zorder=3)
+        label = f"Marin DNA 1B · {config}" if marin else config
+        ax.annotate(label, (row.variants_per_hour, 100 * row.value),
+                    xytext=offsets[config], textcoords="offset points",
+                    ha="right" if marin else "left", color=color, fontsize=8)
     ax.set_xscale("log")
-    ax.set_xlabel("Throughput (variants/hour)")
-    ax.set_ylabel("VEP AUPRC (%)")
-    ax.grid(which="major", color="#d9ccba", linewidth=0.8)
-
-    fig.tight_layout()
+    ax.set_xlim(400, 2.5e6)
+    ax.set_ylim(30, 43)
+    ax.set_xlabel("Variants scored per hour on one GH200")
+    ax.set_ylabel("Zero-shot macro-AUPRC (%)", fontsize=9)
+    ax.grid(which="major", color="#dedbd6", linewidth=.5)
+    speed = rates.set_index("configuration")["variants_per_hour"]
+    fast, slow = speed["Optimized FP8"], speed["Evo 2 40B"]
+    fig.text(.14, .053, "Scoring one million variants", weight="bold", fontsize=9)
+    fig.text(.14, .02, f"Marin DNA FP8  {60e6 / fast:.0f} min     Evo 2 40B  "
+             f"{1e6 / slow / 24:.0f} days     ({round(fast / slow, -1):,.0f}× throughput)",
+             fontsize=8.5)
     return fig
 
 
@@ -2982,8 +2961,9 @@ def vep_performance_vs_throughput(output_dir: Path) -> None:
         output_dir,
         "vep_performance_vs_throughput",
         lambda _: plot_throughput(
-            local_data.load_plot_csv("vep_performance_vs_throughput_leaderboard"),
-            local_data.load_plot_csv("vep_performance_vs_throughput_inference_costs")
+            local_data.load_plot_csv("mendelian_zero_shot_comparison"),
+            local_data.load_plot_csv("mendelian_probe_comparison"),
+            local_data.load_plot_csv("gh200_scoring_rates"),
         ),
     )
 
@@ -3101,13 +3081,6 @@ def next_base_prediction(output_dir: Path) -> None:
 def training_dataset_provenance(output_dir: Path) -> None:
     """Convert the authored training-dataset provenance diagram."""
     render_artwork(output_dir, "training_dataset_provenance")
-
-
-@cli.command("evaluation_benchmarks")
-@click.pass_obj
-def evaluation_benchmarks(output_dir: Path) -> None:
-    """Convert the authored evaluation-benchmarks diagram."""
-    render_artwork(output_dir, "evaluation_benchmarks")
 
 
 @cli.command("variant_scoring_workflow")

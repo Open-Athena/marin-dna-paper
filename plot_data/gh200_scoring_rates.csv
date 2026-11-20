@@ -1,0 +1,6 @@
+method_id,configuration,variants_per_hour,source
+mix-v0.9-p1B-i24-exp135-m5.1-step-59158,Optimized FP8,1467776,https://github.com/Open-Athena/marin-dna/issues/430
+mix-v0.9-p1B-i24-exp135-m5.1-step-59158,Compiled BF16,953551,https://github.com/Open-Athena/marin-dna/issues/354
+evo2_1b_base,Evo 2 1B base,11700,https://github.com/Open-Athena/marin-dna/issues/354
+evo2_7b,Evo 2 7B,3100,https://github.com/Open-Athena/marin-dna/issues/354
+evo2_40b,Evo 2 40B,630,https://github.com/Open-Athena/marin-dna/issues/354
