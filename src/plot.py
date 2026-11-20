@@ -1356,7 +1356,7 @@ def plot_scaling(data: pd.DataFrame | None = None) -> Figure:
     return fig
 
 
-# Likelihood
+# Regional monitoring loss
 
 MATCHED_LOSS_COLUMN = {
     "missense_variant": "eval_loss_cds",
@@ -1374,13 +1374,12 @@ ANNOTATION_HEADROOM_SUBSETS = frozenset({"synonymous_variant", "3_prime_UTR_vari
 ANNOTATION_HEADROOM_FRACTION = 0.3
 
 
-def _likelihood_plot_panel(
+def _monitoring_loss_plot_panel(
     ax: plt.Axes,
     data: pd.DataFrame,
     *,
     title: str,
     add_annotation_headroom: bool,
-    show_xlabel: bool,
     show_ylabel: bool,
 ) -> None:
     """Draw paired protocol fits and endpoint AUPRCs for one consequence."""
@@ -1434,8 +1433,6 @@ def _likelihood_plot_panel(
         )
 
     ax.set_title(title)
-    if show_xlabel:
-        ax.set_xlabel("LL (−loss)", labelpad=X_LABEL_PAD)
     if show_ylabel:
         ax.set_ylabel("AUPRC (%)")
     ax.grid(False)
@@ -1446,8 +1443,8 @@ def _likelihood_plot_panel(
     ax.set_box_aspect(1)
 
 
-def plot_likelihood(data: pd.DataFrame | None = None) -> Figure:
-    """Build the combined Mendelian + SGE LL-versus-AUPRC figure."""
+def plot_monitoring_loss(data: pd.DataFrame | None = None) -> Figure:
+    """Plot AUPRC against negative regional monitoring loss for both benchmarks."""
     if data is None:
         data = local_data.load_plot_csv("vep_by_sequence_likelihood")
 
@@ -1484,12 +1481,11 @@ def plot_likelihood(data: pd.DataFrame | None = None) -> Figure:
         panel = data[
             (data["dataset"] == "mendelian_traits") & (data["subset"] == subset)
         ]
-        _likelihood_plot_panel(
+        _monitoring_loss_plot_panel(
             axes[axis_name],
             panel,
             title=title,
             add_annotation_headroom=subset in ANNOTATION_HEADROOM_SUBSETS,
-            show_xlabel=index >= 3,
             show_ylabel=index in (0, 3),
         )
 
@@ -1500,12 +1496,11 @@ def plot_likelihood(data: pd.DataFrame | None = None) -> Figure:
     assert tuple((subset, title) for _, subset, title in sge_axes) == tuple(SGE_SUBSETS)
     for index, (axis_name, subset, title) in enumerate(sge_axes):
         panel = data[(data["dataset"] == "sge") & (data["subset"] == subset)]
-        _likelihood_plot_panel(
+        _monitoring_loss_plot_panel(
             axes[axis_name],
             panel,
             title=title,
             add_annotation_headroom=False,
-            show_xlabel=True,
             show_ylabel=index == 0,
         )
 
@@ -1564,6 +1559,17 @@ def plot_likelihood(data: pd.DataFrame | None = None) -> Figure:
     sge_top = max(axes[name].get_position().y1 for name, *_ in sge_axes)
     fig.text(0.02, mendelian_top + 0.012, "Mendelian", weight="bold")
     fig.text(0.02, sge_top + 0.012, "SGE", weight="bold")
+    # Use one full-width label per benchmark to keep the three-column grid readable.
+    renderer = fig.canvas.get_renderer()
+    for row in (mendelian_rows[1], sge_row):
+        bounds = Bbox.union([ax.get_window_extent(renderer) for ax in row])
+        tick_bottom = min(ax.xaxis.get_tightbbox(renderer).y0 for ax in row)
+        x, y = fig.transFigure.inverted().transform(
+            ((bounds.x0 + bounds.x1) / 2, tick_bottom - 3 * fig.dpi / 72)
+        )
+        fig.text(
+            x, y, "Negative regional monitoring loss", ha="center", va="top"
+        )
     return fig
 
 
@@ -3083,8 +3089,8 @@ def vep_by_model_size(output_dir: Path) -> None:
 @cli.command("vep_by_sequence_likelihood")
 @click.pass_obj
 def vep_by_sequence_likelihood(output_dir: Path) -> None:
-    """Paired endpoint AUPRC versus sequence loss; reads bundled CSVs."""
-    render(output_dir, "vep_by_sequence_likelihood", lambda _: plot_likelihood())
+    """AUPRC versus negative regional monitoring loss; reads bundled CSVs."""
+    render(output_dir, "vep_by_sequence_likelihood", lambda _: plot_monitoring_loss())
 
 
 @cli.command("missense_readout_scaling")

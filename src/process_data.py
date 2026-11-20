@@ -537,7 +537,7 @@ def load_loss_vs_auprc(
     results: pd.DataFrame | None = None,
     metrics: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
-    """Join paired AUPRCs to each consequence's matched validation LL."""
+    """Join paired AUPRCs to each class's negative regional monitoring loss."""
     if results is None:
         results = pd.read_csv(local_data.SCALING_RESULTS_PATH)
     if metrics is None:
@@ -554,6 +554,7 @@ def load_loss_vs_auprc(
 
     data = metrics.merge(metadata, on="params", how="left", validate="many_to_one")
     assert len(data) == len(metrics)
+    # Retain the legacy CSV column name: ll is negative regional monitoring loss.
     data["ll"] = np.nan
     for subset, loss_column in MATCHED_LOSS_COLUMN.items():
         mask = data["subset"] == subset
