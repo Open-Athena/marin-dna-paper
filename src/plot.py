@@ -3083,13 +3083,6 @@ def training_dataset_provenance(output_dir: Path) -> None:
     render_artwork(output_dir, "training_dataset_provenance")
 
 
-@cli.command("evaluation_benchmarks")
-@click.pass_obj
-def evaluation_benchmarks(output_dir: Path) -> None:
-    """Convert the authored evaluation-benchmarks diagram."""
-    render_artwork(output_dir, "evaluation_benchmarks")
-
-
 @cli.command("variant_scoring_workflow")
 @click.pass_obj
 def variant_scoring_workflow(output_dir: Path) -> None:
