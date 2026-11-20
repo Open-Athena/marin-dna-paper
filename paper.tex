@@ -1183,19 +1183,67 @@ Total & 23,853 & 3,526 & 14,888 & 1,459 \\
 \end{table}
 
 \subsection{Zero-shot scoring and linear probes}\label{methods:scoring}
-\begin{itemize}
-\item Introduce the two scoring workflows in Figure~\ref{fig:model-overview}C.
-Define reference/alternate sequence construction, variant centering,
-LLR sign and aggregation, scoring windows, and forward/reverse-complement
-handling. TODO: specify exact equations and model-specific token handling.
-\item Specify embedding layer and pooling, reference/alternate feature
-construction, probe family, fitting, tuning, and evaluation splits. Distinguish
-subset-specific probes from any pooled analysis. TODO: document regularization,
-preprocessing, and labeled-data usage from the evaluation implementation.
-\item Define matched-variant inclusion across readouts and model sizes, and
-handling of missing predictions. TODO: document all exclusions and ensure
-no evaluation-label leakage in probe selection.
-\end{itemize}
+
+\paragraph{Zero-shot scoring}
+For each SNV, we extracted a window from GRCh38, checked the reference
+allele, and substituted the alternate base to create a second sequence
+with identical flanks (Figure~\ref{fig:model-overview}C). The later
+Marin DNA checkpoints used 127 bases on either side of the SNV and a
+beginning-of-sequence token. The early upstream/CDS experiments used
+512 bases and Evo~2 used 8,192 bases, both without a beginning-of-sequence
+token. In each even-length window the forward sequence had one extra
+base to the left of the SNV. We scored the same interval in its forward
+and reverse-complement orientations~\citep{marindnabencheval,marindnaevo2code}.
+
+On each strand $s$, the log-likelihood ratio was
+$\mathrm{LLR}_s=\ell_s(\mathrm{alt})-\ell_s(\mathrm{ref})$.
+For each allele, $\ell_s$ sums the natural log probabilities of the
+observed bases from the SNV through the end of the oriented window.
+Each probability is conditional on the preceding sequence and normalized
+over A, C, G and T. The shared prefix cancels in the ratio. Bases after
+the SNV contribute because their predicted probabilities can change
+when the allele changes. For both Mendelian disease and SGE, we ranked
+variants by $-(\mathrm{LLR}_{\mathrm{fwd}}+\mathrm{LLR}_{\mathrm{rc}})/2$.
+Higher scores indicate that the model assigns lower relative likelihood
+to the alternate sequence.
+
+\paragraph{Linear probes}
+For each allele we averaged the frozen model's final-layer hidden
+states over all DNA positions, excluding any beginning-of-sequence
+token, then averaged the two strand vectors. The probe input was the
+reference vector concatenated with the signed allele difference,
+$[h_{\mathrm{ref}},\,h_{\mathrm{alt}}-h_{\mathrm{ref}}]$. Evo~2 used
+its final normalized hidden states and the same feature construction
+and fitting procedure~\citep{marindnaevo2code}. We fitted a separate
+$L_2$-regularized logistic regression for each checkpoint, benchmark and
+variant class. A class needed both labels and at least 300 development
+variants spanning at least three chromosomes. The 40 mature-miRNA
+variants in the Mendelian development partition therefore received
+no probe score.
+
+Following the TraitGym chromosome holdout design, we scored each
+variant with the predicted probability of the positive class from a
+probe fitted on the other development chromosomes~\citep{benegas2025traitgym,marindnabencheval}.
+Within each outer training fold, we chose the inverse regularization
+strength $C$ from the 17 powers of ten from $10^{-12}$ to $10^4$ by
+maximizing mean average precision across up to five chromosome-grouped
+inner folds. We fitted feature means and standard deviations on the
+training portion of each fit, then used those values to standardize
+the held-out features.
+
+\paragraph{Comparisons across readouts}
+Figure~\ref{fig:throughput}A averages eight Mendelian class scores
+within each readout. Zero-shot AUPRC pools variants within a class,
+whereas probe AUPRC averages chromosome-specific values within that
+class, weighted by variant count (Supplementary
+Figures~\ref{fig:benchmarks} and~\ref{fig:benchmark-probes}). For the
+scaling comparisons in Figure~\ref{fig:missense-scaling}B,C and
+Supplementary Figures~\ref{fig:downstream} and~\ref{fig:loss-vep}, we
+used chromosome-weighted AUPRC for both readouts. For each Marin DNA
+checkpoint we retained variants with a finite held-out probe prediction
+and verified both strand-specific likelihood ratios were finite. Within
+each plotted class the retained variants were identical across the eight
+model sizes.
 
 \subsection{Statistical analysis and comparator
 evaluation}\label{methods:statistics}
