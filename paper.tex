@@ -1085,19 +1085,20 @@ Separate chromosomes were reserved for independent evaluation
 
 The Mendelian benchmark was derived from TraitGym, with additional
 missense and splicing variants~\citep{benegas2025traitgym,mendeliancard}.
-Pathogenic SNVs were obtained from OMIM submissions to
-ClinVar~\citep{amberger2015omim,landrum2020clinvar}, Smedley et al.,
-and HGMD records distributed with Sei.
+Pathogenic SNVs included OMIM submissions to
+ClinVar~\citep{amberger2015omim,landrum2020clinvar} and noncoding
+variants curated from the Mendelian disease literature~\citep{smedley2016regulatory}.
+We also included disease-associated
+regulatory variants from HGMD~\citep{stenson2017hgmd},
+using the variant list released with Sei~\citep{chen2022sei}.
 OMIM curation used the 19 October 2025 ClinVar GRCh38 release and
 corresponding submission summary, retaining literature-based
 pathogenic assertions with consistent clinical significance and
 excluding reclassified entries.
-Variants were deduplicated and pathogenic candidates restricted to
-those with gnomAD allele frequencies below 0.1\%.
+After deduplication, we retained pathogenic candidates with allele
+frequencies below 0.1\% in gnomAD v4.1~\citep{chao2024gnomad}.
 Putatively benign controls were drawn from gnomAD SNVs with allele
 number at least 25,000 and frequency above 0.1\%.
-This threshold was reduced from the 5\% used in TraitGym to expand
-the pool of available controls.
 
 Each pathogenic SNV was matched to nine controls without replacement,
 requiring the same chromosome and annotated consequence.
@@ -1180,7 +1181,6 @@ Total & 23,853 & 3,526 & 14,888 & 1,459 \\
 \end{tabular}
 \end{table}
 
-
 Both benchmarks assigned odd autosomes and chromosome X to the
 development partition (named \texttt{train} in the released datasets)
 and even autosomes and chromosome Y to a reserved test partition
@@ -1193,7 +1193,7 @@ For linear probes, predictions were obtained by holding out each
 development chromosome in turn, fitting on the remaining development
 chromosomes, and selecting regularization by chromosome-grouped
 cross-validation within the fitting data
-(Section~\nameref{methods:scoring}).
+(Section~\nameref{methods:probes}).
 Thus, variant labels from the evaluated chromosome were not used
 to fit its probe, although the development partition was used
 throughout model development.
@@ -1209,17 +1209,17 @@ positives were available.
 The missense comparisons in Figure~\ref{fig:missense-scaling}B,C
 used 5,800 Mendelian and 19,059 SGE development variants,
 respectively.
-Evaluation metrics, variant inclusion criteria for linear probes,
-and uncertainty estimation are described in
-Section~\nameref{methods:statistics}.
+Section~\nameref{methods:probes} gives the criteria for fitting a probe.
+Section~\nameref{methods:statistics} describes variant inclusion for
+paired comparisons, evaluation metrics, and uncertainty estimation.
 
 
-\subsection{Zero-shot scoring and linear probes}
+\subsection{Zero-shot scoring}
 \label{methods:scoring}
 
-We evaluated variant effects using two approaches: zero-shot
-likelihood-ratio scoring and linear classifiers trained on frozen
-model representations (Figure~\ref{fig:model-overview}C).
+Zero-shot scoring and linear probing used the same reference and
+alternate sequences as inputs to the frozen model
+(Figure~\ref{fig:model-overview}C).
 For each single-nucleotide variant (SNV), we extracted a genomic
 window from GRCh38, verified the reference allele, and substituted
 the alternate base to construct a second sequence with identical
@@ -1261,8 +1261,11 @@ We used $S_{\mathrm{LLR}}$ to rank variants in both benchmarks,
 with larger values indicating lower relative likelihood of the
 alternate sequence.
 
-For linear probing, we extracted representations from the frozen
-model's final hidden layer after the decoder's final normalization.
+\subsection{Linear probes}
+\label{methods:probes}
+
+We extracted representations from the frozen model's final hidden
+layer after the decoder's final normalization.
 For each allele, hidden states were averaged across all DNA
 positions, excluding BOS where present, and the resulting vectors
 were averaged across forward and reverse-complement orientations.
