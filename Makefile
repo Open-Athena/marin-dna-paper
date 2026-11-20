@@ -13,7 +13,7 @@ GENERATED_SVGS := $(addprefix figures/,$(addsuffix .svg,$(DATA_FIGURES) $(SCHEMA
 CSV_upstream_coding_mixture_balance := plot_data/upstream_coding_mixture_balance_endpoints.csv plot_data/upstream_coding_mixture_balance_trajectories.csv
 CSV_vep_by_model_size := plot_data/vep_by_model_size.csv
 CSV_vep_by_sequence_likelihood := plot_data/vep_by_sequence_likelihood.csv
-CSV_missense_readout_scaling := plot_data/missense_readout_scaling.csv
+CSV_missense_readout_scaling := plot_data/missense_readout_scaling.csv plot_data/sequence_loss_scaling_results.csv plot_data/vep_by_model_size.csv
 CSV_mixture_zero_shot_trajectories := plot_data/mixture_zero_shot_trajectories.csv
 CSV_mixture_probe_trajectories := plot_data/mixture_probe_trajectories.csv
 CSV_mendelian_zero_shot_comparison := plot_data/mendelian_zero_shot_comparison.csv
@@ -56,13 +56,13 @@ figures/$(1).pdf figures/$(1).svg &: $$(FIGURE_CODE) $$(CSV_$(1))
 figure-$(1):
 	$$(PLOT) $(1)
 endef
-$(foreach name,$(filter-out dataset_timetree sequence_loss_scaling,$(DATA_FIGURES)) $(SCHEMATIC_FIGURES),$(eval $(call plot_targets,$(name))))
+$(foreach name,$(filter-out dataset_timetree missense_readout_scaling,$(DATA_FIGURES)) $(SCHEMATIC_FIGURES),$(eval $(call plot_targets,$(name))))
 
-figures/sequence_loss_scaling.pdf figures/sequence_loss_scaling.svg figures/sequence_loss_scaling_fit.txt &: $(FIGURE_CODE) $(CSV_sequence_loss_scaling)
-	$(PLOT) sequence_loss_scaling
-.PHONY: figure-sequence_loss_scaling
-figure-sequence_loss_scaling:
-	$(PLOT) sequence_loss_scaling
+figures/missense_readout_scaling.pdf figures/missense_readout_scaling.svg figures/sequence_loss_scaling_fit.txt &: $(FIGURE_CODE) $(CSV_missense_readout_scaling)
+	$(PLOT) missense_readout_scaling
+.PHONY: figure-missense_readout_scaling
+figure-missense_readout_scaling:
+	$(PLOT) missense_readout_scaling
 
 figures/dataset_timetree.pdf figures/dataset_timetree.svg figures/dataset_timetree.png &: src/plot_dataset_timetree.py pyproject.toml uv.lock $(CSV_dataset_timetree)
 	$(FIGURE_PYTHON) src/plot_dataset_timetree.py

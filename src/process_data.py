@@ -963,7 +963,11 @@ RECIPES = {
     "vep_by_model_size": lambda: {"vep_by_model_size": prepare_scaling()},
     "vep_by_sequence_likelihood": lambda: {
         "vep_by_sequence_likelihood": load_loss_vs_auprc(metrics=prepare_scaling())},
-    "missense_readout_scaling": lambda: {"missense_readout_scaling": prepare_missense()},
+    "missense_readout_scaling": lambda: {
+        "missense_readout_scaling": prepare_missense(),
+        "sequence_loss_scaling_results": local_data.load_scaling_results(),
+        "vep_by_model_size": prepare_scaling(),
+    },
     "mixture_zero_shot_trajectories": lambda: {"mixture_zero_shot_trajectories": prepare_trajectories("llr")},
     "mixture_probe_trajectories": lambda: {"mixture_probe_trajectories": prepare_trajectories("probe")},
     "mendelian_zero_shot_comparison": lambda: {"mendelian_zero_shot_comparison": prepare_zero_shot_comparison()},

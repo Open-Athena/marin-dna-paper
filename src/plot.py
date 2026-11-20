@@ -1024,9 +1024,9 @@ def _write_kaplan_fit_report(
 
 
 def plot_loss_scaling(
-    history: pd.DataFrame, results: pd.DataFrame, palette: dict, report_path: Path
+    history: pd.DataFrame, results: pd.DataFrame, palette: dict
 ) -> Figure:
-    """1x2: train/eval loss vs step. Inset on eval panel: final loss vs params with Kaplan fit."""
+    """Training and monitoring trajectories, supporting the main scaling figure."""
     name_to_params = dict(zip(results["run_name"], results["params"], strict=True))
     history = history.assign(params=history["run_name"].map(name_to_params))
     # Log-x cannot show step=0; the step-0 eval is pre-training and not informative anyway.
@@ -1035,10 +1035,8 @@ def plot_loss_scaling(
     fig, axes = plt.subplots(1, 2, figsize=figsize(FIGURE_WIDTH, 6.5))
     panels = [
         (axes[0], "train/loss", "Train loss"),
-        (axes[1], "eval/loss", "Validation loss"),
+        (axes[1], "eval/loss", "Monitoring loss"),
     ]
-    # Eval-loss lines need a high zorder so they draw over the inset on the right panel.
-    line_zorder = {axes[0]: 2, axes[1]: 20}
     for ax, metric, ylabel in panels:
         sub = history[history["metric"] == metric]
         for params in sorted(sub["params"].unique()):
@@ -1047,7 +1045,7 @@ def plot_loss_scaling(
                 line["step"],
                 line["value"],
                 color=palette[int(params)],
-                zorder=line_zorder[ax],
+                zorder=2,
             )
         ax.set_xscale("log")
         ax.set_yscale("log")
@@ -1057,10 +1055,6 @@ def plot_loss_scaling(
         ax.set_box_aspect(1)
         # Loss values span ~0.5–1.5; render as plain decimals rather than 6×10⁻¹ etc.
         set_plain_decimal_yticks(ax)
-
-    # Inset on eval-loss panel: final eval loss vs params with Kaplan scaling-law fit.
-    # Sits in the bottom-left empty region (low-step / low-loss has no curve data there).
-    _attach_kaplan_inset(axes[1], results, palette, report_path)
 
     fig.tight_layout(rect=(0, 0.08, 1, 1))
     set_square_subplot_height(fig, axes, LOSS_SCALING_SUBPLOT_HEIGHT_PX)
@@ -1072,98 +1066,24 @@ def plot_loss_scaling(
     return fig
 
 
-def _attach_kaplan_inset(
-    parent_ax, results: pd.DataFrame, palette: dict, report_path: Path
+def _plot_terminal_monitoring_loss(
+    ax: Axes, results: pd.DataFrame, report_path: Path
 ) -> None:
-    """Embed a small params-vs-loss panel with Kaplan fit inside `parent_ax`.
-
-    Inset axes uses parent-axes-fraction coords. The fit equation/constants sit
-    in the open space just to the right of the inset.
-    """
+    """Promote the original inset fit without extending its observed size range."""
     fit_df = results.dropna(subset=["params", "eval_loss"]).sort_values("params")
+    assert len(fit_df) == 8 and fit_df["params"].is_unique
     P = fit_df["params"].astype(float).to_numpy()
     L = fit_df["eval_loss"].astype(float).to_numpy()
     A, alpha, L_inf = _fit_kaplan_law(P, L, report_path)
     pred = A * P ** (-alpha) + L_inf
-    ss_res = float(np.sum((L - pred) ** 2))
-    ss_tot = float(np.sum((L - L.mean()) ** 2))
-    r2 = 1.0 - ss_res / ss_tot if ss_tot > 0 else float("nan")
-
-    # zorder=0 puts the inset under parent's eval-loss lines (which use zorder=20),
-    # so the curves visually cross over the inset like a framed window beneath them.
-    # Keep the bottom (y0) where it is; the height controls only the top edge.
-    inset_bounds = (0.10, 0.17, 0.27, 0.40)
-    inset = parent_ax.inset_axes(list(inset_bounds), zorder=0)
-
-    # Replace the default rectangular background/spines with a rounded FancyBboxPatch
-    # placed in parent axes-fraction coords, so the inset reads as a card with rounded edges.
-    inset.patch.set_visible(False)
-    for spine in inset.spines.values():
-        spine.set_visible(False)
-    rounded_bg = FancyBboxPatch(
-        (inset_bounds[0], inset_bounds[1]),
-        inset_bounds[2],
-        inset_bounds[3],
-        boxstyle="round,pad=0,rounding_size=0.025",
-        transform=parent_ax.transAxes,
-        facecolor="none",
-        edgecolor="black",
-        linewidth=0.2,
-        zorder=0,
-        clip_on=False,
-    )
-    parent_ax.add_patch(rounded_bg)
-
-    # Y-range: zoom to the data points with a little padding. The asymptote and
-    # fit details live in a text block to the right, so the inset needn't reach
-    # all the way down to L_inf.
-    dataspan = float(L.max() - L.min()) or 1.0
-    inset.set_ylim(L.min() - 0.12 * dataspan, L.max() + 0.12 * dataspan)
-
-    P_grid = np.geomspace(P.min() * 0.92, P.max() * 1.08, 200)
-    inset.plot(
-        P_grid,
-        A * P_grid ** (-alpha) + L_inf,
-        color="0.2",
-        alpha=0.92,
-        zorder=2,
-    )
-    for p, loss in zip(P, L, strict=True):
-        inset.scatter(
-            [p],
-            [loss],
-            color=palette[int(p)],
-            edgecolors="k",
-            zorder=3,
-        )
-
-    inset.set_xscale("log")
-    inset.set_xlabel("Parameters (N)", labelpad=2)
-    inset.set_ylabel("")
-    inset.tick_params(length=2.5, pad=1)
-    inset.minorticks_off()
-    inset.grid(False)
-    set_plain_decimal_yticks(inset)
-
-    # Fit equation + constants in the open space just right of the inset (the
-    # empty low-loss/early-step corner), bottom-aligned to the inset plot. No
-    # background box (transparent) so it doesn't mask the loss curves; high
-    # zorder keeps the text itself on top.
-    parent_ax.text(
-        inset_bounds[0] + inset_bounds[2] + 0.03,
-        inset_bounds[1],
-        r"$L(N) = A \cdot N^{-\alpha} + L_{\infty}$"
-        "\n"
-        rf"$A = {A:.3g},\ \alpha = {alpha:.3f}$"
-        "\n"
-        rf"$L_{{\infty}} = {L_inf:.3f},\ R^2 = {r2:.3f}$",
-        transform=parent_ax.transAxes,
-        ha="left",
-        va="bottom",
-        fontsize=MATPLOTLIB_NOTE_SIZE,
-        color="0.15",
-        linespacing=1.6,
-        zorder=25,
+    r2 = 1.0 - float(np.sum((L - pred) ** 2)) / float(np.sum((L - L.mean()) ** 2))
+    P_grid = np.geomspace(P.min(), P.max(), 200)
+    ax.plot(P_grid, A * P_grid ** (-alpha) + L_inf, color="0.2", zorder=2)
+    ax.scatter(P, L, color="black", edgecolors="k", zorder=3)
+    ax.set_ylabel("Terminal monitoring\nloss")
+    ax.text(
+        0.97, 0.95, rf"$\alpha = {alpha:.3f}$" + "\n" + rf"$R^2 = {r2:.3f}$",
+        transform=ax.transAxes, ha="right", va="top", fontsize=MATPLOTLIB_NOTE_SIZE,
     )
 
 
@@ -1579,8 +1499,6 @@ MISSENSE_DATASET = "mendelian_traits"
 
 SUBSET = "missense_variant"
 
-MISSENSE_SUBPLOT_HEIGHT_PX = 164.0
-
 MARIN = "MarinDNA"
 
 EVO2 = "Evo 2"
@@ -1603,13 +1521,11 @@ def _format_parameter_count(value: float, _position: int) -> str:
     return f"{value:g}"
 
 
-def plot_missense(data: pd.DataFrame | None = None) -> Figure:
-    """Build the combined MarinDNA + Evo 2 missense scaling figure."""
-    if data is None:
-        data = local_data.load_plot_csv("missense_readout_scaling")
-    fig, ax = plt.subplots(figsize=figsize(8.4, 7.2))
-
-    for family in FAMILIES:
+def _plot_missense_readouts(
+    ax: Axes, data: pd.DataFrame, families: tuple[str, ...]
+) -> None:
+    """Preserve the existing paired missense points and stored standard errors."""
+    for family in families:
         family_key = "marindna" if family == MARIN else "evo2"
         marker = MODEL_FAMILY_MARKERS[family_key]
         for score_type, _label, protocol in READOUTS:
@@ -1639,65 +1555,60 @@ def plot_missense(data: pd.DataFrame | None = None) -> Figure:
                 zorder=2,
             )
 
-    ax.set_xscale("log")
-    ax.xaxis.set_major_locator(LogLocator(base=10))
-    ax.xaxis.set_major_formatter(FuncFormatter(_format_parameter_count))
-    ax.set_xlabel("Model parameters", labelpad=X_LABEL_PAD)
     ax.set_ylabel("AUPRC (%)")
-    ax.grid(False)
-    ax.margins(x=0.04)
-    ax.set_box_aspect(1)
-    fig.subplots_adjust(left=0.16, right=0.62, top=0.95, bottom=0.16)
-    set_square_subplot_height(fig, (ax,), MISSENSE_SUBPLOT_HEIGHT_PX)
 
+
+def plot_missense(report_path: Path) -> Figure:
+    """Sequence-loss scaling and paired Mendelian/SGE missense readouts."""
+    results = local_data.load_plot_csv("sequence_loss_scaling_results")
+    mendelian = local_data.load_plot_csv("missense_readout_scaling")
+    scaling = local_data.load_plot_csv("vep_by_model_size")
+    sge = scaling[(scaling["dataset"] == "sge") & (scaling["subset"] == SUBSET)].copy()
+    sge["family"] = MARIN
+    assert set(sge["params"]) == set(results["params"])
+    assert set(mendelian.loc[mendelian["family"] == MARIN, "params"]) == set(results["params"])
+
+    fig, grid = plt.subplots(2, 2, figsize=figsize(6.5, 6.8))
+    axes = list(grid.flat)[:3]
+    _plot_terminal_monitoring_loss(axes[0], results, report_path)
+    _plot_missense_readouts(axes[1], mendelian, FAMILIES)
+    _plot_missense_readouts(axes[2], sge, (MARIN,))
+    for ax, title in zip(axes, (
+        "A  Sequence\n    monitoring loss", "B  Mendelian\n    missense", "C  SGE missense"
+    ), strict=True):
+        ax.set_title(title, loc="left", weight="bold", fontsize=MATPLOTLIB_BASE_SIZE)
+        ax.set_xscale("log")
+        ax.xaxis.set_major_locator(LogLocator(base=10))
+        ax.xaxis.set_major_formatter(FuncFormatter(_format_parameter_count))
+        ax.set_xlabel("Model parameters", labelpad=X_LABEL_PAD)
+        ax.grid(False)
+        ax.margins(x=0.04)
+        ax.set_box_aspect(1)
+    legend_ax = grid[1, 1]
+    legend_ax.set_box_aspect(1)
+    legend_ax.set_axis_off()
+    fig.tight_layout(h_pad=1.3, w_pad=0.7)
     protocol_handles = [
-        Line2D(
-            [0],
-            [0],
-            color=SCORING_PROTOCOL_COLORS[protocol],
-            linestyle=SCORING_PROTOCOL_LINESTYLES[protocol],
-            label=label,
-        )
+        Line2D([0], [0], color=SCORING_PROTOCOL_COLORS[protocol],
+               linestyle=SCORING_PROTOCOL_LINESTYLES[protocol], label=label)
         for _score, label, protocol in READOUTS
     ]
     family_handles = [
-        Line2D(
-            [0],
-            [0],
-            color="#4b4b4b",
-            marker=MODEL_FAMILY_MARKERS["marindna" if family == MARIN else "evo2"],
-            markerfacecolor="#b8b0a3",
-            markeredgecolor="#1f1e1b",
-            linestyle="none",
-            label=family,
-        )
-        for family in FAMILIES
+        Line2D([0], [0], color="#4b4b4b",
+               marker=MODEL_FAMILY_MARKERS[key], markerfacecolor="#b8b0a3",
+               markeredgecolor="#1f1e1b", linestyle="none", label=label)
+        for key, label in (("marindna", "Marin DNA"), ("evo2", "Evo 2 (B only)"))
     ]
-    axis_position = ax.get_position()
-    legend_x = axis_position.x1 + 0.04
-    protocol_legend = fig.legend(
-        handles=protocol_handles,
-        title="Scoring protocol",
-        ncol=1,
-        loc="upper left",
-        bbox_to_anchor=(legend_x, axis_position.y1),
-        frameon=False,
-        handlelength=2.4,
+    protocol_legend = legend_ax.legend(
+        handles=protocol_handles, title="Scoring method", loc="upper left",
+        bbox_to_anchor=(0, 1.05), frameon=False, alignment="left",
+        handlelength=1.6, handletextpad=0.5,
     )
-    fig.add_artist(protocol_legend)
-    fig.canvas.draw()
-    protocol_bottom = (
-        protocol_legend.get_window_extent(renderer=fig.canvas.get_renderer()).y0
-        / fig.bbox.height
-    )
-    fig.legend(
-        handles=family_handles,
-        title="Model family",
-        ncol=1,
-        loc="upper left",
-        bbox_to_anchor=(legend_x, protocol_bottom - 0.025),
-        frameon=False,
-        handletextpad=0.4,
+    legend_ax.add_artist(protocol_legend)
+    legend_ax.legend(
+        handles=family_handles, title="Model family", loc="lower left",
+        bbox_to_anchor=(0, -0.05), frameon=False, alignment="left",
+        handlelength=1.6, handletextpad=0.5,
     )
     return fig
 
@@ -3009,7 +2920,6 @@ def _loss_scaling_figure(staging: Path) -> Figure:
         local_data.load_plot_csv("sequence_loss_scaling_history"),
         results,
         palette(params),
-        staging / "sequence_loss_scaling_fit.txt",
     )
 
 
@@ -3056,12 +2966,11 @@ def regional_hyperparameter_transfer(output_dir: Path) -> None:
 @cli.command("sequence_loss_scaling")
 @click.pass_obj
 def sequence_loss_scaling(output_dir: Path) -> None:
-    """Training/validation loss scaling and the Kaplan fit report."""
+    """Supplementary training and monitoring loss trajectories."""
     render(
         output_dir,
         "sequence_loss_scaling",
         _loss_scaling_figure,
-        reports=("sequence_loss_scaling_fit.txt",),
     )
 
 
@@ -3096,8 +3005,12 @@ def vep_by_sequence_likelihood(output_dir: Path) -> None:
 @cli.command("missense_readout_scaling")
 @click.pass_obj
 def missense_readout_scaling(output_dir: Path) -> None:
-    """MarinDNA/Evo 2 missense readouts; reads bundled CSVs."""
-    render(output_dir, "missense_readout_scaling", lambda _: plot_missense())
+    """Three-panel model scaling and variant prediction; reads bundled CSVs."""
+    render(
+        output_dir, "missense_readout_scaling",
+        lambda staging: plot_missense(staging / "sequence_loss_scaling_fit.txt"),
+        reports=("sequence_loss_scaling_fit.txt",),
+    )
 
 
 @cli.command("mixture_zero_shot_trajectories")

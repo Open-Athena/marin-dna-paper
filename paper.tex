@@ -385,14 +385,27 @@ measurements of variant effects. This allows us to examine whether the
 benefits of scaling depend on the evaluation task and scoring protocol.
 [TODO reference Method for details]
 
+To investigate how model scale affects variant prediction, we trained
+eight Marin DNA models ranging from 46M to 4B parameters, each using
+the same training-data mixture and approximately 85B input tokens.
+We calibrated optimizer hyperparameters on a 25M-parameter reference
+model and transferred them to larger models using fixed rules for
+batch size and training duration (Methods).
+Across the eight model sizes, sequence monitoring loss decreased
+smoothly with parameter count and was well described by a power-law
+relationship (Figure~\ref{fig:missense-scaling}A).
+Thus, the common training recipe produced progressively better
+sequence predictors over the tested model-size range.
+
+
 \begin{itemize}
 \item Mendelian missense prediction reveals information that likelihood
-scores alone miss. Lead with Figure~\ref{fig:missense-scaling}A: as model size
+scores alone miss. Lead with Figure~\ref{fig:missense-scaling}B: as model size
 increases, likelihood-based ranking worsens beyond an intermediate size while
 probe performance improves. The analogous pattern in Evo 2 shows that this
 observation spans two model families; it does not establish a shared mechanism.
 \item One scoring rule is therefore insufficient to judge whether scaling
-has improved a model. Use the planned Figure~\ref{fig:missense-scaling}B
+has improved a model. Use Figure~\ref{fig:missense-scaling}C
 to contrast SGE missense, where both readouts improve; cite Supplementary
 Figure~\ref{fig:downstream} for the existing evidence. Explain SGE as
 experimental
@@ -406,27 +419,25 @@ optimum, and improvements should be assessed across tasks and readouts.
 \end{itemize}
 \begin{figure}
 \centering
-\small
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{|p{\dimexpr\linewidth-2\tabcolsep-2\arrayrulewidth\relax}|}
-\hline
-\textbf{A \quad Mendelian missense}\par
-\includegraphics[width=\linewidth]{figures/missense_readout_scaling.pdf} \\[3pt]
-\hline
-\textbf{B \quad Experimental missense effects}\par
-\textit{Planned SGE comparison.} Plot chromosome-weighted AUPRC versus
-model size for Marin DNA SGE missense variants under zero-shot likelihood
-scoring and linear probing. Use matched variants, consistent readout colors,
-a logarithmic model-size axis, and standard-error bars. Draw on the existing
-results in Supplementary Figure~\ref{fig:downstream}; include no unverified
-Evo 2 SGE measurements. \\[3pt]
-\hline
-\end{tabular}
-\caption{Scaling and readout choice: draft panel layout.
-\textbf{A}, Existing Marin DNA and Evo 2 Mendelian missense comparison on
-identical variants. Performance is chromosome-weighted AUPRC; error bars
-denote standard errors. \textbf{B}, Planned experimental SGE missense panel
-contrasting the two readouts using existing Marin DNA results.}
+\includegraphics[width=\linewidth]{figures/missense_readout_scaling.pdf}
+\caption{Model scaling and variant prediction.
+\textbf{A}, Terminal conservation-weighted human monitoring loss across
+eight Marin DNA model sizes, with the descriptive fit
+$L(N)=AN^{-\alpha}+L_{\infty}$ ($A=17.6$, $L_{\infty}=0.192$;
+$\alpha$ and $R^2$ shown in the panel). The curve is restricted to the
+observed parameter range. These models used approximately 84.77B
+model-input tokens each, the dataset-proportional CDS/upstream/downstream
+mixture, and transferred optimization settings, rather than the final
+Staged five-region recipe. Monitoring loci were not excluded from
+pretraining; the fixed-token fit establishes neither generalization to
+independent loci nor compute-optimal scaling.
+\textbf{B}, Mendelian missense AUPRC for the same Marin DNA models and
+the available Evo 2 models (1B, 7B, and 40B), using zero-shot
+likelihood-ratio scoring and linear probes.
+\textbf{C}, SGE missense AUPRC for the eight Marin DNA models under
+both scoring methods. B and C use the established matched-variant
+comparisons and chromosome-weighted AUPRC; error bars show $\pm$ one
+standard error. Connecting lines join measured endpoints.}
 \label{fig:missense-scaling}
 \end{figure}
 
@@ -996,7 +1007,7 @@ Training used the standard learning-rate schedule, with 10\% warmup
 and linear decay over the final 20\% of training.
 We trained one model at each size without size-specific retuning,
 and used the terminal checkpoint of each run for all downstream
-comparisons (Figure~\ref{fig:missense-scaling}A and Supplementary
+comparisons (Figure~\ref{fig:missense-scaling}B,C and Supplementary
 Figures~\ref{fig:downstream} and~\ref{fig:loss-vep}).
 Exact training budgets and checkpoint details are provided in
 Supplementary Section~\nameref{supp:scaling-details}.
@@ -1019,16 +1030,7 @@ marindnamonitoringcds,marindnamonitoringupstream,
 marindnamonitoringdownstream}.
 The monitored genomic loci were not excluded from pretraining.
 
-\begin{figure}
-\centering
-\includegraphics[width=\linewidth]{figures/sequence_loss_scaling.pdf}
-\caption{Sequence loss across model sizes. Eight models from 46M to 4B
-parameters are each trained on approximately 84.77B model-input tokens
-from the proportional CDS/upstream/downstream mixture. Curves show logged
-training and conservation-weighted human monitoring losses. The inset
-shows a Kaplan-style power-law fit to the eight terminal monitoring
-losses; $R^2$ describes the fit to these endpoints.}\label{fig:scaling}
-\end{figure}
+
 
 
 Monitoring loss was calculated as weighted next-nucleotide
@@ -1041,7 +1043,7 @@ Consequently, equal numbers of sequences in each region did not
 necessarily contribute equally to the overall statistic.
 The same monitoring datasets were used for reference hyperparameter
 selection, transfer validation, and the scaling experiments
-(Figures~\ref{fig:transfer} and~\ref{fig:scaling}).
+(Figure~\ref{fig:transfer} and Supplementary Figure~\ref{fig:scaling}).
 Because the monitored loci were not withheld from training, this
 statistic measures sequence-modeling performance on a fixed,
 conservation-weighted collection of human sequences rather than
@@ -1051,7 +1053,7 @@ conventions and should not be interpreted as a conventional
 training--test generalization gap.
 
 We examined sequence-loss scaling using the training and monitoring
-loss trajectories shown in Figure~\ref{fig:scaling}.
+loss trajectories shown in Supplementary Figure~\ref{fig:scaling}.
 To summarize the relationship between model size and terminal
 monitoring loss, we fitted the power-law relationship
 \citep{kaplan2020scaling}
@@ -1063,7 +1065,7 @@ overall monitoring loss.
 The fit used unweighted nonlinear least squares in loss space,
 using all eight model endpoints.
 The fitted relationship and coefficient of determination ($R^2$)
-are shown in Figure~\ref{fig:scaling}; fitting procedures and
+are shown in Figure~\ref{fig:missense-scaling}A; fitting procedures and
 diagnostics are described in Supplementary
 Section~\nameref{supp:scaling-details}.
 This is a descriptive relationship at a fixed training-token budget,
@@ -1222,6 +1224,21 @@ show both specialists and both generalists on a common 0--70\% vertical
 scale. The source metric locations and model identifiers are retained
 in the accompanying plotting-data table.
 
+
+Figure~\ref{fig:missense-scaling}B,C reuses the Marin DNA missense
+endpoints from Supplementary Figure~\ref{fig:downstream}. Both scoring methods
+use the same 5,800 Mendelian missense variants or 19,059 SGE missense
+variants across all eight terminal models, retaining rows with finite
+probe predictions and forward/reverse-complement likelihood ratios.
+AUPRC is averaged across chromosomes with weights proportional to the
+number of variants; standard errors use 1,000 chromosome-bootstrap
+resamples with seed 0. The SGE scaling comparison retains this
+chromosome-weighted aggregation, rather than averaging across assays.
+Panel B also retains the archived paired Evo 2 summaries for 1B, 7B,
+and 40B models, each reporting 5,800 Mendelian missense variants for
+both readouts. Their point estimates and stored standard errors were
+used unchanged. Source locations and model identifiers are recorded in
+the plotting-data tables. No Evo 2 SGE measurements are included.
 
 For Supplementary Figure~\ref{fig:loss-vep}, we examined associations
 between regional sequence-modeling performance and variant prediction
@@ -1759,11 +1776,12 @@ documented in the corresponding source records
 \citep{marindnamonitoringcode,marindnamonitoringcds,
 marindnamonitoringupstream,marindnamonitoringdownstream}.
 
-For Figure~\ref{fig:scaling}, logged training losses were subsampled
+For Supplementary Figure~\ref{fig:scaling}, logged training losses were subsampled
 at the optimizer steps for which monitoring loss was also recorded.
 Step zero was excluded from the logarithmic horizontal axis, and
 observed points were connected without smoothing.
-The terminal monitoring-loss scaling relationship was fitted using
+The terminal monitoring-loss scaling relationship in
+Figure~\ref{fig:missense-scaling}A was fitted using
 SciPy's \texttt{curve\_fit}, minimizing unweighted squared residuals
 in loss space.
 The parameter bounds were $A\geq0$, $0\leq\alpha\leq5$, and
@@ -1871,5 +1889,18 @@ AdamH learning rate, $\beta_2$, and $\epsilon$, evaluated separately for
 CDS, upstream, and downstream monitoring sequences from the same training
 runs as Figure~\ref{fig:transfer}.
 Squares mark transferred settings; circles mark tested alternatives.}\label{fig:regional-transfer}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[width=\linewidth]{figures/sequence_loss_scaling.pdf}
+\caption{Training and monitoring loss trajectories across model sizes.
+Eight Marin DNA models from 46M to 4.02B parameters were each trained
+on approximately 84.77B model-input tokens from the dataset-proportional
+CDS/upstream/downstream mixture. Curves show logged training loss and
+conservation-weighted human monitoring loss; monitoring loci were not
+withheld from pretraining. Training losses are shown at steps with
+recorded monitoring loss, without smoothing; step zero is omitted from
+the logarithmic axis. The terminal monitoring-loss fit is shown in
+Figure~\ref{fig:missense-scaling}A.}\label{fig:scaling}
 \end{figure}
 \end{document}
