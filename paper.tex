@@ -1065,104 +1065,122 @@ rather than an estimate of compute-optimal scaling or evidence for
 extrapolation beyond the tested model sizes.
 
 \subsection{Evaluation benchmarks}\label{methods:benchmarks}
-\begin{itemize}
-\item Anchor clinical curation in ClinVar~\citep{landrum2020clinvar}.
-Describe Mendelian sources, pathogenic and putatively benign labels,
-consequence classes, and inclusion criteria. Explain control matching and
-chromosome-disjoint development/test splits. Document changes from TraitGym,
-including the 0.1\% control allele-frequency threshold and expanded variant
-classes. TODO: pin source releases, matching rules, and split assignments.
-Relative to TraitGym~\citep{benegas2025traitgym}, the minimum control allele
-frequency was lowered from 5\% to 0.1\% (``non-rare''). The larger control pool
-allowed matching of TSS distance and, for splicing variants, exon distance
-within consequence classes. Missense and splicing variants and additional
-pathogenic sources were added. Preserve the pinned dataset card as provenance
-for the construction and matching diagnostics~\citep{mendeliancard}.
-\item Describe SGE assay sources in
-MaveDB~\citep{findlay2018sge,esposito2019mavedb},
-gene coverage, variant inclusion,
-and conversion of assay measurements to evaluation labels. TODO: supply
-accession/version identifiers, thresholds, and counts.
-\item Use Figure~\ref{fig:evaluation} and Table~\ref{tab:benchmarks} to document
-benchmark flow, class counts, exclusions, and split sizes. Distinguish
-chromosome-disjoint evaluation labels from the separate question of pretraining
-sequence exposure.
-\end{itemize}
-\textcolor{red}{JK: it's not obvious to me what the distinction between
-what Figure~\ref{fig:evaluation} and Table~\ref{tab:benchmarks} are doing is
-here. Needs to be
-worked out in detail, to see what we're trying to document here.}
 
-% Draft counts and source descriptions transcribed from blog/eval_datasets.svg.
-% These are the blog snapshot, not yet verified against versioned dataset
-% records.
-\begin{table*}
-\caption{Draft evaluation benchmark summary. Counts reproduce the blog's
-benchmark diagram; train/validation/test counts and source versions remain
-to be verified. Positive and negative labels are defined separately below.}
-\label{tab:benchmarks}
-\centering
-\small
-\setlength{\tabcolsep}{4pt}
-\renewcommand{\arraystretch}{1.15}
-\begin{tabularx}{\linewidth}{@{}p{0.13\linewidth}L L L@{}}
-\toprule
-Benchmark & Sources & Positive label & Negative label \\
-\midrule
-Mendelian & OMIM, Smedley et al., HGMD; gnomAD controls. Releases: TODO. &
-Pathogenic; allele frequency $<0.1\%$. Exact inclusion rules: TODO. &
-Non-rare gnomAD controls; allele frequency $>0.1\%$. Nine matched controls
-per pathogenic variant. \\
-SGE & MaveDB, 11 studies. Accessions, genes, and versions: TODO. &
-Abnormal function, using ClinGen/ExCALIBR or author thresholds.
-Per-assay thresholds: TODO. &
-Normal function under the corresponding assay classification.
-Ambiguous-label exclusions: TODO. \\
-\bottomrule
-\end{tabularx}
-\par\medskip
-\begin{tabularx}{\linewidth}{@{}l L r r r r r r@{}}
-\toprule
-Benchmark & Variant class & Positive & Negative & Total & Train & Validation &
-Test \\
-\midrule
-Mendelian & Missense & ? & ? & 10,000 & ? & ? & ? \\
-& Splicing & ? & ? & 5,500 & ? & ? & ? \\
-& 5-prime UTR & ? & ? & 3,050 & ? & ? & ? \\
-& Promoter & ? & ? & 2,700 & ? & ? & ? \\
-& ncRNA & ? & ? & 1,590 & ? & ? & ? \\
-& 3-prime UTR & ? & ? & 1,100 & ? & ? & ? \\
-& Distal & ? & ? & 990 & ? & ? & ? \\
-& Synonymous & ? & ? & 650 & ? & ? & ? \\
-& Mature miRNA$^{a}$ & ? & ? & 50 & ? & ? & ? \\
-& Total in diagram & 2,563 & 23,067 & 25,630 & ? & ? & ? \\
-\midrule
-SGE & Missense & 4,250 & 27,066 & 31,316 & ? & ? & ? \\
-& Splicing & 735 & 6,690 & 7,425 & ? & ? & ? \\
-& Total in diagram & 4,985 & 33,756 & 38,741 & ? & ? & ? \\
-\bottomrule
-\end{tabularx}
-\par\smallskip
-\parbox{\linewidth}{\footnotesize
-?: not provided in the blog diagram; TODO: obtain exact label and split counts
-from versioned dataset records. The diagram specifies GRCh38 SNVs, excludes
-HIGH-impact annotations, and assigns odd chromosomes to training/validation
-and even chromosomes to testing; the internal training/validation partition
-is TODO. Confirm these rules and counts for each benchmark and analysis.
-Mendelian matching uses chromosome, consequence, TSS distance, and exon
-distance; SGE uses no matching or subsampling.
-$^{a}$The diagram lists mature miRNA separately, whereas the main results
-summarize eight variant classes. TODO: establish whether this subset is
-excluded, merged, or otherwise treated differently before finalizing totals.}
-\end{table*}
+We evaluated two types of evidence for single-nucleotide variants
+(SNVs) on GRCh38. In the Mendelian benchmark, the prediction task was
+to distinguish variants implicated in disease from population controls.
+In saturation genome editing (SGE), the task was to distinguish edits
+with abnormal and normal functional readouts in the assayed cells
+(Figure~\ref{fig:evaluation}). Both datasets used Ensembl variant
+consequences and excluded high-impact consequences, including stop gains
+and canonical splice donor and acceptor variants. The splicing class
+therefore covers splice-region and near-exon variants.
+
+\paragraph{Mendelian disease.}
+We used a TraitGym-derived benchmark with additional missense and
+splicing variants~\citep{benegas2025traitgym,mendeliancard}.
+Pathogenic SNVs were collected from OMIM submissions to
+ClinVar~\citep{amberger2015omim,landrum2020clinvar}, Smedley et al., and
+HGMD records distributed with Sei. The OMIM curation used the 19 October
+2025 ClinVar GRCh38 release and October submission summary, selecting
+literature-based pathogenic assertions with consistent significance and
+excluding reclassified entries. The pipeline deduplicated variants and
+filtered pathogenic candidates at a gnomAD allele frequency of
+$<0.1\%$. Controls were putatively benign gnomAD SNVs with allele
+number $\geq25{,}000$ and frequency $>0.1\%$. Lowering the control
+frequency threshold from TraitGym's 5\% expanded the pool for matching.
+
+Each retained pathogenic SNV was matched to nine controls without
+replacement, requiring the same chromosome and annotated consequence.
+For promoter variants, matching also required the same distance bins
+for the nearest protein-coding transcription start site and exon.
+Splicing and distal variants were matched within class-specific bins
+for distance to the nearest coding exon. Within those strata, controls
+were selected by Euclidean distance on robustly scaled distances to the
+nearest coding and noncoding transcription start sites and exons.
+Strata with insufficient controls contributed fewer pathogenic SNVs,
+and missense positives were capped at 1,000. The resulting 2,563
+matched groups each contain one positive and nine controls. The pinned
+release records the bin boundaries, class retention, and matching
+diagnostics~\citep{mendeliancard,marindnabenchbuilder}.
+
+\paragraph{Experimental variant effects.}
+The SGE benchmark used MaveDB score sets measuring the effects of
+edits at endogenous loci on cell fitness or proliferation
+\citep{findlay2018sge,esposito2019mavedb,sgebenchcard}. We retained
+missense and splicing SNVs with a binary functional classification.
+Classification used each assay's score calibration, with priority given
+to ClinGen/ExCALIBR. Eight retained genes used ExCALIBR thresholds
+(BAP1, BARD1, BRCA1, PALB2, RAD51C, RAD51D, VHL, XRCC2), two used
+investigator-provided thresholds (CTCF, SFPQ), and DDX3X used harmonized
+author classes. Abnormal calls were positives and normal calls were
+negatives. Intermediate and unclassified variants were excluded,
+including BRCA2, which lacked a calibration. All eligible variants
+were retained at their observed class frequencies. The pinned release
+lists the MaveDB accessions and supplies the assay-specific threshold
+ranges in its calibration table~\citep{sgebenchcard}.
+
+\paragraph{Splits and reported comparisons.}
+Both releases assign odd autosomes and X to the development partition
+(named \texttt{train}) and even autosomes and Y to the reserved test
+partition (Table~\ref{tab:benchmarks}). Each Mendelian matched group
+and each assayed SGE gene therefore belongs to one partition. The
+reported comparisons use the development partition. For linear probes,
+each chromosome was scored by a probe fitted on the other development
+chromosomes, with regularization selected by chromosome-grouped
+cross-validation within the fitting fold~\citep{marindnabencheval}.
+These partitions govern access to variant labels during evaluation.
+Pretraining exposure to genomic sequence is described in
+Section~\nameref{methods:scaling}.
+
+The Mendelian macro-average in Figure~\ref{fig:throughput} includes
+classes with at least 30 development positives. Eight classes qualified.
+Mature miRNA contributed four development positives and is included
+only in the release counts below. The missense comparisons in
+Figure~\ref{fig:missense-scaling}B,C use 5,800 Mendelian and 19,059 SGE
+development variants, respectively. Their chromosome-weighted AUPRC and
+uncertainty estimates are described in Section~\nameref{methods:statistics}.
 
 \begin{figure}
 \centering
 \includegraphics[width=\linewidth]{figures/evaluation_benchmarks.pdf}
-\caption{Variant effect prediction benchmarks. Clinical Mendelian and
-experimental SGE evidence provide complementary labels across the displayed
-variant classes and subset sizes.}\label{fig:evaluation}
+\caption{Label construction for the two benchmarks. Mendelian controls
+were sampled within matched groups. SGE labels were assigned from
+experimental readouts using assay-specific calibrations.}\label{fig:evaluation}
 \end{figure}
+
+\begin{table}
+\centering\small
+\caption{Benchmark composition by release partition. Positive counts
+are pathogenic SNVs for Mendelian disease and abnormal functional calls
+for SGE. All counts are from the pinned split files
+\citep{mendeliancard,sgebenchcard}.}\label{tab:benchmarks}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+& \multicolumn{2}{c}{Development} & \multicolumn{2}{c}{Reserved test} \\
+\cmidrule(lr){2-3}\cmidrule(l){4-5}
+Class & Total & Positive & Total & Positive \\
+\midrule
+\multicolumn{5}{@{}l}{\textit{Mendelian disease}} \\
+Missense & 5,800 & 580 & 4,200 & 420 \\
+Splicing & 3,190 & 319 & 2,310 & 231 \\
+5$'$ UTR & 2,100 & 210 & 950 & 95 \\
+Promoter & 2,050 & 205 & 650 & 65 \\
+ncRNA & 1,150 & 115 & 440 & 44 \\
+3$'$ UTR & 770 & 77 & 330 & 33 \\
+Distal & 580 & 58 & 410 & 41 \\
+Synonymous & 460 & 46 & 190 & 19 \\
+Mature miRNA & 40 & 4 & 10 & 1 \\
+Total & 16,140 & 1,614 & 9,490 & 949 \\
+\addlinespace
+\multicolumn{5}{@{}l}{\textit{SGE}} \\
+Missense & 19,059 & 3,007 & 12,257 & 1,243 \\
+Splicing & 4,794 & 519 & 2,631 & 216 \\
+Total & 23,853 & 3,526 & 14,888 & 1,459 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Zero-shot scoring and linear probes}\label{methods:scoring}
 \begin{itemize}
