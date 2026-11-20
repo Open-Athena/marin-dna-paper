@@ -4,29 +4,6 @@ PLOT := $(FIGURE_PYTHON) src/plot.py
 PROCESS_DATA := $(FIGURE_PYTHON) src/process_data.py
 FIGURE_CODE := src/plot.py src/local_data.py src/metrics.py pyproject.toml uv.lock
 
-# Every PDF referenced by paper.tex, in manuscript order.
-PAPER_FIGURES := \
-	figures/multispecies_training_sequences.pdf \
-	figures/next_base_prediction.pdf \
-	figures/variant_scoring_workflow.pdf \
-	figures/vep_performance_vs_throughput.pdf \
-	figures/upstream_coding_mixture_balance.pdf \
-	figures/missense_readout_scaling.pdf \
-	figures/training_dataset_provenance.pdf \
-	figures/hyperparameter_transfer_workflow.pdf \
-	figures/learning_rate_transfer.pdf \
-	figures/sequence_loss_scaling.pdf \
-	figures/evaluation_benchmarks.pdf \
-	figures/dataset_timetree.pdf \
-	figures/mendelian_zero_shot_comparison.pdf \
-	figures/mendelian_probe_comparison.pdf \
-	figures/region_specialist_performance.pdf \
-	figures/mixture_probe_trajectories.pdf \
-	figures/vep_by_model_size.pdf \
-	figures/vep_by_sequence_likelihood.pdf \
-	figures/optimizer_parameter_transfer.pdf \
-	figures/regional_hyperparameter_transfer.pdf
-
 DATA_FIGURES := upstream_coding_mixture_balance vep_by_model_size vep_by_sequence_likelihood missense_readout_scaling mixture_zero_shot_trajectories mixture_probe_trajectories mendelian_zero_shot_comparison mendelian_probe_comparison region_specialist_performance learning_rate_transfer optimizer_parameter_transfer regional_hyperparameter_transfer sequence_loss_scaling vep_performance_vs_throughput dataset_timetree
 SCHEMATIC_FIGURES := multispecies_training_sequences next_base_prediction
 ARTWORK_FIGURES := variant_scoring_workflow training_dataset_provenance hyperparameter_transfer_workflow evaluation_benchmarks
@@ -106,7 +83,8 @@ $(foreach name,$(ARTWORK_FIGURES),$(eval $(call artwork_targets,$(name))))
 $(foreach name,$(SCHEMATIC_FIGURES) $(ARTWORK_FIGURES),$(eval .PHONY: fetch-figure-$(name)))
 $(foreach name,$(SCHEMATIC_FIGURES) $(ARTWORK_FIGURES),$(eval fetch-figure-$(name): figure-$(name)))
 
-paper.pdf: $(PAPER_FIGURES) paper.tex paper.bib oup-contemporary.cls vancouver-authoryear.bst
+# Figures are built explicitly with `make figures` or `make figure-<name>`.
+paper.pdf: paper.tex paper.bib oup-contemporary.cls vancouver-authoryear.bst
 	pdflatex -interaction=nonstopmode -halt-on-error paper.tex
 	@if grep -q '\\citation{' paper.aux && grep -q '\\bibdata{' paper.aux; then bibtex paper; fi
 	pdflatex -interaction=nonstopmode -halt-on-error paper.tex

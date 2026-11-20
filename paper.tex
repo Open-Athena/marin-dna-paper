@@ -853,36 +853,6 @@ They therefore do not isolate the causal effect of introducing
 particular functional regions at different stages of training.
 
 \subsection{Hyperparameter transfer}\label{methods:transfer}
-\begin{itemize}
-\item Use Figure~\ref{fig:transfer-workflow} to explain calibration and
-transfer.
-Situate the calibration in hyperparameter-transfer literature
-\citep{yang2021transfer,mlodozeniec2025completed}.
-Explain how poor tuning can confound model-size comparisons.
-Specify the approximately 25M-parameter reference sweep, 2.5B-token
-horizon, 16,384-sequence batch (4,194,304 input tokens), Vizier search, tuned parameters, and selection
-objective. Refer to Section~\nameref{methods:scaling} for the monitoring
-statistic.
-TODO: provide search spaces, trial counts, and selection rules.
-\item The Complete(d)-inspired transfer uses the reference batch $B_0=16{,}384$
-sequences and horizon $T_0=2.5\times10^9$ model-input tokens. Writing
-$r=(BT_0)/(B_0T)$, it sets
-$\eta_H=\eta_{H,0}\sqrt{B/B_0}(T_0/T)^{0.3}$,
-$\eta_A=\eta_{A,0}\sqrt{r}$,
-$\epsilon=\epsilon_0/\sqrt{r}$, and
-$\beta_2=\mathrm{clip}(\beta_{2,0}^{B/B_0},0.5,0.9999)$.
-Both learning rates are capped at 0.03. Initialization scale, $\beta_1$,
-gradient clipping and z-loss are unchanged. The exponent 0.3 is inherited
-from Marin's text recipe, rather than fitted to DNA, and differs from the
-0.5 token-horizon exponent in Complete(d).
-\item Document target validation at 255M, 476M, and 1B, changed batch sizes and
-token horizons, sweep grids, and unchanged-reference controls. Specify the
-regional checks and criterion for comparing predicted and observed optima.
-Use Figure~\ref{fig:transfer} for learning-rate validation and Supplementary
-Figures~\ref{fig:optimizer-transfer} and~\ref{fig:regional-transfer} for the
-other optimizer and regional checks. Describe the support for the scaling
-recipe without claiming globally optimal tuning or universal transfer.
-\end{itemize}
 
 \begin{figure}
 \centering
@@ -893,13 +863,110 @@ batch sizes and token horizons using fixed transfer
 rules.}\label{fig:transfer-workflow}
 \end{figure}
 
+We calibrated optimization at a small reference scale and tested fixed
+transfer rules at larger scales (Figure~\ref{fig:transfer-workflow}),
+following the principle of small-model hyperparameter transfer
+\citep{yang2021transfer,mlodozeniec2025completed}. This separates changes
+in model capacity from avoidable differences in optimization quality.
+The experiments used the architecture family described in
+Section~\nameref{methods:architecture}, with 255 bases plus BOS, and a
+mixture of animal CDS, upstream, and downstream sequences with sampling
+weights 0.7319, 0.2062, and 0.0619, respectively. Historical configurations
+and results are recorded in the experiment report and pinned training
+implementation~\citep{marindna109,marin4251,marintransfercode}.
+
+The reference model had approximately 25.2M parameters, hidden width 512,
+and six layers. Its configured training budget was 2.5B model-input tokens
+with batches of 16,384 sequences (4,194,304 input tokens per update),
+rounded down to 596 optimizer updates. We used Adam with Hyperball
+normalization (AdamH) for linear-layer weights and Adam for embeddings,
+normalization parameters, and remaining parameters.
+The two parameter groups have separate peak learning rates, denoted
+$\eta_H$ and $\eta_A$. Both schedules used 10\% warmup, a constant middle
+phase, and linear decay to zero over the final 20\% of training.
+Nesterov momentum was disabled.
+
+We ran independent Vizier studies at five initialization scales, each
+configured for ten rounds of four suggestions. The seven optimizer and
+regularization parameters were searched jointly within each study
+(Supplementary Table~\ref{tab:transfer-search}). This specified up to 200
+trials; the archived results contain 195 finished runs, of which 183 had
+finite monitoring loss. We selected the run with the smallest final
+reported \texttt{eval/loss} across the finite results, obtaining a loss of
+1.228545 and initialization scale 0.02. The selected settings are given in
+Supplementary Table~\ref{tab:transfer-search}. The selection objective was
+sequence loss, not downstream variant-prediction performance.
+
+Here, validation loss denotes the human-sequence monitoring statistic
+in Section~\nameref{methods:scaling}. It is cross-entropy in nats, computed
+as the sum of weighted token losses divided by the sum of token weights
+across the monitoring datasets. It is not the unweighted mean of the
+three regional losses. Lowercase positions receive weight 0.01;
+lowercase denotes repeats in training sequences but non-conserved
+positions in the monitoring sequences. These monitoring loci were not
+withheld from pretraining, so the statistic measures optimization on a
+fixed monitoring set rather than generalization to independent loci.
+
+We applied the Complete(d)-inspired rules implemented in Marin relative
+to reference batch $B_0=16{,}384$ sequences and horizon
+$T_0=2.5\times10^9$ model-input tokens. For target batch $B$ and horizon
+$T$, let $r=BT_0/(B_0T)$. Then
+\[\begin{array}{rl}
+\eta_H &= \min\!\left(0.03,\eta_{H,0}\sqrt{B/B_0}(T_0/T)^{0.3}\right),\\
+\eta_A &= \min\!\left(0.03,\eta_{A,0}\sqrt{r}\right),\\
+\epsilon &= \epsilon_0/\sqrt{r},\\
+\beta_2 &= \mathrm{clip}\!\left(\beta_{2,0}^{B/B_0},0.5,0.9999\right).
+\end{array}\]
+Initialization scale, $\beta_1$, gradient-clipping threshold, and z-loss
+weight were retained. The AdamH horizon exponent 0.3 was inherited from
+Marin's text recipe rather than fitted to DNA; it differs from the 0.5
+exponent in the Complete(d) prescription. These rules depend on batch
+size and horizon, with no additional explicit model-size multiplier.
+
+We tested transfer at approximately 255M, 476M, and 1.12B parameters,
+using batches of 4,096 sequences and a configured 10B-input-token budget
+(9,536 updates). All three sizes therefore shared the predicted settings
+$\eta_H=0.00513490$, $\eta_A=0.00747379$, $\beta_2=0.975819$, and
+$\epsilon=4\times10^{-15}$. At each size, one run using all transferred
+settings served as the common anchor for three one-parameter-at-a-time
+sweeps. The learning-rate sweep changed only $\eta_H$, leaving $\eta_A$
+and the other parameters fixed. The $\beta_2$ and $\epsilon$ sweeps likewise
+changed only the named parameter. The grids are specified in Supplementary
+Table~\ref{tab:transfer-search}. At 1.12B only, an additional control used
+all reference-optimal settings without transfer, under the same target
+batch and training horizon.
+
+The plotted export combines versions v0.14 and v0.15: v0.14 supplies the
+1.12B learning-rate and $\beta_2$ sweeps and both controls; v0.15 supplies
+its $\epsilon$ sweep and all runs at the two smaller sizes. There are 25
+runs per smaller size and 26 at 1.12B, for 76 runs in total. These are
+individual training runs, not replicated estimates at each setting.
+The export retains finished runs and runs marked crashed after more than
+99\% of configured steps, using their latest reported evaluation loss;
+70 runs were marked finished and six crashed, all with more than 99.9\%
+recorded progress.
+
+Figure~\ref{fig:transfer} shows overall monitoring loss against $\eta_H$;
+Supplementary Figure~\ref{fig:optimizer-transfer} shows the corresponding
+$\beta_2$ and $\epsilon$ sweeps. Supplementary
+Figure~\ref{fig:regional-transfer} uses the CDS, upstream, and downstream
+monitoring losses from these same runs, not separately trained or tuned
+regional models. Squares identify the transferred anchors, circles the
+sweep runs, and the diamond in Figure~\ref{fig:transfer} the unchanged-reference
+control. Connecting lines join observed values, without fitting a response
+curve or estimating uncertainty. The transferred learning rate attained
+the lowest observed overall loss at each size, whereas some tested
+$\beta_2$ and $\epsilon$ settings gave lower loss than the transferred
+anchor. The experiments assess local sensitivity and the usefulness of
+the transferred recipe; they do not establish joint or global optima.
+
 \begin{figure}
 \centering
 \includegraphics[width=\linewidth]{figures/learning_rate_transfer.pdf}
-\caption{Learning-rate transfer at 255M, 476M, and 1B parameters. The control
-uses the reference-sweep optimum unchanged; sweep points test target-scale
-settings. The transferred prediction gives the lowest observed loss at each
-scale.}\label{fig:transfer}
+\caption{Learning-rate transfer at 255M, 476M, and 1B parameters. Circles vary the AdamH learning rate with other settings fixed; squares
+mark the transferred settings. The diamond is the 1B control using all
+reference-optimal settings unchanged. The transferred learning rate gives
+the lowest observed monitoring loss among tested values at each scale.}\label{fig:transfer}
 \end{figure}
 
 \subsection{Scaling experiments and loss monitoring}\label{methods:scaling}
@@ -1407,6 +1474,53 @@ $\sim$166B comparison & Upstream 25\%; others 18.75\% \\
 \end{table}
 
 
+\begin{table*}
+\centering\small
+\caption{Reference calibration search and target-scale validation grids.
+Reference parameters were searched jointly within each initialization
+study; target parameters were varied one at a time around the transferred
+anchor. Values are rounded for display.}
+\label{tab:transfer-search}
+\begin{tabular}{lll}
+\toprule
+Reference parameter & Search range or values & Selected value \\
+\midrule
+Initialization scale & $\{0.04,0.02,0.01,0.005,0.0025\}$ & 0.02 \\
+AdamH learning rate $\eta_H$ & $[5\times10^{-5},0.03]$ & 0.0155661 \\
+Adam learning rate $\eta_A$ & $[5\times10^{-5},0.03]$ & 0.0298951 \\
+$\beta_1$ & $[0.5,1.0]$ & 0.667560 \\
+$\beta_2$ & $[0.5,1.0]$ & 0.906727 \\
+$\epsilon$ & $[10^{-15},10^{-3}]$ & $10^{-15}$ \\
+Gradient-clipping threshold & $[0.1,1.0]$ & 0.995188 \\
+Z-loss weight & $[10^{-7},0.1]$ & $4.31288\times10^{-6}$ \\
+\bottomrule
+\end{tabular}
+\par\medskip
+\begin{tabularx}{\linewidth}{@{}lL@{}}
+\toprule
+Target parameter & Grid, including the shared transferred anchor \\
+\midrule
+$\eta_H$ & Seven logarithmically spaced values from
+$8.78906\times10^{-4}$ to $0.03$, with central value $0.00513490$. \\
+$\beta_2$ & Seven linearly spaced values from $0.951737$ to $0.9999$,
+with central value $0.975819$, plus lower values
+$0.7$, $0.783912$, and $0.867825$. \\
+$\epsilon$ & Anchor $4\times10^{-15}$; six logarithmically spaced
+values above it through $10^{-3}$, and three below it with the same
+multiplicative spacing, reaching $8\times10^{-21}$. \\
+\bottomrule
+\end{tabularx}
+\par\smallskip
+\parbox{\linewidth}{\footnotesize
+The reference studies used Vizier's DEFAULT algorithm with continuous
+floating-point ranges and no explicit logarithmic parameter scaling.
+Each study was configured for ten rounds of four suggestions.
+The common anchor is counted once per model size, giving six additional
+learning-rate runs, nine $\beta_2$ runs, and nine $\epsilon$ runs per size.
+The separate unchanged-reference control was evaluated only at 1.12B.
+Exact run settings and losses are provided in the accompanying plotting data.}
+\end{table*}
+
 \subsection{Training configuration details}
 \label{supp:training-details}
 
@@ -1548,15 +1662,18 @@ bars denote standard errors.}\label{fig:loss-vep}
 \centering
 \includegraphics[width=\linewidth]{figures/optimizer_parameter_transfer.pdf}
 \caption{Adam $\beta_2$ and $\epsilon$ transfer. Target-scale loss is compared
-across optimizer settings at the same model sizes as
-Figure~\ref{fig:transfer}.}\label{fig:optimizer-transfer}
+across one-parameter-at-a-time sweeps at the model sizes in
+Figure~\ref{fig:transfer}. Squares mark transferred settings; circles
+mark tested alternatives. The unchanged-reference control is omitted.}\label{fig:optimizer-transfer}
 \end{figure}
 
 \begin{figure}
 \centering
 \includegraphics[width=\linewidth]{figures/regional_hyperparameter_transfer.pdf}
 \caption{Region-specific hyperparameter transfer. Validation loss versus
-learning rate, $\beta_2$, and $\epsilon$, evaluated separately for CDS,
-upstream, and downstream regions.}\label{fig:regional-transfer}
+AdamH learning rate, $\beta_2$, and $\epsilon$, evaluated separately for
+CDS, upstream, and downstream monitoring sequences from the same training
+runs as Figures~\ref{fig:transfer} and~\ref{fig:optimizer-transfer}.
+Squares mark transferred settings; circles mark tested alternatives.}\label{fig:regional-transfer}
 \end{figure}
 \end{document}

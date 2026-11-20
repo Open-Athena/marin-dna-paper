@@ -15,7 +15,11 @@
     "lib/levanter/src/levanter/layers/rotary.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/lib/levanter/src/levanter/layers/rotary.py",
     "lib/levanter/src/levanter/optim/adamh.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/lib/levanter/src/levanter/optim/adamh.py",
     "lib/levanter/src/levanter/data/text/_batch_tokenizer.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/lib/levanter/src/levanter/data/text/_batch_tokenizer.py",
-    "lib/haliax/src/haliax/nn/loss.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/lib/haliax/src/haliax/nn/loss.py"
+    "lib/haliax/src/haliax/nn/loss.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/lib/haliax/src/haliax/nn/loss.py",
+    "experiments/references/reference_hyperparameter_sweep.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/experiments/references/reference_hyperparameter_sweep.py",
+    "experiments/dna/exp109_bolinas_scaling_analysis/reference_hparams.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/experiments/dna/exp109_bolinas_scaling_analysis/reference_hparams.py",
+    "experiments/dna/exp109_bolinas_scaling_analysis/transfer_validation.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/experiments/dna/exp109_bolinas_scaling_analysis/transfer_validation.py",
+    "lib/levanter/src/levanter/eval.py": "https://github.com/marin-community/marin/blob/a638849fa837f924aaac66ff3d0c1f581dfdd49e/lib/levanter/src/levanter/eval.py"
   },
   "mixture_source": "https://github.com/marin-community/marin/blob/a41a83fdddfdef85a75e39b56c32949518e3f578/experiments/dna/exp135_bolinas_mix_sweep.py",
   "evidence_notes": [
@@ -135,5 +139,32 @@
     "m5.1": "Staged",
     "m1.3": "Uniform",
     "m3.3": "Upstream-weighted"
+  },
+  "hyperparameter_transfer_evidence": {
+    "experiment_context": "https://github.com/Open-Athena/marin-dna/issues/109",
+    "reference_report": "https://github.com/marin-community/marin/issues/4251#issuecomment-4454526014",
+    "transfer_report": "https://github.com/marin-community/marin/issues/4251#issuecomment-4454668376",
+    "reference_archive": "https://github.com/user-attachments/files/27776506/reference_sweep_results.zip",
+    "reference_archive_member": "reference_sweep_results/reference_sweep_data.csv",
+    "reference_csv_sha256": "47a434b0e7a7820f21c5c228e6a9735c929cd0d9909a96f3610b04718f416d81",
+    "configured_trials": 200,
+    "finished_trials": 195,
+    "finite_loss_trials": 183,
+    "selected_run": "dna-bolinas-reference-v0.6-IR0.02-E1-L8-T32",
+    "selected_eval_loss": 1.2285451889038086,
+    "transfer_export": "plot_data/transfer_validation_results.csv",
+    "transfer_runs": 76,
+    "transfer_finished": 70,
+    "transfer_crashed_above_99_percent_progress": 6,
+    "version_composition": "v0.14 supplies 1.12B LR/beta2 sweeps and both controls; v0.15 supplies 1.12B epsilon and all smaller-scale runs.",
+    "notes": [
+      "The archived CSV verifies 195 finished and 183 finite-loss trials; the pinned training-code comment incorrectly describes 183 as finished.",
+      "Configured search capacity is not completed trial count; the archive does not establish the disposition of the five remaining configured slots.",
+      "Vizier reads the last tracker summary and marks non-finite objectives infeasible; the seven search ranges have no explicit logarithmic scale argument.",
+      "Monitoring eval/loss is the weighted token-level micro-average, not the arithmetic average of the regional losses.",
+      "Reference loss selection and transfer validation do not establish generalization to withheld loci.",
+      "The transferred AdamH learning rate minimizes observed loss at all three sizes. Beta2 and epsilon alternatives sometimes outperform their anchors; no replicated-run uncertainty is available.",
+      "The crashed-run inclusion rule is based on recorded progress, not independent proof of the failure cause."
+    ]
   }
 }

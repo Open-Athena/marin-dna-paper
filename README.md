@@ -8,8 +8,9 @@ Sources: [Marin DNA blog](https://openathena.ai/blog/marin-dna/),
 
 ## Build the paper and figures
 
-Install the plotting environment with `uv sync --locked`. The paper also needs
-GNU Make 4.3 or later, `pdflatex`, and BibTeX.
+Building the paper from existing figures needs GNU Make 4.3 or later,
+`pdflatex`, and BibTeX. To rebuild figures, install the plotting environment
+with `uv sync --locked`.
 
 Every data-driven figure renders from CSVs checked into `plot_data/`. No AWS
 credentials, raw Parquets, network access, or untracked caches are needed to
@@ -17,7 +18,8 @@ render. Schematics use local Python code or source SVG artwork rather than
 measurement tables.
 
 ```sh
-make                                      # Figures and paper.pdf
+make                                      # paper.pdf using existing figures
+make -B paper.pdf                         # Rebuild paper after figure-only changes
 make figures                              # All figures from local inputs
 make figures-all                          # Force regeneration of every figure
 make figure-vep_by_model_size              # One figure
@@ -32,7 +34,9 @@ suffix, such as `upstream_coding_mixture_balance_endpoints.csv` and
 mixture trajectory figure remains available even though its content is now in
 the combined upstream/CDS figure.
 
-The Makefile tracks CSV dependencies, so editing an export rebuilds its figure.
+Paper builds do not rebuild figures or invoke `uv`. Build figures explicitly
+with the targets above. Figure targets track CSV dependencies, so `make figures`
+rebuilds figures whose exports have changed.
 Plots write PDF and SVG; `sequence_loss_scaling` also writes its fitted-parameter
 report. `dataset_timetree` additionally writes PNG. Source SVG diagrams remain
 editable and are converted to PDF. The plotting code's original license is
