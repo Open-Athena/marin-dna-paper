@@ -886,10 +886,13 @@ $\eta_H$ and $\eta_A$. Both schedules used 10\% warmup, a constant middle
 phase, and linear decay to zero over the final 20\% of training.
 Nesterov momentum was disabled.
 
-We ran independent Vizier studies at five initialization scales, each
-configured for ten rounds of four suggestions. The seven optimizer and
-regularization parameters were searched jointly within each study
-(Supplementary Table~\ref{tab:transfer-search}). This specified up to 200
+We ran five independent hyperparameter searches using Vizier~\citep{vizierrepo},
+one at each initialization scale, each configured for ten rounds of four
+suggestions. The seven optimizer and regularization parameters were
+varied jointly within each search
+(Supplementary Table~\ref{tab:transfer-search}), using Vizier's DEFAULT
+algorithm with continuous floating-point ranges and no explicit
+logarithmic parameter scaling. This specified up to 200
 trials; the archived results contain 195 finished runs, of which 183 had
 finite monitoring loss. We selected the run with the smallest final
 reported \texttt{eval/loss} across the finite results, obtaining a loss of
@@ -898,8 +901,8 @@ Supplementary Table~\ref{tab:transfer-search}. The selection objective was
 sequence loss, not downstream variant-prediction performance.
 
 Here, validation loss denotes the human-sequence monitoring statistic
-in Section~\nameref{methods:scaling}. It is cross-entropy in nats, computed
-as the sum of weighted token losses divided by the sum of token weights
+in Section~\nameref{methods:scaling}. It is cross-entropy computed using
+natural logarithms, averaged over tokens with the specified loss weights
 across the monitoring datasets. It is not the unweighted mean of the
 three regional losses. Lowercase positions receive weight 0.01;
 lowercase denotes repeats in training sequences but non-conserved
@@ -907,7 +910,7 @@ positions in the monitoring sequences. These monitoring loci were not
 withheld from pretraining, so the statistic measures optimization on a
 fixed monitoring set rather than generalization to independent loci.
 
-We applied the Complete(d)-inspired rules implemented in Marin relative
+We applied the Complete(d)-inspired rules~\citep{mlodozeniec2025completed} implemented in Marin relative
 to reference batch $B_0=16{,}384$ sequences and horizon
 $T_0=2.5\times10^9$ model-input tokens. For target batch $B$ and horizon
 $T$, let $r=BT_0/(B_0T)$. Then
@@ -934,7 +937,10 @@ and the other parameters fixed. The $\beta_2$ and $\epsilon$ sweeps likewise
 changed only the named parameter. The grids are specified in Supplementary
 Table~\ref{tab:transfer-search}. At 1.12B only, an additional control used
 all reference-optimal settings without transfer, under the same target
-batch and training horizon.
+batch and training horizon. Counting the common anchor once per model
+size, each grid adds six learning-rate runs, nine $\beta_2$ runs, and nine
+$\epsilon$ runs. Exact run settings and losses are provided in the
+accompanying plotting data.
 
 The plotted export combines versions v0.14 and v0.15: v0.14 supplies the
 1.12B learning-rate and $\beta_2$ sweeps and both controls; v0.15 supplies
@@ -1365,8 +1371,7 @@ the Registry of candidate cis-regulatory elements.
 \todo
 \bibliography{paper}
 \clearpage
-\onecolumn
-\section*{Supplementary material}
+\twocolumn[\section*{Supplementary material}]
 % Source audit: data/dataset_provenance/sources.json records the source
 % commits of the exported manifests and the remaining provenance gaps.
 % In particular, do not treat inspected HF card revisions as training-job
@@ -1378,7 +1383,7 @@ the Registry of candidate cis-regulatory elements.
 
 
 
-\begin{table}
+\begin{table*}[t]
 \centering\small
 \caption{Model architectures. Widths denote hidden and feed-forward
 dimensions; Q/KV denotes query and key/value attention head counts.
@@ -1404,7 +1409,7 @@ Reference ($\sim$25M) & 6 & 512 & 2048 & 4/4 & Separate \\
 Qwen3 1.7B preset & 28 & 2048 & 6144 & 16/8 & Tied \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
 \subsection{Architecture configuration details}
 \label{supp:architecture-details}
@@ -1436,7 +1441,7 @@ Further experiment-specific configurations are given in
 Supplementary Table~\ref{tab:models}.
 
 
-\begin{table}
+\begin{table*}[t]
 \centering\small
 \caption{Training configurations. Batch sizes are effective sequences
 per optimizer update. Training exposure is measured in model-input
@@ -1471,21 +1476,21 @@ Upstream-weighted & 256 & 8,192 &
 $\sim$166B comparison & Upstream 25\%; others 18.75\% \\
 \bottomrule
 \end{tabularx}
-\end{table}
+\end{table*}
 
 
-\begin{table*}
-\centering\small
+\begin{table}[tp]
+\centering\small\setlength{\tabcolsep}{3pt}
 \caption{Reference calibration search and target-scale validation grids.
 Reference parameters were searched jointly within each initialization
-study; target parameters were varied one at a time around the transferred
+search; target parameters were varied one at a time around the transferred
 anchor. Values are rounded for display.}
 \label{tab:transfer-search}
-\begin{tabular}{lll}
+\begin{tabularx}{\linewidth}{@{}LLr@{}}
 \toprule
-Reference parameter & Search range or values & Selected value \\
+Parameter & Search range & Selected \\
 \midrule
-Initialization scale & $\{0.04,0.02,0.01,0.005,0.0025\}$ & 0.02 \\
+Initialization scale & 0.04, 0.02, 0.01, 0.005, 0.0025 & 0.02 \\
 AdamH learning rate $\eta_H$ & $[5\times10^{-5},0.03]$ & 0.0155661 \\
 Adam learning rate $\eta_A$ & $[5\times10^{-5},0.03]$ & 0.0298951 \\
 $\beta_1$ & $[0.5,1.0]$ & 0.667560 \\
@@ -1494,11 +1499,11 @@ $\epsilon$ & $[10^{-15},10^{-3}]$ & $10^{-15}$ \\
 Gradient-clipping threshold & $[0.1,1.0]$ & 0.995188 \\
 Z-loss weight & $[10^{-7},0.1]$ & $4.31288\times10^{-6}$ \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \par\medskip
 \begin{tabularx}{\linewidth}{@{}lL@{}}
 \toprule
-Target parameter & Grid, including the shared transferred anchor \\
+Parameter & Target grid including transferred anchor \\
 \midrule
 $\eta_H$ & Seven logarithmically spaced values from
 $8.78906\times10^{-4}$ to $0.03$, with central value $0.00513490$. \\
@@ -1510,16 +1515,7 @@ values above it through $10^{-3}$, and three below it with the same
 multiplicative spacing, reaching $8\times10^{-21}$. \\
 \bottomrule
 \end{tabularx}
-\par\smallskip
-\parbox{\linewidth}{\footnotesize
-The reference studies used Vizier's DEFAULT algorithm with continuous
-floating-point ranges and no explicit logarithmic parameter scaling.
-Each study was configured for ten rounds of four suggestions.
-The common anchor is counted once per model size, giving six additional
-learning-rate runs, nine $\beta_2$ runs, and nine $\epsilon$ runs per size.
-The separate unchanged-reference control was evaluated only at 1.12B.
-Exact run settings and losses are provided in the accompanying plotting data.}
-\end{table*}
+\end{table}
 
 \subsection{Training configuration details}
 \label{supp:training-details}
@@ -1587,8 +1583,6 @@ observed, and inherited training exposure are documented in the
 \href{https://github.com/Open-Athena/marin-dna-paper/blob/main/data/training_provenance/sources.json}{training-provenance record}.
 
 
-\clearpage
-\twocolumn
 % Supplementary numbering uses distinct PDF anchors.
 \setcounter{figure}{0}
 \renewcommand{\thefigure}{S\arabic{figure}}
