@@ -2646,15 +2646,22 @@ def plot_mixture_figure(endpoint: pl.DataFrame, trajectories: pl.DataFrame) -> F
         ("two_class_mean", "Mean of both")
     ], strict=True):
         for x, arm in enumerate(order):
-            value = endpoint.filter((pl.col("arm") == arm) & (pl.col("subset") == subset))["value"].item()
-            ax.plot(x, value * 100, marker="o", markersize=4, color=colors[arm], linestyle="none")
+            row = endpoint.filter(
+                (pl.col("arm") == arm) & (pl.col("subset") == subset)
+            )
+            value, se = row["value"].item(), row["se"].item()
+            ax.bar(x, value * 100, width=.75, color=colors[arm],
+                   edgecolor=TEXT_COLOR, linewidth=.5,
+                   yerr=se * 100, error_kw={"ecolor": TEXT_COLOR,
+                                          "elinewidth": .8, "capsize": 0})
         ax.set_title(title, pad=4)
         ax.set_xlim(-.5, 3.5)
         ax.set_xticks([])
-        ax.yaxis.set_major_locator(MaxNLocator(3))
+        ax.set_ylim(0, 55)
+        ax.set_yticks([0, 25, 50])
     axes_a[0].set_ylabel("AUPRC (%)")
     fig.text(.02, .975, "A  Balanced upstream/CDS sampling", fontsize=8, weight="bold")
-    fig.legend([Line2D([], [], color=colors[a], marker="o", linestyle="none", markersize=4) for a in order],
+    fig.legend([Patch(facecolor=colors[a], edgecolor=TEXT_COLOR, linewidth=.5) for a in order],
                labels, loc="upper center", bbox_to_anchor=(.53, .962), ncol=2,
                frameon=False, columnspacing=.7, handletextpad=.3, handlelength=.8)
     fig.text(.02, .695, "B  Five-region training histories", fontsize=8, weight="bold")

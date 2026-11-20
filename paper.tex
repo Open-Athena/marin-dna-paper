@@ -310,8 +310,9 @@ regions improved prediction of noncoding variants.
 with 512-base inputs without BOS. Four training conditions are compared at
 step 22,000 (approximately 23.1B input tokens): upstream-only (100/0),
 CDS-only (0/100), proportional (approximately 10/90), and balanced (50/50).
-The three plots show zero-shot promoter and missense AUPRC and their
-unweighted two-class mean.
+The three bar plots show zero-shot promoter and missense AUPRC and their
+unweighted two-class mean. Error bars denote $\pm$ one standard error
+(Methods).
 \textbf{B}, Five-region training histories using the later Marin DNA 1B
 architecture with 255 bases plus BOS. Zero-shot pooled Mendelian AUPRC is
 shown for all eight variant classes and their eight-class macro-average
@@ -1056,6 +1057,41 @@ no evaluation-label leakage in probe selection.
 
 \subsection{Statistical analysis and comparator
 evaluation}\label{methods:statistics}
+
+For Figure~\ref{fig:mixtures}A, we used pooled AUPRC within each
+variant class from the four step-22,000 checkpoints described in
+Section~\nameref{methods:mixtures}. Standard errors were taken from the
+stored matched-group bootstrap estimates. The bootstrap resamples
+matched groups with replacement within each variant class, keeping each
+pathogenic variant together with its nine matched controls, and
+recomputes AUPRC for each resample. The evaluation pipeline uses 1,000
+resamples with random seed 0; the standard error is the sample standard
+deviation of the bootstrap AUPRC values. The two-class summary is the
+unweighted mean of promoter and missense AUPRC. Because these classes
+contain disjoint matched groups, its standard error is
+$\sqrt{\mathrm{SE}_{\mathrm{promoter}}^2 +
+\mathrm{SE}_{\mathrm{missense}}^2}/2$.
+Bars show point estimates with $\pm$ one standard error; these errors
+describe evaluation-sample uncertainty, not variation across training runs.
+
+For Supplementary Figure~\ref{fig:specialists}, we compared the early
+1.7B upstream specialist at step 22,000 with Evo 2 (40B) and GPN-Star (M)
+on promoter and 5$'$ UTR variants, and the early 1.7B CDS specialist at
+step 34,000 with the same comparators on missense, splicing, and synonymous
+variants. The specialist training exposures were approximately 23.1B and
+35.7B input tokens, respectively (Section~\nameref{methods:mixtures}).
+We extracted per-class pooled AUPRC and stored standard errors from the
+Mendelian benchmark metric tables used by the evaluation pipeline.
+The Marin DNA and Evo 2 tables use the benchmark's training split.
+Marin DNA and Evo 2 used the negative log-likelihood ratio averaged across
+forward and reverse-complement strands; GPN-Star used the negative
+calibrated log-likelihood ratio. Each panel contains one estimate per
+model for its variant class. AUPRC and standard errors were converted to
+percentages, and bars show $\pm$ one stored standard error. Each panel
+uses its own vertical scale with a lower limit of 10\%, the positive-class
+prevalence. The source metric locations and model identifiers are retained
+in the accompanying plotting-data table.
+
 \begin{itemize}
 \item For the contextual comparison with Carbon, record that its model card
 specifies a 3B-parameter stock Llama decoder, 6-mer DNA tokenization,
@@ -1065,8 +1101,9 @@ model, not a training protocol used for Marin DNA. The card's Evo 2 comparison
 uses the 7B checkpoint, so do not infer a direct comparison with Evo 2 40B.
 \item Define AUPRC, pooled versus chromosome-weighted aggregation, and
 unweighted macro-averages across variant classes. Map each figure panel to
-its aggregation scheme. TODO: specify standard-error calculation, resampling
-units if applicable, and treatment of small subsets.
+its aggregation scheme. For analyses beyond Figure~\ref{fig:mixtures}A
+and Supplementary Figure~\ref{fig:specialists}, TODO: specify standard-error
+calculation, resampling units if applicable, and treatment of small subsets.
 \item Describe loss--VEP correlations and fitted trend lines, including
 matched-region definitions and the endpoints entering each analysis.
 TODO: supply the exact statistical procedures used in the figure scripts.
