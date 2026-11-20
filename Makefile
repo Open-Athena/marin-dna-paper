@@ -22,7 +22,7 @@ CSV_region_specialist_performance := plot_data/region_specialist_performance.csv
 CSV_hyperparameter_transfer := plot_data/hyperparameter_transfer.csv
 CSV_regional_hyperparameter_transfer := plot_data/regional_hyperparameter_transfer.csv
 CSV_sequence_loss_scaling := plot_data/sequence_loss_scaling_results.csv plot_data/sequence_loss_scaling_history.csv
-CSV_vep_performance_vs_throughput := plot_data/vep_performance_vs_throughput_leaderboard.csv plot_data/vep_performance_vs_throughput_inference_costs.csv
+CSV_vep_performance_vs_throughput := plot_data/mendelian_zero_shot_comparison.csv plot_data/mendelian_probe_comparison.csv plot_data/gh200_scoring_rates.csv
 CSV_dataset_timetree := plot_data/dataset_timetree.csv
 
 .PHONY: all figures figures-all process-data fetch-data fetch-sweeps figure-clean clean mrproper

@@ -980,8 +980,9 @@ RECIPES = {
         "sequence_loss_scaling_history": local_data.load_scaling_history(),
     },
     "vep_performance_vs_throughput": lambda: {
-        "vep_performance_vs_throughput_leaderboard": local_data.load_leaderboard(),
-        "vep_performance_vs_throughput_inference_costs": local_data.load_inference_costs(),
+        "mendelian_zero_shot_comparison": prepare_zero_shot_comparison(),
+        "mendelian_probe_comparison": prepare_probe_comparison(),
+        "gh200_scoring_rates": local_data.load_plot_csv("gh200_scoring_rates"),
     },
     "dataset_timetree": lambda: {"dataset_timetree": prepare_dataset_timetree()},
 }
