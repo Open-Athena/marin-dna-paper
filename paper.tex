@@ -1322,172 +1322,235 @@ positive class from the fit that held out the variant's chromosome.
 Evaluation aggregation and uncertainty estimation are described
 in Section~\nameref{methods:statistics}.
 
+\subsection{Performance metrics and uncertainty}
+\label{methods:statistics}
 
-\subsection{Performance metrics and uncertainty}\label{methods:statistics}
+We measured variant-ranking performance using average precision, the
+stepwise area under the precision--recall curve (AUPRC). At each distinct
+score threshold, precision is the proportion of predicted positives
+that are truly positive, and recall is the proportion of all positives
+recovered. Average precision sums precision weighted by the increase
+in recall at successive thresholds, treating tied scores together.
+Positive labels denote pathogenic Mendelian variants or abnormal SGE
+effects. Pooled AUPRC was calculated by ranking all evaluated variants
+within a class together. For chromosome-weighted AUPRC, we calculated
+AUPRC separately on each chromosome containing both labels, then
+averaged these values with weights proportional to the number of
+variants with finite scores on each chromosome. This measures
+within-chromosome discrimination without requiring scores from
+different chromosome-held-out probe fits to have identical calibration.
 
-We measured ranking performance by the area under the precision--recall
-curve (AUPRC), calculated as average precision. At successive distinct
-score thresholds in descending order, we summed precision times the
-increase in recall. Precision is the fraction of variants at or above the
-threshold that are positive, and recall is the fraction of all positives
-recovered at that threshold. We included tied scores together. The positive
-label denotes a pathogenic Mendelian variant or an abnormal SGE effect. Pooled AUPRC uses one ranking of
-all evaluated variants within a class. For chromosome-weighted AUPRC,
-we ranked variants separately on each chromosome and averaged the resulting
-AUPRCs with weights proportional to the number of finite scores on each
-contributing chromosome. We excluded chromosomes lacking either label
-among those scores. This preserves within-chromosome discrimination when
-probe scores from different holdout folds have different calibrations.
+We summarized Mendelian performance using an unweighted macro-average
+across the eight variant classes with at least 30 development positives
+(16,100 variants in total; Table~\ref{tab:benchmarks}).
+Figure~\ref{fig:throughput}A uses pooled AUPRC within each class for
+zero-shot scoring and chromosome-weighted AUPRC for linear probes
+(Supplementary Figures~\ref{fig:benchmarks}
+and~\ref{fig:benchmark-probes}).
+These aggregates can be compared across models within each scoring
+method, but differences between scoring methods also reflect their
+different aggregation procedures.
+The early mixture and specialist comparisons used pooled class AUPRC
+(Figure~\ref{fig:mixtures}A and Supplementary
+Figure~\ref{fig:specialists}).
+Figure~\ref{fig:mixtures}A reports the unweighted mean of promoter
+and missense AUPRC, whereas Figure~\ref{fig:mixtures}B reports the
+eight-class macro-average at each checkpoint.
+The corresponding linear-probe trajectories use chromosome-weighted
+AUPRC within each class (Supplementary
+Figure~\ref{fig:mixture-probe}).
 
-The Mendelian macro-average gives equal weight to each of the eight
-classes with at least 30 pathogenic variants (16,100 variants in total,
-Table~\ref{tab:benchmarks}). Figure~\ref{fig:throughput}A uses pooled
-class AUPRCs for zero-shot scoring and chromosome-weighted class AUPRCs
-for probes (Supplementary Figures~\ref{fig:benchmarks}
-and~\ref{fig:benchmark-probes}). These aggregates support comparisons
-across models within each readout. Their difference combines the effect
-of changing the readout with that of changing how variants are aggregated.
-The zero-shot mixture and specialist comparisons also use pooled class
-AUPRCs (Figure~\ref{fig:mixtures} and Supplementary Figure~\ref{fig:specialists}).
-The mixture summaries average promoter and missense in
-Figure~\ref{fig:mixtures}A and all eight classes at each checkpoint in
-Figure~\ref{fig:mixtures}B. The corresponding probe trajectories use chromosome weighting
-within each class (Supplementary Figure~\ref{fig:mixture-probe}).
+All comparisons used the development partition.
+Linear-probe predictions were obtained from chromosome-held-out
+fits within this partition (Section~\nameref{methods:probes}).
+Figure~\ref{fig:throughput} uses the available class-level results
+for each model and scoring method.
+For the Marin DNA scaling comparisons, we instead restricted the
+evaluation to variants with finite out-of-fold probe predictions
+and finite strand-averaged likelihood ratios; both individual
+strand scores were finite for all retained variants.
+We verified that chromosome, position, and reference and alternate
+alleles matched across all eight terminal models within each class.
+Both scoring methods were then evaluated on the same variants using
+chromosome-weighted AUPRC, including for SGE.
+The missense comparisons used 5,800 Mendelian and 19,059 SGE variants
+(Figure~\ref{fig:missense-scaling}B,C).
+Supplementary Figures~\ref{fig:downstream} and~\ref{fig:loss-vep}
+use the same selection and aggregation procedures for their
+respective variant classes.
 
-All comparisons use the development partition. For probes we evaluated
-out-of-fold predictions on held-out development chromosomes
-(Section~\nameref{methods:probes}). Figure~\ref{fig:throughput} uses
-the available class results for each model and readout independently.
-For the Marin DNA scaling series we instead selected variants with finite
-out-of-fold probe predictions and required a finite strand-averaged LLR
-on every retained variant. Both strand scores were finite throughout.
-We verified that chromosome, position, reference and alternate allele
-were identical across the eight terminal models within each class.
-Both readouts then used chromosome-weighted AUPRC, including for SGE.
-The missense panels used 5,800 Mendelian and 19,059 SGE variants
-(Figure~\ref{fig:missense-scaling}B,C). Supplementary
-Figures~\ref{fig:downstream} and~\ref{fig:loss-vep} use the same
-selection and aggregation for every plotted class.
-
-Error bars show one standard error (SE) on either side of each AUPRC estimate.
-For pooled Mendelian AUPRC we sampled matched groups with replacement
-within each class, keeping each pathogenic variant together with its nine
-controls and recalculating average precision. Because groups are disjoint
-across classes, the SE of an unweighted mean over $K$ classes was
-$\sqrt{\sum_{k=1}^{K}\mathrm{SE}_k^2}/K$. This combines the separate
-class errors for both the two-class mean and the eight-class zero-shot
-macro-average. For chromosome-weighted AUPRC we resampled the contributing
-chromosomes with replacement, retaining their variant-count weights at
-each draw. A class SE required at least two contributing chromosomes.
-For the probe macro-average we resampled the union of contributing
-chromosomes once per draw, applied the same multiplicities to all eight
-classes and averaged their recalculated AUPRCs. We discarded a draw if
-any class lacked a contributing chromosome. Each bootstrap used 1,000 draws
-with seed~0. The SE was the sample standard deviation of defined replicates
+We estimated uncertainty by bootstrap resampling, reporting error
+bars of $\pm$ one standard error (SE).
+For pooled Mendelian AUPRC, we resampled matched groups within each
+class, keeping each pathogenic variant together with its nine
+controls, and recalculated average precision.
+For an unweighted mean of $K$ classes, whose matched groups were
+disjoint, we combined the class-level standard errors as
+$\sqrt{\sum_{k=1}^{K}\mathrm{SE}_k^2}/K$.
+This procedure was used for the two-class mean and the eight-class
+zero-shot macro-average.
+For chromosome-weighted AUPRC, we resampled contributing chromosomes
+with replacement and recalculated the weighted average using the
+resampled chromosome multiplicities.
+At least two contributing chromosomes were required to estimate
+a class-level SE.
+For the linear-probe macro-average, each bootstrap draw sampled
+the union of contributing chromosomes and applied the same
+multiplicities across all eight classes before recalculating their
+mean AUPRC. Draws in which any class lacked a contributing
+chromosome were discarded.
+Each bootstrap used 1,000 draws, and the SE was calculated as the
+sample standard deviation of the defined replicates
 \citep{marindnabencheval,marindnaevo2metrics}.
-These SEs quantify evaluation-sample variation for a fixed checkpoint and
-fixed predictions. Variation across independent training runs and uncertainty in model
-differences require separate estimates. Separate paired zero-shot
-comparisons are described in Supplementary Section~\nameref{supp:comparators}.
 
-\subsection{Comparator model evaluation}\label{methods:comparators}
+These uncertainty estimates describe variation in evaluation samples
+for fixed model predictions, rather than variation across
+independently trained models.
+Uncertainty in differences between models requires a separate
+paired analysis. The available paired zero-shot comparisons are
+described in Supplementary Section~\nameref{supp:comparators}.
 
-We evaluated the 1B base, 7B and 40B Evo~2 checkpoints on the Mendelian
-development partition~\citep{brixi2026evo2,marindna131,marindnaevo2code}.
-Like Marin DNA, Evo~2 takes one DNA sequence as input. We scored both
-alleles on both strands in 8,192-base windows without BOS and ranked
-variants by the negative strand-averaged LLR (Section~\nameref{methods:scoring}).
-We pooled frozen final-normalization embeddings across positions and
-strands, stored them in single precision, and fitted the same
-chromosome-held-out probes as for Marin DNA.
-For the missense scaling comparison the archived Evo~2 summaries report
-5,800 variants for both readouts at each size. They contain no variant
-identifiers with which to verify the match to Marin DNA independently.
-The archive supplies paired readouts for Mendelian variants only, so the
-SGE scaling panel contains Marin DNA measurements alone.
 
-For GPN-Star we used the mammalian alignment model's negative calibrated
-LLR~\citep{ye2025gpnstar}. For AlphaGenome, which was trained on
-experimental functional-genomics data, we used the maximum across tracks
-of the L2 difference between log-transformed reference and alternate
-predictions~\citep{avsec2026alphagenome}. Both scores were evaluated
-on the Mendelian development partition. AUPRC measures how each score
-ranks the same pathogenicity label, although the scores measure different
-properties of a substitution. These evaluations supplied variant scores
-without the paired allele embeddings and fitted probes required for the
-linear-probe comparison. Checkpoint sources, score definitions and
-evaluation revisions are given in Supplementary Section~\nameref{supp:comparators}.
+\subsection{Comparator model evaluation}
+\label{methods:comparators}
 
-\subsection{Computational efficiency measurements}\label{methods:efficiency}
+We evaluated the Evo~2 1B base, 7B, and 40B checkpoints on the
+Mendelian development partition
+\citep{brixi2026evo2,marindna131,marindnaevo2code}.
+Like Marin DNA, Evo~2 operates on individual DNA sequences.
+We evaluated reference and alternate alleles on both strands using
+8,192-base windows without BOS, ranking variants by the negative
+mean of the strand-specific log-likelihood ratios
+(Section~\nameref{methods:scoring}).
+For linear probing, we averaged the frozen model's final normalized
+hidden states across sequence positions and strands, retained the
+resulting embeddings in single precision, and used the same feature
+construction and chromosome-held-out classifier-fitting procedure
+as for Marin DNA.
+The archived Evo~2 missense scaling results include 5,800 variants
+for both scoring methods at each model size.
+Although these counts match the Marin DNA evaluation, individual
+variant identifiers were unavailable for independent verification
+of the cross-model match.
+The archived paired evaluations cover Mendelian variants only;
+the SGE scaling comparison therefore includes Marin DNA alone.
 
-We compared the Staged Marin DNA 1B checkpoint with Evo~2 1B base, 7B
-and 40B on a single Lambda GH200 with 96\,GB of GPU memory. Scoring one
-variant included both alleles on both strands and returned likelihood
-ratios, Jensen--Shannon divergences and pooled final-layer embeddings for
-each allele. Marin DNA used 255 bases plus BOS (256 tokens) and Evo~2
-used 8,192 bases. Throughput measures complete variants at these deployed
-context lengths. Per-token efficiency at equal context was not measured.
+We additionally evaluated two models using different sources of
+biological information.
+For the mammalian alignment-based GPN-Star model, we used the
+negative calibrated log-likelihood ratio~\citep{ye2025gpnstar}.
+For AlphaGenome, which was trained using experimental
+functional-genomics measurements, we used the maximum across
+output tracks of the L2 difference between log-transformed
+reference and alternate predictions~\citep{avsec2026alphagenome}.
+Both models were evaluated on the Mendelian development partition.
+Although AUPRC measures discrimination of the same pathogenicity
+labels, these scores quantify different properties of the sequence
+substitution.
+Compatible allele embeddings and fitted linear probes were not
+available for these comparisons.
+Model checkpoints, scoring conventions, and evaluation provenance
+are documented in Supplementary
+Section~\nameref{supp:comparators}.
 
-We measured unique variants per hour after warmup. For optimized FP8
-Marin DNA we divided the number of variants by the median elapsed time
-for three complete passes over both strands. For historical compiled-BF16
-Marin DNA we used the median interval between prediction batches. For
-Evo~2 we used the steady-state batch times recorded by the native
-Evo~2/Vortex implementation. The latter two rates account for two strand
-passes per variant. Datasets, batch sizes and timing boundaries differed
-across these historical benchmarks~\citep{marindna131,marindna354,marindna430}.
-Supplementary Section~\nameref{supp:inference} gives the conditions for
-each measurement.
 
-At a sustained rate of $v$ variants per hour, scoring one million variants
-requires $10^6/v$ GPU-hours. We multiplied by the recorded rental rate of
-\$2.29 per GPU-hour to obtain the marginal costs in Table~\ref{tab:scoring-cost}.
-The extrapolations cover steady-state scoring only. They carry no separate
-charge for provisioning, model download, genome and sequence preparation,
-tokenization, compilation, warmup, persistent storage, downstream analysis
-or taxes. We did not time end-to-end million-variant jobs.
+\subsection{Computational efficiency measurements}
+\label{methods:efficiency}
+
+We compared inference throughput for the Staged Marin DNA 1B
+checkpoint and the Evo~2 1B base, 7B, and 40B models on a single
+Lambda GH200 GPU with 96\,GB of memory.
+Scoring each variant required evaluating reference and alternate
+alleles on both strands, producing likelihood ratios,
+Jensen--Shannon divergences, and pooled final-layer embeddings
+for each allele.
+Marin DNA used 255 DNA bases preceded by BOS (256 tokens), whereas
+Evo~2 used 8,192-base inputs.
+Throughput was measured in complete variants scored per hour at
+these deployed context lengths, rather than at matched sequence
+lengths. The comparison therefore does not measure relative
+per-token efficiency at equal context.
+
+We estimated steady-state throughput after model warmup.
+For optimized FP8 Marin DNA, throughput was calculated from the
+median elapsed time of three complete passes over both strands.
+For the historical compiled-BF16 Marin DNA benchmark, we used
+the median interval between prediction batches.
+Evo~2 throughput was calculated from steady-state batch times
+recorded using its native Evo~2/Vortex inference implementation.
+Both historical measurements account for two strand passes per
+variant.
+The benchmarks differed in datasets, batch sizes, and timing
+procedures~\citep{marindna131,marindna354,marindna430};
+their detailed configurations are documented in Supplementary
+Section~\nameref{supp:inference}.
+
+We estimated the time and marginal GPU rental cost of scoring
+one million variants from the measured throughput.
+For throughput $v$ variants per hour, the required GPU time is
+$10^6/v$ hours; costs were calculated using the recorded rental
+rate of \$2.29 per GPU-hour (Table~\ref{tab:scoring-cost}).
+These estimates assume sustained steady-state throughput and
+exclude provisioning, model downloads, genome and sequence
+preparation, tokenization, compilation and warmup, persistent
+storage, downstream analysis, and taxes.
+They are extrapolated scoring costs rather than measurements
+of complete million-variant analysis jobs.
 
 \begin{table*}[t]
 \centering
 \small
-\caption{Illustrative GPU scoring costs for one million variants on one GH200 at
-the recorded rate of \$2.29 per hour.
-Times and costs extrapolate sustained scoring at the listed batch sizes.
-Calculations use the historical compiled-BF16 measurement and the published,
-rounded Evo~2 rates~\citep{marindna354}.}
+\caption{Illustrative GPU scoring costs for one million variants
+on a single GH200 at the recorded rental rate of \$2.29 per hour.
+Times and costs assume sustained throughput at the listed batch
+sizes and exclude preparation and startup costs.
+The compiled-BF16 Marin DNA and Evo~2 rates are historical
+measurements~\citep{marindna354}.}
 \label{tab:scoring-cost}
 \begin{tabular}{lrrrrr}
-\hline
-Model/configuration & Context (tokens) & Batch & Variants/hour & Time/1M &
-US\$/1M \\
-\hline
+\toprule
+Model/configuration & Context (tokens) & Batch &
+Variants/hour & Time/1M & US\$/1M \\
+\midrule
 Marin DNA 1B, optimized FP8 & 256 & 128 & 1,467,776 & 41 min & 1.56 \\
 Marin DNA 1B, compiled BF16 & 256 & 128 & 953,551 & 63 min & 2.40 \\
-Evo 2 1B base & 8,192 & 16 & 11,700 & 3.6 days & 196 \\
-Evo 2 7B & 8,192 & 8 & 3,100 & 13 days & 739 \\
-Evo 2 40B & 8,192 & 1 & 630 & 66 days & 3,635 \\
-\hline
+Evo~2 1B base & 8,192 & 16 & 11,700 & 3.6 days & 196 \\
+Evo~2 7B & 8,192 & 8 & 3,100 & 13 days & 739 \\
+Evo~2 40B & 8,192 & 1 & 630 & 66 days & 3,635 \\
+\bottomrule
 \end{tabular}
 \end{table*}
 
-We validated FP8 scoring against compiled BF16 on the Mendelian development
-partition by comparing variant-level LLRs and the change in eight-class
-zero-shot macro-AUPRC. The upper limit of the paired 95\% bootstrap
-interval for AUPRC loss was below the prespecified 0.01 tolerance.
-A separate check with existing BF16-trained classifiers left their
-compatibility with FP8 embeddings unresolved~\citep{marindna430}.
+We assessed the numerical accuracy of optimized FP8 inference
+against compiled BF16 using variant-level likelihood ratios
+and the eight-class zero-shot Mendelian macro-AUPRC on the
+development partition.
+The upper bound of the paired 95\% bootstrap confidence interval
+for the AUPRC reduction was below the prespecified tolerance
+of 0.01.
+A separate evaluation using existing BF16-trained linear probes
+did not establish compatibility with FP8 embeddings
+\citep{marindna430}.
 
-For training compute we counted only the stages inherited by the final
-Staged 1B checkpoint (approximately 166.0B input tokens).
-Levanter estimates training operations as three times the model's forward
-FLOPs per token, including attention at the training context length.
-At $6.837\times10^9$ FLOPs per token this gives approximately
-$1.135\times10^{21}$ FLOPs~\citep{marindnaflops}.
-For Evo~2 40B the authors report $2.25\times10^{24}$ FLOPs for 40.3B
-parameters and 9.3T tokens, without adjustments for training context length
-or mixed precision~\citep{evo2computetable}. The Evo~2 estimate is
-approximately 1,980 times the Marin DNA estimate. Both exclude other training
-runs, hyperparameter searches and the rest of model development.
+We estimated final-model training compute using only the stages
+inherited by the selected Staged Marin DNA 1B checkpoint,
+corresponding to approximately 166.0B model-input tokens.
+Levanter estimates training FLOPs as three times the model's
+forward-pass FLOPs, including attention at the training context
+length.
+At $6.837\times10^9$ FLOPs per input token, this gives
+approximately $1.135\times10^{21}$ training FLOPs
+\citep{marindnaflops}.
+For Evo~2 40B, the authors report $2.25\times10^{24}$ FLOPs
+for a 40.3B-parameter model trained on 9.3 trillion tokens,
+without adjustment for training context length or mixed
+precision~\citep{evo2computetable}.
+The reported Evo~2 training compute is therefore approximately
+1,980 times the estimated compute for the final Marin DNA model.
+These figures describe the training of the selected models,
+excluding exploratory runs, hyperparameter searches, and
+other development experiments.
+
 
 \section{Availability of source code and requirements}
 \todo
